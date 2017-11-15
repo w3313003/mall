@@ -1,0 +1,1 @@
+export const currentgood = state => state.currentgood
