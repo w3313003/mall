@@ -2,7 +2,7 @@
     <div class='dorm-wrap'>
         <div class='title'>
             寝室装饰    
-            <svg class="icon fenlei" aria-hidden="true">
+            <svg class="icon fenlei" aria-hidden="true" @click='back'>
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>  
@@ -60,6 +60,9 @@ export default {
             const index = e.currentTarget.dataset.index;
             this.currentIndex = index;
             this.$refs.mySwiper.swiper.slideTo(index)
+        },
+        back(){
+            this.$router.back();
         }
     },
     data(){

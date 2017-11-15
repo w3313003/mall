@@ -100,7 +100,7 @@
                     <router-link to='/dorm' tag='div' class='index-choose-wrap'>
                         <img src="../.././assets/img/item1.png" alt="">
                     </router-link>
-                    <router-link to='/' tag='div' class='index-choose-wrap'>
+                    <router-link to='/fashion' tag='div' class='index-choose-wrap'>
                         <img src="../.././assets/img/item2.png" alt="">
                     </router-link>
                 </div>

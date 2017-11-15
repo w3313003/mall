@@ -2,7 +2,7 @@
    <div class='f-wrap'>
         <div class='title'>
             寝室装饰    
-            <svg class="icon fenlei" aria-hidden="true">
+            <svg class="icon fenlei" aria-hidden="true" @click='back'>
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>  
@@ -11,7 +11,11 @@
 
 <script>
 export default {
-  
+    methods:{
+        back(){
+            this.$router.back()
+        }
+    }
 }
 </script>
 
