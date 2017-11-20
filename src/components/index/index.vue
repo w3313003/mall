@@ -12,31 +12,59 @@
                 </div>
                 </div> 
                
-                <div class='msg'>
-                     <div v-if='isSearching' @click='isSearching = false'>
-                    取消
+                <div class='msg'  v-if='isSearching'>
+                     <div @click='isSearching = false'>
+                        取消
+                    </div>
                 </div>
-                    <svg class="icon" aria-hidden="true"  v-else>
+                <div v-else style='font-size:.5rem;color:#666'>
+                    <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-pingjia"></use>
-                </svg>
-        </div>
+                    </svg>
+                </div>
         </div> 
         <transition name='searchList'>
             <div class='search-block' v-show='isSearching'>
+                <div class='near'>
+                    <div class='title'>
+                        最近搜索
+                    </div>
+                    <div class='itemwrap'>
+                        <div class="item">
+                            第一个
+                        </div>
+                        <div class="item">
+                            第一个
+                        </div>
+                        <div class="item">
+                            第一个
+                        </div>
+                    </div>
+                </div>
+                <div class='history'>
+                    <div class='title'>
+                        热门搜索
+                    </div>
+                    <div class='itemwrap'>
+                        <div class="item">
+                            第一个
+                        </div>
+                        <div class="item">
+                            第一个
+                        </div>
+                        <div class="item">
+                            第一个
+                        </div>
+                    </div>
+                </div>
             </div>  
         </transition>
         <scroll :data='fmaleitem' class='index-scroll' ref='scroll'>
             <div>
                 <div class='swipe-wrap'>
                     <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
-                        <swiper-slide>
-                            <img src='../.././assets/img/banner.png' alt="">
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src='../.././assets/img/banner.png' alt="">
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src='../.././assets/img/banner.png' alt="">
+                        <swiper-slide v-for='(item,index) in banner' :key="index">
+                            <img :src='item.banner' alt="">
                         </swiper-slide>
                         <div class="swiper-pagination"  slot="pagination"></div>
                     </swiper>
@@ -47,7 +75,7 @@
                         <div class='icon'>
                             <div>
                                 <svg class="icon" aria-hidden="true">
-                                    <use xlink:href="#icon-hongbao"></use>
+                                    <use xlink:href="#icon-icon-test"></use>
                                 </svg>
                             </div>
                         </div>
@@ -67,7 +95,7 @@
                         <div class='icon'>
                             <div>
                             <svg class="icon" aria-hidden="true">
-                                <use xlink:href="#icon-aixin2"></use>
+                                <use xlink:href="#icon-xin1"></use>
                             </svg>
                             </div>
                         </div>
@@ -184,8 +212,6 @@
                             </div>
                         </div>
                         </transition>
-                                    <div class='block'></div>
-
                     </div>
                 </div>                
             </div>
@@ -206,6 +232,16 @@ export default {
     swiper,
     swiperSlide
   },
+  created(){
+      this.axios.get('/api/getBaannerList').then(res => {
+          console.log(res.data);
+          res.data.forEach(v => {
+                v.banner = `http://10.0.0.23:8181${v.banner}`
+          });
+          console.log(res.data);
+          this.banner = res.data
+      })
+  },
   mounted() {
       this.$nextTick(() => {
           this._inithScroll();
@@ -216,6 +252,7 @@ export default {
   },
   data() {
     return {
+      banner:[],
       notNextTick: true,
       swiperOption:{
           pagination: '.swiper-pagination',
@@ -312,31 +349,66 @@ export default {
     left 0
     z-index 999
     border 1px solid #666
-
+    box-sizing border-box
+    padding 0.2667rem 0.3333rem
+    .near   
+        .title
+            font-size .35rem
+            color #989898
+        .itemwrap
+            margin 0.2667rem 0
+            display flex
+            flex-wrap wrap
+            .item 
+                height 0.6667rem
+                box-sizing border-box
+                line-height 0.6667rem
+                border 0.0133rem solid #555
+                border-radius 0.3333rem
+                padding 0 .2rem
+                margin-right  .3rem
+    .history
+        .title
+            font-size .35rem
+            color #989898
+        .itemwrap
+            margin 0.2667rem 0
+            display flex
+            flex-wrap wrap
+            .item 
+                height 0.6667rem
+                box-sizing border-box
+                line-height 0.6667rem
+                border 0.0133rem solid #555
+                border-radius 0.3333rem
+                padding 0 .2rem
+                margin-right  .3rem    
 .search-wrap
     height 0.93rem
     overflow hidden
     background-color rgba(0,0,0,.1)
+    display flex
+    box-sizing border-box
+    padding  0 .3rem
+    align-items center
+    justify-content space-around
 
 .msg
-    position fixed
-    height 0.6667rem
+    height 0.8rem
     z-index 99
     top 0.1333rem
     right 3%
-    width 6%
+    flex 0 0 1.5333rem
     display flex
     align-items center
     justify-content center
-    font-size 0.3rem
-    svg 
-        font-size 0.4rem
-        color #666
-        font-weight 700
+    font-size 0.34rem
+    color #fff
+    border-radius 0.1333rem
+    background #fc7aa5
 .search-input
-    position fixed
     height 0.6667rem
-    width 85%
+    flex 1
     top 0.1333rem
     left 5%
     background #fff
@@ -346,6 +418,7 @@ export default {
     display flex
     font-size 0.4rem
     overflow hidden
+    margin-right 15px
     .input-wrap
         flex 1
         input

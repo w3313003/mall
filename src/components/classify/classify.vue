@@ -1,31 +1,66 @@
 <template>
     <div class='classify-wrap'>
-        <transition name='searchList'>
-            <div class='search-block' v-show='searing'>
-            </div>  
-        </transition>
+        <div class='search-wrap'>
+                    <div class='search-input'>
+                            <div class='s-svg'>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-sousuo"></use>
+                                </svg>
+                            </div>
+                            <div class='input-wrap'>
+                                <input type='text' placeholder='搜索' @click='isSearching = true'>
+                            </div>
+                            </div> 
+
+                            <div class='msg'  v-if='isSearching'>
+                                 <div @click='isSearching = false'>
+                                    取消
+                                </div>
+                            </div>
+                            <div v-else style='font-size:.5rem;color:#666'>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-pingjia"></use>
+                                </svg>
+                            </div>
+                    </div> 
+                <transition name='searchList'>
+                    <div class='search-block' v-show='isSearching'>
+                        <div class='near'>
+                            <div class='title'>
+                                最近搜索
+                            </div>
+                            <div class='itemwrap'>
+                                <div class="item">
+                                    第一个
+                                </div>
+                                <div class="item">
+                                    第一个
+                                </div>
+                                <div class="item">
+                                    第一个
+                                </div>
+                            </div>
+                        </div>
+                        <div class='history'>
+                            <div class='title'>
+                                热门搜索
+                            </div>
+                            <div class='itemwrap'>
+                                <div class="item">
+                                    第一个
+                                </div>
+                                <div class="item">
+                                    第一个
+                                </div>
+                                <div class="item">
+                                    第一个
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                </transition>
         <scroll class='scroll'>
             <div>
-                <div class='search-wrap'>
-                    <div class='search-input'>
-                        <div class='s-svg'>
-                            <svg class="icon" aria-hidden="true">
-                                <use xlink:href="#icon-sousuo"></use>
-                            </svg>
-                        </div>
-                        <div class='input-wrap'>
-                            <input type='text' placeholder='搜索' @focus="open">
-                        </div>
-                    </div> 
-                    <div class='msg'>
-                         <div v-if='searing' @click='searing = false'>
-                            取消
-                        </div>
-                        <svg class="icon" aria-hidden="true"  v-else>
-                            <use xlink:href="#icon-pingjia"></use>
-                        </svg>
-                    </div>
-                </div>
                 <div class='content'>
                     <div class='male'>
                         <div class='title'>
@@ -70,7 +105,7 @@ import scroll from "common/scroll";
 export default {
     data() {
         return {
-            searing:false,
+            isSearching:false
         };
     },
     components: {
@@ -104,16 +139,57 @@ export default {
     left 0
     z-index 999
     border 1px solid #666
+    box-sizing border-box
+    padding 0.2667rem 0.3333rem
+    .near   
+        .title
+            font-size .35rem
+            color #989898
+        .itemwrap
+            margin 0.2667rem 0
+            display flex
+            flex-wrap wrap
+            .item 
+                height 0.6667rem
+                box-sizing border-box
+                line-height 0.6667rem
+                border 0.0133rem solid #555
+                border-radius 0.3333rem
+                padding 0 .2rem
+                margin-right  .3rem
+    .history
+        .title
+            font-size .35rem
+            color #989898
+        .itemwrap
+            margin 0.2667rem 0
+            display flex
+            flex-wrap wrap
+            .item 
+                height 0.6667rem
+                box-sizing border-box
+                line-height 0.6667rem
+                border 0.0133rem solid #555
+                border-radius 0.3333rem
+                padding 0 .2rem
+                margin-right  .3rem  
 
 .search-wrap
     height 0.93rem
     overflow hidden
-    background-color #fff
+    background-color rgba(0,0,0,.1)
+    display flex
+    box-sizing border-box
+    padding  0 .3rem
+    align-items center
+    justify-content space-around
+
+.fmale
+    margin-top 0.1333rem
 
 .content
     .male,.fmale
         background #fff
-        margin-top 0.1333rem
         .title
             height 1.2rem
             line-height 1.2rem
@@ -156,41 +232,37 @@ export default {
                         font-size 0.3333rem
 
 .msg
-    position fixed
-    height 0.6667rem
+    height 0.8rem
     z-index 99
     top 0.1333rem
     right 3%
-    width 6%
+    flex 0 0 1.5333rem
     display flex
     align-items center
     justify-content center
-    font-size 0.3rem
-    svg 
-        font-size 0.4rem
-        color #666
-        font-weight 700
-        
+    font-size 0.34rem
+    color #fff
+    border-radius 0.1333rem
+    background #fc7aa5
 .search-input
-    position fixed
-    background #e7e7e7
     height 0.6667rem
-    width 85%
+    flex 1
     top 0.1333rem
     left 5%
+    background #fff
     z-index 99
     border 1px solid #e7e7e7
     border-radius 0.333rem
     display flex
     font-size 0.4rem
     overflow hidden
+    margin-right 15px
     .input-wrap
         flex 1
         input
             width 100%
             height 100%
             font-size 0.4rem
-            background #e7e7e7
     .s-svg
         text-align center
         flex 0 0 0.8rem

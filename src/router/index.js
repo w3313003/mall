@@ -131,10 +131,21 @@ const returnGoods = resolve => {
         resolve(module)
     })
 }
+const seller = resolve => {
+    import ('@/components/seller/seller').then(module => {
+        resolve(module)
+    })
+}
+const sellerTypes = resolve => {
+    import ('@/components/seller/sellerTypes').then(module => {
+        resolve(module)
+    })
+}
 
 Vue.use(Router)
 
-export default new Router({
+
+export const router = new Router({
     routes: [{
             path: '/',
             name: 'index',
@@ -228,5 +239,18 @@ export default new Router({
             path: '/returnGoods',
             component: returnGoods
         },
+        {
+            path: '/seller',
+            component: seller
+        },
+        {
+            path: '/seller/types',
+            component: sellerTypes
+        }
     ]
+})
+
+router.beforeEach((to, from, next) => {
+    console.log(from);
+    next();
 })

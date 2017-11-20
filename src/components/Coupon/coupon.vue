@@ -32,7 +32,10 @@
                                     :stroke-dashoffset='(1 - (item.Aused/item.totalCount)) * dasharray' />
                                 </svg>
                             </div>
-                            <div class='btn'>立即领取</div>
+                            <div class='btn'>
+                                <span v-if='true'>立即领取</span>
+                                <span v-else>已领取</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -173,6 +176,8 @@ export default {
                             .disc
                                 text-align basename
                                 margin-left 0.2667rem
+                                display flex
+                                align-items flex-end
  
                     .r
                         flex 1

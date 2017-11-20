@@ -110,7 +110,7 @@
                         </div>
                     </div>
                 </div>
-                <div class='r-btn'>
+                <div class='r-btn' @click='getComment'>
                     查看更多评价
                 </div>
                 </div>
@@ -119,16 +119,16 @@
             </swiper-slide>
             <swiper-slide>
             <scroll class='scroll scroll-m' ref='scrollM'>
-                    <good-list :goodList='tests' @nowTrue='nowIsTrue'></good-list>
+                <good-list :goodList='tests' @nowTrue='nowIsTrue'></good-list>
             </scroll>
             </swiper-slide>
             <swiper-slide>
                 <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
                     <div class='ratingblock'>
                         <div class='rating-nav'>
-                            <div @click='getAllrating'>全部({{ratingNum}})</div>
-                            <div @click='getGoodrating'>好评({{goodRating}})</div>
-                            <div @click='getImagerating'>有图({{hasImage}})</div>
+                            <div @click='getAllComment'>全部({{ratingNum}})</div>
+                            <div @click='getGoodComment'>好评({{goodRating}})</div>
+                            <div @click='getImageComment'>有图({{hasImage}})</div>
                         </div>
                         <div class='rating-detail'>
                             <div class='rating-item' v-for='(item,index) in sourcegood.ratingList' :key="index">
@@ -311,16 +311,16 @@ export default {
             this.$refs.mySwiper.swiper.slideTo(2)
         },
         // 评价过滤
-        getAllrating(){
+        getAllComment(){
             this.good = JSON.parse(JSON.stringify(this.sourcegood));
         },
-        getGoodrating(){
+        getGoodComment(){
             this.good = JSON.parse(JSON.stringify(this.sourcegood));
             this.good.ratingList = this.good.ratingList.filter(v => {
                     return v.type === 1;
             })
         },
-        getImagerating(){
+        getImageComment(){
             this.good = JSON.parse(JSON.stringify(this.sourcegood));
             this.good.ratingList = this.good.ratingList.filter(v => {
                 return v.img.length !== 0;
@@ -363,6 +363,10 @@ export default {
                 freight: this.sourcegood.freight
             };
             console.log(goodData)
+        },
+        getComment(){
+            this.currentIndex = 2;
+            this.$refs.mySwiper.swiper.slideTo(2)
         },
         ...mapMutations({
             back:'SET_GOODDETAIL_SHOW',

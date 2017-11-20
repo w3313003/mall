@@ -62,7 +62,7 @@
                 <div class="qq">商家qq:4545445</div>
             </div>
         </div>
-        <shopChoosing>
+        <shopChoosing v-if='false'>
         
         </shopChoosing>    
         <div class='bottom'>
@@ -82,7 +82,7 @@ export default {
     },
     methods:{
         back(){
-
+            this.$emit('close')
         },
         fileclick(){
             this.$refs.files.click();
