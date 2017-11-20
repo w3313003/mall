@@ -571,6 +571,62 @@ export const shopList = [{
 
 ]
 
+export const orderList = [{
+    sellername: '墨刀旗舰店',
+    type: 1,
+    id: 1,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 2,
+    id: 2,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 3,
+    id: 3,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 4,
+    id: 4,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 1,
+    id: 5,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}]
 
 let elementStyle = document.createElement('div').style
 

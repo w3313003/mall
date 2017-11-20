@@ -14,7 +14,7 @@
                             </svg>
                         </div>
                         <div class='input-wrap'>
-                            <input type='text' placeholder='搜索' @click="open">
+                            <input type='text' placeholder='搜索' @focus="open">
                         </div>
                     </div> 
                     <div class='msg'>
@@ -79,7 +79,6 @@ export default {
     methods:{
         open(){
             this.searing = true;
-            console.log(132)
         }
     }
 };

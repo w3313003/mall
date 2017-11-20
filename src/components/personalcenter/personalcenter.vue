@@ -35,15 +35,15 @@
                 <div class='l'>
                     我的订单
                 </div>
-                <div class="r">
+                <router-link to='/order' class="r" tag='div'>
                     查看全部订单
                     <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-jiantou"></use>
                     </svg>    
-                </div> 
+                </router-link> 
             </div>
             <div class='content'>
-                <div class='item'>
+                <div class='item' data-id='0' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -51,7 +51,7 @@
                         待付款
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='1' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon2.png" alt="">
                     </div>
@@ -59,7 +59,7 @@
                         待发货
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='2' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -67,7 +67,7 @@
                         待收货
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='3' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -75,19 +75,19 @@
                         待评价
                     </div>
                 </div>
-                <div class='item'>
+                <router-link to='/returnGoods' class='item' tag="div">
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
                     <div>
                         退换货
                     </div>
-                </div>
+                </router-link>
             </div>
         </div>
         <div class='ul-content'>
             <ul>
-                <li>
+                <router-link to='/personalcenter/activities' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_08.png" alt="">
                     </div>
@@ -97,8 +97,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/collection' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_09.png" alt="">
                     </div>
@@ -108,8 +108,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/my_comment' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_10.png" alt="">
                     </div>
@@ -119,8 +119,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/my_comment' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_11.png" alt="">
                     </div>
@@ -130,7 +130,7 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
+                </router-link>
                 <li>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_12.png" alt="">
@@ -142,7 +142,7 @@
                         </svg>
                     </div>
                 </li>
-                <li>
+                <router-link to='/personalcenter/help' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_13.png" alt="">
                     </div>
@@ -152,8 +152,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/feedback' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_14.png" alt="">
                     </div>
@@ -163,7 +163,7 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
+                </router-link>
             </ul>
         </div>
         </div>
@@ -194,6 +194,15 @@ export default {
         infoDetail(){
             this.$router.push({
                 path:'/personalcenter/personalinfo'
+            })
+        },
+        goOrderCenter(e){
+            const index =  +e.currentTarget.dataset.id + 1;
+            this.$router.push({
+                name:'order',
+                params:{
+                    index
+                }
             })
         }
     }
@@ -288,7 +297,7 @@ export default {
         display flex
         justify-content space-between
         .item
-            width 80px
+            width 1.0667rem
             box-sizing border-box
             padding 0.4rem 0
             display flex

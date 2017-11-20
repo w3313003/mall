@@ -108,7 +108,6 @@ import { Switch } from 'mint-ui'
         }
     },
     created() {
-
     },
     methods: {
         showPicker(){

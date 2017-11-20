@@ -20,7 +20,6 @@
             <scroll class='scroll scroll-l' ref='scroll' :data='sourcegood.ratingList'>
                 <div>
                 <div class='img-wrap'>
-                    <div class='back' @click.stop='backs'></div>
                     <swiper :options="soption" :not-next-tick="notNextTick" ref="swiper">
                         <swiper-slide>
                             <img src='../.././assets/img/goodimg.png' alt="">
@@ -124,7 +123,7 @@
             </scroll>
             </swiper-slide>
             <swiper-slide>
-                <scroll class='scroll scroll-r' ref='scrollR' :data='good.ratingList'>
+                <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
                     <div class='ratingblock'>
                         <div class='rating-nav'>
                             <div @click='getAllrating'>全部({{ratingNum}})</div>
@@ -132,7 +131,7 @@
                             <div @click='getImagerating'>有图({{hasImage}})</div>
                         </div>
                         <div class='rating-detail'>
-                            <div class='rating-item' v-for='(item,index) in good.ratingList' :key="index">
+                            <div class='rating-item' v-for='(item,index) in sourcegood.ratingList' :key="index">
                                 <div class='r-t'>
                                     <div class='r-header'>
                                         <div class='avatar'>
@@ -202,7 +201,9 @@
                 立即购买    
             </div> 
         </div>       
-        <shopChoosing ref='shopcart' :goodInfo='sourcegood' @appendTo='appendTo' 
+        <confirm v-if='false'></confirm> 
+        <shopChoosing 
+        ref='shopcart' :goodInfo='sourcegood' @appendTo='appendTo' 
         @add='add'
         @less='less'
          v-if='choosing'></shopChoosing> 
@@ -218,8 +219,8 @@ import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import { mapGetters } from "vuex";
 import { mapMutations } from 'vuex'
 import goodList from 'common/goodList'
-import {Toast} from 'mint-ui'
 import shopChoosing from 'common/shopChoosing'
+import confirm from 'common/confirm'
 
 export default {
     created(){
@@ -234,25 +235,21 @@ export default {
     },
     computed:{
         ratingNum(){
-            if(!this.get_good_detailshow) return
             return this.sourcegood.ratingList.length
         },
 
         // type 1 好评
         goodRating(){
-            if(!this.get_good_detailshow) return;
              return this.sourcegood.ratingList.filter(v => {
                 return v.type == 1;
             }).length;
         },
         badRating(){
-            if(!this.get_good_detailshow) return
             return this.sourcegood.ratingList.filter(v => {
                 return v.type != 1
             }).length
         },
         hasImage(){
-            if(!this.get_good_detailshow) return;
             return this.sourcegood.ratingList.filter(v => {
                 return v.img.length != 0
             }).length
@@ -269,7 +266,8 @@ export default {
     components:{
         scroll,
         goodList,
-        shopChoosing
+        shopChoosing,
+        confirm
     },
     methods:{
         calcheight(){
@@ -420,12 +418,11 @@ export default {
     height 100vh
     background-color #Fff
     z-index 1000
+    display flex
+    flex-direction column
     .nav
         height 1.2rem
         width 100%
-        position fixed
-        top 0 
-        left 0
         display flex
         justify-content space-around
         box-sizing border-box
@@ -458,9 +455,8 @@ export default {
     .content
         height 100%
         overflow hidden
-        margin-top 1.2rem
-        margin-bottom 1.3333rem
         background-color #e7e7e7
+        flex 1
         position relative
         .back
             width 0.5333rem
@@ -585,14 +581,10 @@ export default {
                 border-radius 0.333rem
     .bottom
         background #fff
-        position fixed
         width 100%
         height 1.3333rem
-        bottom 0
-        left 0
         display flex
         border-top 0.0133rem solid #e7e7e7
-        z-index 1001
         .l
             flex 0 0 5.0667rem
             display flex 

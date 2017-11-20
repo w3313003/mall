@@ -6,25 +6,69 @@ const index = (resolve) => {
     })
 }
 const classify = resolve => {
-    import ('@/components/classify/classify').then(module => {
-        resolve(module)
-    })
-}
+        import ('@/components/classify/classify').then(module => {
+            resolve(module)
+        })
+    }
+    // 他她圈
 const sof = resolve => {
     import ('@/components/sof/sof').then(module => {
         resolve(module)
     })
 }
-const shopcart = resolve => {
-    import ('@/components/shopcart/shopcart').then(module => {
+const sofcomment = resolve => {
+    import ('@/components/sof/sofcomment').then(module => {
         resolve(module)
     })
 }
+const sofDetail = resolve => {
+        import ('@/components/sof/sofDetail').then(module => {
+            resolve(module)
+        })
+    }
+    // end
+const shopcart = resolve => {
+        import ('@/components/shopcart/shopcart').then(module => {
+            resolve(module)
+        })
+    }
+    // 个人中心
 const personalcenter = resolve => {
     import ('@/components/personalcenter/personalcenter').then(module => {
         resolve(module)
     })
 }
+const activities = resolve => {
+    import ('@/components/personalcenter/activities').then(module => {
+        resolve(module)
+    })
+}
+const collection = resolve => {
+    import ('@/components/personalcenter/collection').then(module => {
+        resolve(module)
+    })
+}
+const my_comment = resolve => {
+    import ('@/components/personalcenter/comment').then(module => {
+        resolve(module)
+    })
+}
+const help = resolve => {
+    import ('@/components/personalcenter/help').then(module => {
+        resolve(module)
+    })
+}
+const personalinfo = resolve => {
+    import ('@/components/personalinfo/personalinfo').then(module => {
+        resolve(module)
+    })
+}
+const feedback = resolve => {
+        import ("@/components/personalcenter/feedback").then(module => {
+            resolve(module)
+        })
+    }
+    // end
 const coupon = resolve => {
     import ('@/components/Coupon/coupon').then(module => {
         resolve(module)
@@ -55,11 +99,6 @@ const gooddetail = resolve => {
         resolve(module)
     })
 }
-const personalinfo = resolve => {
-    import ('@/components/personalinfo/personalinfo').then(module => {
-        resolve(module)
-    })
-}
 
 const address = resolve => {
         import ('@/components/address/address').then(module => {
@@ -74,6 +113,21 @@ const dorm = resolve => {
 }
 const fashion = resolve => {
     import ('@/components/index/fashion').then(module => {
+        resolve(module)
+    })
+}
+const order = resolve => {
+    import ('@/components/order/ordercenter').then(module => {
+        resolve(module)
+    })
+}
+const orderdetail = resolve => {
+    import ('@/components/order/detail').then(module => {
+        resolve(module)
+    })
+}
+const returnGoods = resolve => {
+    import ('@/components/returnGoods/returnGoods').then(module => {
         resolve(module)
     })
 }
@@ -94,18 +148,42 @@ export default new Router({
             name: 'sof',
             component: sof
         }, {
+            path: '/sof/comment/:id',
+            component: sofcomment
+        }, {
+            path: '/sof/detail/:id',
+            component: sofDetail
+        }, {
             path: '/shopcart',
             name: 'shopcart',
             component: shopcart
-        }, {
+        },
+        //个人中心 
+        {
             path: '/personalcenter',
             name: 'personalcenter',
             component: personalcenter
+        }, {
+            path: '/personalcenter/activities',
+            component: activities
+        }, {
+            path: '/personalcenter/collection',
+            component: collection
+        }, {
+            path: '/personalcenter/my_comment',
+            component: my_comment
+        }, {
+            path: '/personalcenter/help',
+            component: help
+        }, {
+            path: '/personalcenter/feedback',
+            component: feedback
         }, {
             path: '/personalcenter/personalinfo',
             name: 'personalinfo',
             component: personalinfo
         },
+        // end
         {
             path: '/coupon',
             name: 'coupon',
@@ -138,6 +216,17 @@ export default new Router({
         }, {
             path: '/fashion',
             component: fashion
-        }
+        }, {
+            path: '/order',
+            name: 'order',
+            component: order
+        }, {
+            path: '/order/:id',
+            component: orderdetail
+        },
+        {
+            path: '/returnGoods',
+            component: returnGoods
+        },
     ]
 })

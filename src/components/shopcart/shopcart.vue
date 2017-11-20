@@ -5,7 +5,7 @@
         </div>
         <scroll class='scroll' :data='goodList'>
             <div>
-                <div v-if='goodList.length > 0 ' class='gooditem' v-for='(allitem,allindex) in goodList' :key="allindex">
+                <div  class='gooditem' v-for='(allitem,allindex) in goodList' :key="allindex">
                     <div class='header'>
                         <div class='radio' @click='chooseall(allitem)'>
                             <img v-if='allitem.allclick' src='../.././assets/img/radio.png'>
@@ -153,8 +153,7 @@ export default {
     },
     methods:{
         _initshopList(){
-            let map = {},
-                arr = [];
+            let map = {};
             shopList.forEach(v => {
                 this.$set(v,'isclick',true);
                 this.$set(v,'editing',false)
@@ -168,8 +167,8 @@ export default {
                     }
                 };
             });
-            Object.values(map).forEach(v => {
-                arr.push(v);
+            let arr = Object.values(map).map(v => {
+                return v;
             });
             arr.forEach(v => {
                 for(let i of shopList){
@@ -203,8 +202,8 @@ export default {
             this.currentgood.amount++
         },
         Shopless(){
-            if(this.currentgood == 1) return;
-            this.currentgood--
+            if(this.currentgood.amount == 1) return;
+            this.currentgood.amount--
         },
         chooseColor(item){
             this.currentColor = item;
