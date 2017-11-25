@@ -270,4 +270,11 @@ export default {
         .icon 
             color #666
 
+
+.searchList-enter-active, .searchList-leave-active {
+        transition: all .3s
+}
+.searchList-enter, .searchList-leave-to{
+    transform :translate3d(0,100%,0)
+}
 </style>

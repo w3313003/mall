@@ -116,6 +116,11 @@ const fashion = resolve => {
         resolve(module)
     })
 }
+const fDetail = resolve => {
+    import ('@/components/index/fashionDetail').then(module => {
+        resolve(module)
+    })
+}
 const order = resolve => {
     import ('@/components/order/ordercenter').then(module => {
         resolve(module)
@@ -141,6 +146,13 @@ const sellerTypes = resolve => {
         resolve(module)
     })
 }
+
+const hyh = resolve => {
+    import ('@/components/index/hyh').then(module => {
+        resolve(module)
+    })
+}
+
 
 Vue.use(Router)
 
@@ -212,7 +224,7 @@ export const router = new Router({
             name: 'sales',
             component: sales
         }, {
-            path: '/good_all/:id',
+            path: '/good/:id',
             component: gooddetail
         }, {
             path: '/good_all',
@@ -227,6 +239,9 @@ export const router = new Router({
         }, {
             path: '/fashion',
             component: fashion
+        }, {
+            path: '/fashion/:id',
+            component: fDetail
         }, {
             path: '/order',
             name: 'order',
@@ -246,11 +261,14 @@ export const router = new Router({
         {
             path: '/seller/types',
             component: sellerTypes
+        },
+        {
+            path: '/hyh',
+            component: hyh
         }
     ]
 })
 
 router.beforeEach((to, from, next) => {
-    console.log(from);
     next();
 })

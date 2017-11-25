@@ -7,7 +7,7 @@
             </svg>
         </div>  
         <div class='video-wrap'>
-            <video src=""></video>
+            <video controls :src="videoSrc"></video>
         </div>
         <div class='banner'>
             <img src="../.././assets/img/d-banner.png" alt="">
@@ -55,6 +55,13 @@ export default {
         swiper,
         swiperSlide
     },
+    created(){
+        this.axios.get('/api/getBedRoomVideo').then(res => {
+            console.log(res.data.obj)
+            this.videoSrc = res.data.obj[0].bedroomVideo = `http://10.0.0.22:8181${res.data.obj[0].bedroomVideo}`;
+            console.log(this.videoSrc)
+        })
+    },
     methods:{
         toggleNav(e){
             const index = e.currentTarget.dataset.index;
@@ -67,6 +74,7 @@ export default {
     },
     data(){
         return {
+            videoSrc:'',
             goodLists: moocgoodList,
             notNextTick: true,
             swiperOption:{
@@ -106,7 +114,6 @@ export default {
     .video-wrap
         width 100%
         height 4rem
-        background #000
         overflow hidden
         video 
             width 100%

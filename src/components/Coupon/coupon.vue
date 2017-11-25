@@ -1,40 +1,44 @@
 <template>
     <div class='coupon-wrap'>
-        <scroll :data='sellerList' class='scroll'>
+        <scroll :data='couponList' class='scroll'>
             <div class='seller-wrap'>
-                <div class='seller' v-for='(item,index) in sellerList' :key="index">
+                <div class='seller' v-for='(item,index) in couponList' :key="index">
                     <div class='img-wrap'>
-                        <img src="../.././assets/img/seller-logo1.png" alt="">
+                        <img src="../.././assets/img/seller-logo1.png" alt="" v-if='!item.shopImg'>
+                        <img v-lazy='item.shopImg' alt="" v-else>
                     </div>
                     <div class='seller-content'>
                         <div class='l'>
                             <div class='title'>
-                                {{item.name}}
+                                {{item.shopName}}
                             </div>
                             <div class='content'>
                                 <div class='price'>
-                                    ￥<span>{{item.Amount}}</span>元
+                                    ￥<span>{{item.money}}</span>元
                                 </div>
                                 <div class='disc'>
-                                    {{item.disc}}
+                                    满{{item.fullAmount}}减{{item.money}}元
                                 </div>
                             </div>
                         </div>
                         <div class='r'>
                             <div class='circle' ref='svgwrap'>
-                                <div class='disc-data'>
-                                    <div>已抢</div>
-                                    {{item.Aused/item.totalCount | formatParent}}%
+                                <div v-if='item.state == 2'>
+                                    <div class='disc-data'>
+                                        <div>已抢</div>
+                                        {{item.pullNum/item.number | formatParent}}%
+                                    </div>
+                                    <svg ref='svg' width="1.3333rem" height="1.3333rem" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                        <circle class="progress-background" r="50" cx="50" cy="50" fill="transparent" />
+                                        <circle class="progress-bar" r="50" cx="50" cy="50" fill="transparent" :stroke-dasharray="dasharray" 
+                                        :stroke-dashoffset='(1 - (item.pullNum/item.number)) * dasharray' />
+                                    </svg>
                                 </div>
-                                <svg ref='svg' width="1.3333rem" height="1.3333rem" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                                    <circle class="progress-background" r="50" cx="50" cy="50" fill="transparent" />
-                                    <circle class="progress-bar" r="50" cx="50" cy="50" fill="transparent" :stroke-dasharray="dasharray" 
-                                    :stroke-dashoffset='(1 - (item.Aused/item.totalCount)) * dasharray' />
-                                </svg>
+                                    <img v-if='item.state == 1' src='../.././assets/img/already.png' style='width:100%;height:100%' >
                             </div>
                             <div class='btn'>
-                                <span v-if='true'>立即领取</span>
-                                <span v-else>已领取</span>
+                                <span v-if='item.state == 2'>立即领取</span>
+                                <span v-if='item.state == 1'>已领取</span>
                             </div>
                         </div>
                     </div>
@@ -54,8 +58,22 @@ export default {
     },
     filters:{
         formatParent(val) {
-            return val * 100;
+            return Math.round(val * 100);
         }
+    },
+    created(){
+        this.axios.get('/api/redpacket/getRedpacketList').then(res => {
+            res.data.obj.forEach(v => {
+                if(!v.shopName || v.type == 2) {
+                    this.$set(v,'shopName','平台红包');
+                };
+                if(v.shopImg){
+                    v.shopImg = `http://10.0.0.22:8181${v.shopImg}`
+                }
+            })
+            this.couponList = res.data.obj;
+            console.log(this.couponList)
+        })
     },
     mounted(){
         this.$nextTick(() => {
@@ -64,63 +82,7 @@ export default {
     data(){
         return {
             dasharray: Math.PI * 100,
-            sellerList:[
-            {
-                name:'adidas官方旗舰店',
-                totalCount:10,
-                Aused:2,
-                Amount:20,
-                disc:'满100-20',
-                Already:false
-            },
-            {
-                name:'亚瑟士官方旗舰店',
-                totalCount:10,
-                Aused:2,
-                Amount:20,
-                disc:'满100-20',
-                Already:false
-            },
-            {
-                name:'耐克官方旗舰店',
-                totalCount:10,
-                Aused:9,
-                Amount:30,
-                disc:'满100-30',
-                Already:false
-            },
-            {
-                name:'耐克官方旗舰店',
-                totalCount:10,
-                Aused:9,
-                Amount:30,
-                disc:'满100-30',
-                Already:true
-            },
-            {
-                name:'耐克官方旗舰店',
-                totalCount:10,
-                Aused:9,
-                Amount:30,
-                disc:'满100-30',
-                Already:true
-            },
-            {
-                name:'耐克官方旗舰店',
-                totalCount:10,
-                Aused:9,
-                Amount:30,
-                disc:'满100-30',
-                Already:true
-            },
-            {
-                name:'耐克官方旗舰店',
-                totalCount:10,
-                Aused:9,
-                Amount:30,
-                disc:'满100-30',
-                Already:false
-            }],
+            couponList:[],
         }
     },
     methods:{
@@ -170,12 +132,13 @@ export default {
                             display flex
                             font-size 0.35rem
                             color #f44820
+                            flex-wrap wrap
                             .price
+                                margin-right 0.2667rem
                                 span 
                                     font-size 0.6667rem
                             .disc
                                 text-align basename
-                                margin-left 0.2667rem
                                 display flex
                                 align-items flex-end
  
@@ -213,6 +176,7 @@ export default {
         left 50%
         top 50%
         transform translate(-50%,-50%)
+        font-size .3rem
         
 
 </style>

@@ -52,16 +52,23 @@
             <div class='title'>
                 商家推荐
             </div>
+            <div class='item'>
+                 <goodList :goodList='goodList'></goodList>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import goodList from 'common/goodList'
+import { moocgoodList } from 'common/util.js'
 
 export default {
     components:{
         goodList
+    },
+    created(){
+        this.goodList = moocgoodList;
     }
 }
 </script>
@@ -77,6 +84,8 @@ export default {
     height 100vh
     flex-direction column
     background #e7e7e7
+    display flex
+    flex-direction column
     .header
         width 100%
         height 200px
@@ -150,6 +159,8 @@ export default {
     .gooditem
         margin-top 0.1333rem
         background #fff
+        flex 1
+        overflow scroll
         .title
             height 1.2rem
             font-size .35rem

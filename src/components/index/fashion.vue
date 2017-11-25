@@ -6,47 +6,24 @@
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>  
-        <div class='item'>
+        <div class='item' v-for='(item,index) in itemList' :key="index" @click='watchDetail(item)'>
             <div class='header'>
-                <img src="../.././assets/img/avatar.png" alt="">
-                <div class='nickname'>壳斗马蒂</div>
-                <div class='time'>20分钟前</div>
+                <img v-lazy="item.headImg" alt="">
+                <div class='nickname'>{{item.name}}</div>
+                <div class='time'>
+                    {{item.timeDifference}}
+                </div>
             </div>
             <div class='banner'>
-                <img src="../.././assets/img/f_banner.png" alt="">
+                <img v-lazy="item.img" alt="">
             </div>
-            <div class='heading'>这里有一个标题</div>
+            <div class='heading'>{{item.title}}</div>
             <div class='control'>
                 <div>
                     <svg class="icon fenlei" aria-hidden="true">
                         <use xlink:href="#icon-dianzan"></use>
                     </svg>
-                    点赞
-                </div>
-                <div>
-                    <svg class="icon fenlei" aria-hidden="true">
-                        <use xlink:href="#icon-fenxiang-copy"></use>
-                    </svg>
-                    分享
-                </div>
-            </div>
-        </div>
-        <div class='item'>
-            <div class='header'>
-                <img src="../.././assets/img/avatar.png" alt="">
-                <div class='nickname'>壳斗马蒂</div>
-                <div class='time'>20分钟前</div>
-            </div>
-            <div class='banner'>
-                <img src="../.././assets/img/f_banner.png" alt="">
-            </div>
-            <div class='heading'>这里有一个标题</div>
-            <div class='control'>
-                <div>
-                    <svg class="icon fenlei" aria-hidden="true">
-                        <use xlink:href="#icon-dianzan"></use>
-                    </svg>
-                    点赞
+                    {{item.zan}}
                 </div>
                 <div>
                     <svg class="icon fenlei" aria-hidden="true">
@@ -61,9 +38,40 @@
 
 <script>
 export default {
+    created(){
+        this.axios.get('/api/outFit/getOutfitList').then(res => {
+            res.data.obj.forEach(v => {
+                v.img = `http://10.0.0.22:8181${v.img}`;
+                v.headImg = `http://10.0.0.22:8181${v.headImg}`
+            });
+            this.itemList = res.data.obj
+            console.log(this.itemList)
+        })
+    },  
+    data(){
+        return {
+            itemList:[]
+        }
+    },
+    filters:{
+        diffTime(val){
+            let time1 = new Date().getTime(),
+                time2 = new Date(val).getTime();
+            let dalte = (time1-time2)/1000,
+                day = Math.round(dalte / (24*60*60)),
+                afterDay = dalte - day*24*60*60,
+                hour = Math.round(afterDay / ( 60 * 60 ))
+                console.log(-hour)
+        }
+    },
     methods:{
         back(){
             this.$router.back()
+        },
+        watchDetail(item){
+            this.$router.push({
+                path:`/fashion/${item.id}`
+            })
         }
     }
 }
@@ -105,6 +113,7 @@ export default {
             img
                 width 0.9333rem
                 height 0.9333rem
+                border-radius 50%
             .nickname
                 flex 1
                 display flex

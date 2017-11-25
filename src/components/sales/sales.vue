@@ -4,25 +4,25 @@
             <div class='good-wrap'>
                 <div class='good' v-for='(item,index) in goodList' :key="index">
                     <div class='img-wrap'>
-                        <img src='../.././assets/img/goodimg.png'>
+                        <img v-lazy='item.imgMain'>
                     </div>
                     <div class='content'>
                         <div class='title'>
-                            {{item.name}}
+                            {{item.keyword}}
                         </div>
                         <div class='disc'>
                             <div class='l'>
                                 <div>￥
-                                    <span>{{item.price}}</span>
+                                    <span>{{item.sellingPrice}}</span>
                                 </div>
                             </div>
                             <div class='r'>
-                                ￥{{item.oldprice}}件
+                                ￥{{item.marketPrice}}件
                             </div>
                         </div>
                         <div class='acount'>
                             <div>
-                                限量<span>20</span>件
+                                限量<span>{{item.stockNum}}</span>件
                             </div>
                             <div>
                                 月销{{item.totalcount}}件
@@ -41,59 +41,18 @@ export default {
     components:{
         scroll
     },
+    created(){
+        this.axios.get('/api/activity/getActivityList?type=3').then(res => {
+            console.table(res.data);
+            res.data.obj.forEach(v => {
+                v.imgMain = `http://10.0.0.22:8181/${v.imgMain}`
+            });
+            this.goodList = res.data.obj
+        })
+    },
     data(){
         return {
-            goodList:[
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                }
-            ]
+            goodList:[]
 
         }
     }

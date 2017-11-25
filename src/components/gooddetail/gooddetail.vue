@@ -1,3 +1,10 @@
+/*
+ * @Author: ZhaoJie 
+ * @Date: 2017-11-15 10:25:28 
+ * @Last Modified by: 赵杰
+ * @Last Modified time: 2017-11-24 00:26:06
+ */
+
 <template>
 <transition name='normal'>
     <div class='gooddetail-wrap'  @click='stop'>
@@ -17,7 +24,7 @@
         <div class='content' ref='content' >
             <swiper  class='scroll-wrap' :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
             <swiper-slide>
-            <scroll class='scroll scroll-l' ref='scroll' :data='sourcegood.ratingList'>
+            <scroll class='scroll scroll-l' ref='scroll' :data='sourcegood.goodsPrices'>
                 <div>
                 <div class='img-wrap'>
                     <swiper :options="soption" :not-next-tick="notNextTick" ref="swiper">
@@ -34,21 +41,25 @@
                     </swiper>
                 </div>
                 <div class='title'>
-                    {{sourcegood.title}}
+                    {{sourcegood.name}}
                 </div>
                 <div class='module-price'>
-                <div class='price'>￥<span>{{sourcegood.price}}</span></div>
+                <div class='price'>
+                    ￥<span>{{minPrice}}</span>~￥<span>{{maxPrice}}</span>
+
+                </div>
                 <div class='oldprice'>价格：
-                    <span>￥{{sourcegood.oldprice}}</span></div>
+                    <span>￥{{sourcegood.marketPrice}}</span>
+                </div>
                 <div class='disc'>
                     <div class='yunfei'>
                         运费：{{sourcegood.freight}}
                     </div>
                     <div class='count'>
-                        月销 {{sourcegood.totalcount}}
+                        月销 {{sourcegood.orderNum}}件
                     </div>
                     <div class='place'>
-                        {{sourcegood.place}}
+                        {{sourcegood.place}}发货
                     </div>
                 </div>
                 </div>
@@ -80,7 +91,7 @@
                     <div>满100减20</div>
                 </div>
                 </div>
-                <div class='rating-block'>
+                <!-- <div class='rating-block'>
                 <div class='title'>商品评价({{ratingNum}})</div>
                 <div class='rating-nav'>
                     <div>全部({{ratingNum}})</div>
@@ -113,7 +124,7 @@
                 <div class='r-btn' @click='getComment'>
                     查看更多评价
                 </div>
-                </div>
+                </div> -->
                 </div>
             </scroll>
             </swiper-slide>
@@ -123,15 +134,15 @@
             </scroll>
             </swiper-slide>
             <swiper-slide>
-                <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
+                <!-- <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
                     <div class='ratingblock'>
                         <div class='rating-nav'>
-                            <div @click='getAllComment'>全部({{ratingNum}})</div>
-                            <div @click='getGoodComment'>好评({{goodRating}})</div>
-                            <div @click='getImageComment'>有图({{hasImage}})</div>
+                            <div @click='getAllComment'>全部()</div>
+                            <div @click='getGoodComment'>好评()</div>
+                            <div @click='getImageComment'>有图()</div>
                         </div>
                         <div class='rating-detail'>
-                            <div class='rating-item' v-for='(item,index) in sourcegood.ratingList' :key="index">
+                            <div class='rating-item' v-for='(item,index) in good.ratingList' :key="index">
                                 <div class='r-t'>
                                     <div class='r-header'>
                                         <div class='avatar'>
@@ -169,7 +180,7 @@
                             </div>
                         </div>
                     </div>
-                </scroll>
+                </scroll> -->
             </swiper-slide>
             </swiper>
         </div>
@@ -203,10 +214,11 @@
         </div>       
         <confirm v-if='false'></confirm> 
         <shopChoosing 
-        ref='shopcart' :goodInfo='sourcegood' @appendTo='appendTo' 
+        ref='shopcart' :goodInfo='sourcegood'
+        @appendTo='appendTo' 
         @add='add'
         @less='less'
-         v-if='choosing'></shopChoosing> 
+        v-if='choosing'></shopChoosing> 
     </div>
     </transition>
 
@@ -214,7 +226,7 @@
 
 <script>
 import scroll from 'common/scroll'
-import { moocgoodList } from 'common/util'
+// import { obj } from 'common/util'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import { mapGetters } from "vuex";
 import { mapMutations } from 'vuex'
@@ -224,38 +236,48 @@ import confirm from 'common/confirm'
 
 export default {
     created(){
-        if(Object.keys(this.get_current_good).length === 0){
-            console.log(1)
-            this.sourcegood = moocgoodList[0];
-        } else {
-            console.log(2)
-            this.refresh();
-        }
-        console.log(this.sourcegood)
+        let id = this.$route.params.id;
+        this.axios.get('http://192.168.31.205:6060/tests').then(res => {
+            let price = res.data.obj.goodsPrices.map(v => {
+                return Number(v.price);
+            });
+            this.sourcegood = res.data.obj;
+            this.maxPrice = Math.max(...price);
+            this.minPrice = Math.min(...price);
+            console.log(this.sourcegood);
+        })
+        // this.axios.get(`/api/wsc/goods/getById?goodsId=578fdfc60bad4d20a16507b0813f8ce2`).then(res => {
+        //     this.sourcegood = res.data.obj;
+        //     console.log(this.sourcegood);
+        // });
+        // if(Object.keys(this.get_current_good).length === 0){
+        //     this.sourcegood = moocgoodList[0];
+        // } else {
+        //     this.refresh();
+        // }
     },
     computed:{
         ratingNum(){
             return this.sourcegood.ratingList.length
         },
-
         // type 1 好评
         goodRating(){
-             return this.sourcegood.ratingList.filter(v => {
-                return v.type == 1;
-            }).length;
+            //  return this.sourcegood.ratingList.filter(v => {
+            //     return v.type == 1;
+            // }).length;
         },
         badRating(){
-            return this.sourcegood.ratingList.filter(v => {
-                return v.type != 1
-            }).length
+            // return this.sourcegood.ratingList.filter(v => {
+            //     return v.type != 1
+            // }).length
         },
         hasImage(){
-            return this.sourcegood.ratingList.filter(v => {
-                return v.img.length != 0
-            }).length
+            // return this.sourcegood.ratingList.filter(v => {
+            //     return v.img.length != 0
+            // }).length
         },
         cartLength(){
-            return this.shopcartList.length
+            // return this.shopcartList.length
         },
         ...mapGetters([
             'get_current_good',
@@ -350,19 +372,7 @@ export default {
             this.back(false)
         },
         appendTo(){
-            let goodData = {
-                id:this.sourcegood.id,
-                price : this.sourcegood.price,
-                count : this.sourcegood.count,
-                amount : this.amount,
-                sellername: this.sourcegood.sellername,
-                size:this.sourcegood.size,
-                color : this.sourcegood.color,
-                currenttype : this.currentType,
-                totalPrice : this.totalPrice,
-                freight: this.sourcegood.freight
-            };
-            console.log(goodData)
+            
         },
         getComment(){
             this.currentIndex = 2;
@@ -383,6 +393,8 @@ export default {
             tests:[],
             sourcegood:{},
             good:{},
+            maxPrice:0,
+            minPrice:0,
             index:0,
             notNextTick: true,
             rAll:true,

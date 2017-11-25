@@ -32,8 +32,11 @@ export default {
         goodList
     },
     created(){
-        this.$nextTick(() => {
-            this.goodList = moocgoodList;
+        this.axios.get('/api/activity/getActivityList?type=2').then(res => {
+            res.data.obj.forEach(v => {
+                v.imgMain = `http://10.0.0.22:8181${v.imgMain}`
+            });
+            this.goodList = res.data.obj
         })
     },
     methods:{
@@ -41,7 +44,6 @@ export default {
             const wHeight = window.innerHeight,
                   ah = this.$refs.swipe.offsetHeight;
             this.$refs.scroll.$el.style.height = (wHeight - ah) + 'px'
-            console.log(this.$refs.scroll.$el.style.height)
         },
         getTodetail(item){
             this.$router.push({
@@ -56,10 +58,6 @@ export default {
             },20)
             
         });
-        document.addEventListener('resize',() => {
-            this.calcheight();
-            this.$refs.scroll.refresh();
-        })
     },
     data(){
         return {

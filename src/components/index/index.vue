@@ -59,7 +59,7 @@
                 </div>
             </div>  
         </transition>
-        <scroll :data='fmaleitem' class='index-scroll' ref='scroll'>
+        <scroll :data='fmaleitem || maleitem' class='index-scroll' ref='scroll'>
             <div>
                 <div class='swipe-wrap'>
                     <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
@@ -69,8 +69,8 @@
                         <div class="swiper-pagination"  slot="pagination"></div>
                     </swiper>
                 </div>
-                <div class='horizontal-swiper' ref='hSwipe'>
-                    <div class='hSwipe-wrap'>
+                <swiper :options='hOptions' class='n-h-s'>
+                    <swiper-slide class='wrap'>
                     <router-link tag='div' to='/coupon' class='h-wiper-item'>
                         <div class='icon'>
                             <div>
@@ -81,7 +81,9 @@
                         </div>
                         <div class='txt'>红包区</div>
                     </router-link>
-                    <router-link tag='div' to='/bargain' class='h-wiper-item'>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
+                    <router-link tag='div' to='/bargain' class='h-wiper-item' ref='items'>
                         <div class='icon'>
                             <div>
                             <svg class="icon" aria-hidden="true">
@@ -91,6 +93,8 @@
                         </div>
                         <div class='txt'>砍价</div>
                     </router-link>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
                     <router-link tag='div' to='/lover' class='h-wiper-item'>
                         <div class='icon'>
                             <div>
@@ -101,6 +105,8 @@
                         </div>
                         <div class='txt'>情侣馆</div>
                     </router-link>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
                     <router-link tag='div' to='/sales' class='h-wiper-item'>
                         <div class='icon'>
                             <div>
@@ -111,7 +117,9 @@
                         </div>
                         <div class='txt'>校园9.9</div>
                     </router-link>
-                    <div class='h-wiper-item'>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
+                    <router-link tag='div' to='/hyh' class='h-wiper-item'>
                         <div class='icon'>
                             <div>
                             <svg class="icon" aria-hidden="true">
@@ -119,10 +127,10 @@
                             </svg>
                             </div>
                         </div>
-                        <div class='txt'>哗哗哗</div>
-                    </div>
-                    </div>
-                </div>
+                        <div class='txt'>滑一滑</div>
+                    </router-link>
+                    </swiper-slide>
+                </swiper>
                 <div class='line'></div>
                 <div class='section index1'>
                     <router-link to='/dorm' tag='div' class='index-choose-wrap'>
@@ -142,73 +150,60 @@
                                 <span :class='{"active":ismale}'>
                                     男生精选
                                 </span>
-                                
                             </div>
                             <div class="navitem" @click='ismale = false'>
                                 <span :class='{"active":!ismale}'>女生精选</span>
                             </div>
                         </div>
                         <transition name='indexBox' mode='out-in'>
-                        <div class='c-d-wrap' v-if='ismale'> 
-                            <div class='c-d-banner'>
-                                <img src="../.././assets/img/c-d-banner1.png" alt="">
+                            <div class='c-d-wrap' v-if='ismale'>
+                                <div class='act-item' v-for='(v,i) in maleitem' :key="i">
+                                    <div class='c-d-banner'>
+                                        <img v-lazy="v.img" alt="">
+                                    </div>
+                                    <swiper :options='hOptions' class='h-show'>
+                                        <swiper-slide class='showitem' v-for='(item,index) in v.items' :key="index" @click.native='goToGoodsDetail(item)'>
+                                            <img v-lazy="item.img_main">
+                                            <span>￥{{item.selling_price}}</span>
+                                        </swiper-slide>
+                                        <swiper-slide class='showitem last'>
+                                            <router-link to='/' tag='div' class='box'>
+                                            <div class='red'>
+                                                查看全部
+                                            </div>
+                                            <div class='gray'>
+                                                See more
+                                            </div>
+                                            </router-link> 
+                                            </swiper-slide>
+                                    </swiper>
+                                </div> 
                             </div>
-                            <div class='h-show'>
-                                <div class='showitem' v-for='(item,index) in maleitem' :key="index" v-if='index<5'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <span>￥{{item.price}}</span>
-                                </div>
-                            </div>
-                            <div class='c-d-banner'>
-                                <img src="../.././assets/img/c-d-banner1.png" alt="">
-                            </div>
-                            <div class='h-show'>
-                                <div class='showitem' v-for='(item,index) in maleitem' :key="index" v-if='index>=5'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <span>￥{{item.price}}</span>
-                                </div>
-                                <div class='showitem last'>
-                                    <router-link to='/' tag='div' class='box'>
-                                        <div class='red'>
-                                            查看全部
-                                        </div>
-                                        <div class='gray'>
-                                            See more
-                                        </div>
-                                    </router-link> 
-                                </div>
-                            </div>
-                        </div>
                         </transition>
                         <transition name='indexBox' mode='out-in'>
                         <div class='c-d-wrap' v-if='!ismale'> 
-                            <div class='c-d-banner'>
-                                <img src="../.././assets/img/c-d-banner2.png" alt="">
-                            </div>
-                            <div class='h-show'>
-                                <div class='showitem' v-for='(item,index) in fmaleitem' :key="index" v-if='index<5'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <span>￥{{item.price}}</span>
-                                </div>
-                            </div>
-                            <div class='c-d-banner'>
-                                <img src="../.././assets/img/c-d-banner2.png" alt="">
-                            </div>
-                            <div class='h-show'>
-                                <div class='showitem' v-for='(item,index) in fmaleitem' :key="index" v-if='index>=5'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <span>￥{{item.price}}</span>
-                                </div>
-                                <div class='showitem last'>
-                                    <router-link to='/' tag='div' class='box'>
-                                        <div class='red'>
-                                            查看全部
-                                        </div>
-                                        <div class='gray'>
-                                            See more
-                                        </div>
-                                    </router-link> 
-                                </div>
+                            <div class='c-d-wrap'>
+                                <div class='act-item' v-for='(v,i) in fmaleitem' :key="i">
+                                    <div class='c-d-banner'>
+                                        <img v-lazy="v.img" alt="">
+                                    </div>
+                                    <swiper :options='hOptions' class='h-show'>
+                                        <swiper-slide class='showitem' v-for='(item,index) in v.items' :key="index">
+                                            <img v-lazy="item.img_main">
+                                            <span>￥{{item.selling_price}}</span>
+                                        </swiper-slide>
+                                        <swiper-slide class='showitem last'>
+                                            <router-link to='/' tag='div' class='box'>
+                                            <div class='red'>
+                                                查看全部
+                                            </div>
+                                            <div class='gray'>
+                                                See more
+                                            </div>
+                                            </router-link> 
+                                            </swiper-slide>
+                                    </swiper>
+                                </div> 
                             </div>
                         </div>
                         </transition>
@@ -227,92 +222,78 @@ import Bscroll from 'better-scroll'
 
 
 export default {
-  components: {
-    scroll,
-    swiper,
-    swiperSlide
-  },
-  created(){
-      this.axios.get('/api/getBaannerList').then(res => {
-          console.log(res.data);
-          res.data.forEach(v => {
-                v.banner = `http://10.0.0.23:8181${v.banner}`
-          });
-          console.log(res.data);
-          this.banner = res.data
-      })
-  },
-  mounted() {
-      this.$nextTick(() => {
-          this._inithScroll();
-          setTimeout(() => {
-              this.$refs.scroll.refresh()
-          },20)
-      })
-  },
-  data() {
-    return {
-      banner:[],
-      notNextTick: true,
-      swiperOption:{
-          pagination: '.swiper-pagination',
-          paginationClickable: true,
-      },
-      ismale:true,
-      maleitem:[{
-          price:1111
-      },{
-          price:2222
-      },{
-          price:3333
-      },{
-          price:4444
-      },{
-          price:5555
-      },{
-          price:6666
-      },{
-          price:7777
-      },{
-          price:8888
-      },{
-          price:9999
-      }],
-      fmaleitem: [{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      },{
-          price:'女'
-      }],
-      isSearching:false
-    };
-  },
-  methods:{
-      _inithScroll(){
-          if(!this.scroll) {
-              this.scroll = new Bscroll(this.$refs.hSwipe,{
-                    click: true,
-                    startX: 0,
-                    scrollX: true
-                })
-          } else {
-              this.scroll.refresh();
-          }
-      }
-  }
+    components: {
+      scroll,
+      swiper,
+      swiperSlide
+    },
+    created(){
+        this.axios.get('/api/index/getBaannerList').then(res => {
+            res.data.obj.forEach(v => {
+                  v.banner = `http://10.0.0.22:8181${v.banner}`
+            });
+            this.banner = res.data.obj
+        });
+        this.axios.get('/api/index/getProGoodsList?type=0').then(res => {
+            if(res.data.code !== 'success') return false;
+            this.maleitem = this._formatProGoodsList(res.data.obj);
+            console.log(this.maleitem)
+        })
+        this.axios.get('/api/index/getProGoodsList?type=1').then(res => {
+            if(res.data.code !== 'success') return false;
+            this.fmaleitem = this._formatProGoodsList(res.data.obj);
+        })
+    },
+    methods:{
+        _formatProGoodsList(arr){
+            let map = {};
+            arr.forEach(v => {
+                const key = v.pro_id;
+                if(!map[key]) {
+                    map[key] = {
+                        pro_id:key,
+                        items:[],
+                    }
+                };
+            });
+            let _arr = Object.values(map).map(v => {
+                    return v;
+            });
+            _arr.forEach(v => {
+                for(let i of arr){
+                    if(i.pro_id == v.pro_id){
+                        i.img_main = `http://10.0.0.22:8181${i.img_main}`
+                        v.img = `http://10.0.0.22:8181${i.img}`;
+                        v.items.push(i);
+                    }
+                }
+            });
+            return _arr;
+        },
+        goToGoodsDetail(item){
+            this.$router.push({
+                path:`/good/${item.id}`
+            })
+        }
+    },
+    data() {
+      return {
+        banner:[],
+        notNextTick: true,
+        swiperOption:{
+            pagination: '.swiper-pagination',
+            paginationClickable: true,
+        },
+        hOptions:{
+            slidesPerView:'auto',
+            direction:'horizontal',
+        },
+        ismale:true,
+        maleitem:[],
+        fmaleitem: [],
+        isSearching:false
+      };
+    },
 };
 </script>
 
@@ -446,33 +427,36 @@ export default {
             overflow hidden 
             img 
                 width 100%
-        .horizontal-swiper
+        .n-h-s
             height 2.8rem
-            width : 100%
-            overflow hidden
-            .hSwipe-wrap
-                height 2.8rem
-                width 11rem
-                overflow hidden
-                display flex
-                .h-wiper-item
-                    display flex
-                    flex-direction column
-                    justify-content space-around
-                    flex 0 0 1.3333rem 
-                    margin 0 0.4667rem
-                    &:nth-child(1) .icon
+            width : 100vw
+            overflow: hidden
+            .wrap
+                width 1.3333rem 
+                margin 0 0.4667rem
+                &:nth-child(1) 
+                    .icon
                         background #ff7c7b
-                        color #fff
-                    &:nth-child(2) .icon
+                        color #fff                        
+                &:nth-child(2) 
+                    .icon
                         background #5bc994
                         color #fff
-                    &:nth-child(3) .icon
+                &:nth-child(3) 
+                    .icon
                         background #f78db7
                         color #fff
-                    &:nth-child(4) .icon
-                        background #f89a67
-                        color #fff
+                &:nth-child(4) .icon
+                    background #f89a67
+                    color #fff
+                .h-wiper-item
+                    width 1.3333rem 
+                    height 2.8rem
+                    display flex 
+                    flex-direction column 
+                    box-sizing border-box
+                    padding .2rem 0
+                    justify-content space-around
                 .icon
                     width 100%
                     height 1.3333rem
@@ -541,16 +525,15 @@ export default {
         img 
             width 100%
     .h-show
-        display flex
-        justify-content space-between
-        text-align center
-        font-size: 0.3333rem;
-        margin 0.1333rem 0
+        margin 0.2667rem 0
         .showitem
-            width 1.8rem
+            font-size: 0.3333rem;
+            flex 0 0 1.8rem
             height 2.3067rem
+            margin-right 0.2rem
             display flex 
             flex-direction column
+            text-align center
             justify-content space-between
             &.last
                 justify-content center

@@ -167,15 +167,17 @@ export default {
                     }
                 };
             });
-            return Object.values(map).map(v => {
+            let arr = Object.values(map).map(v => {
                 return v;
-            }).forEach(v => {
+            });
+            arr.forEach(v => {
                 for(let i of shopList){
                     if(i.sellername === v.title) {
                         v.items.push(i)
                     }
                 }
             });
+            return arr;
         },
         choosegood(a,b){
             b.isclick = !b.isclick;

@@ -220,7 +220,7 @@ export default {
 
 .header
     height 4rem
-    background-color #fc7aa5
+    background: linear-gradient(0deg, #fc7aa5, #f9acc5)
     display flex
     flex-direction column
     justify-content space-between

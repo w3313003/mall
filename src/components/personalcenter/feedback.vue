@@ -56,7 +56,7 @@ export default {
         fileclick(){
             this.$refs.files.click();
         },
-        upload(e){
+        upload(){
             let file =  this.$refs.files.files[0],
             that = this,
             reg = /^image/gi;
