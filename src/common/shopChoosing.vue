@@ -77,7 +77,10 @@
 </template>
 
 <script>
-// 取数组差集 createdByZhaojie
+/**
+  * 取数组差集
+  * @arguments Array 
+  */
 function diffSet() {
     let arr = [];
     [...arguments].reduce((q, c) => {

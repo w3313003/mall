@@ -11,7 +11,7 @@
             <div class="gooddetail">
                 <img src="../.././assets/img/good-item.png" alt="">
                 <div class='info'>
-                    <div class="t">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
+                    <div class="ts">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
                     <div class="m">颜色颜色颜色颜色颜色</div>
                     <div class="b">
                         <span>￥66.66</span>
@@ -188,6 +188,8 @@ export default {
                 justify-content space-between
             .m
                 color #666
+            .ts
+                padding 0
     .item
         display flex
         font-size .4rem

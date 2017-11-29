@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "axios": "^0.17.0",
-    "better-scroll": "^1.4.1",
+    "better-scroll": "^1.5.0",
     "compression-webpack-plugin": "^1.0.1",
     "mint-ui": "^2.2.10",
     "stylus": "^0.54.5",
@@ -58,7 +58,8 @@
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-middleware": "^1.12.0",
     "webpack-hot-middleware": "^2.18.2",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "weixin-js-sdk": "^1.2.0"
   },
   "engines": {
     "node": ">= 4.0.0",

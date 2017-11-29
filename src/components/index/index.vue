@@ -12,19 +12,19 @@
                 </div>
                 </div> 
                
-                <div class='msg'  v-if='isSearching'>
+                <div class='msg'  v-show='isSearching'>
                      <div @click='isSearching = false'>
                         取消
                     </div>
                 </div>
-                <div v-else style='font-size:.5rem;color:#666'>
+                <div v-if='!isSearching' style='font-size:.5rem;color:#666'>
                     <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-pingjia"></use>
                     </svg>
                 </div>
         </div> 
         <transition name='searchList'>
-            <div class='search-block' v-show='isSearching'>
+            <div class='search-block' v-if='isSearching'>
                 <div class='near'>
                     <div class='title'>
                         最近搜索
@@ -325,7 +325,7 @@ export default {
     width 100%
     height 100%
     background #fff
-    position fixed
+    position absolute
     top 0.93rem
     left 0
     z-index 999

@@ -3,7 +3,7 @@
         <div class='Ttitle'>
             购物车
         </div>
-        <scroll class='scroll' :data='goodList'>
+        <scroll class='scroll' ref='scroll' :data='goodList'>
             <div>
                 <div  class='gooditem' v-for='(allitem,allindex) in goodList' :key="allindex">
                     <div class='header'>
@@ -150,6 +150,9 @@ export default {
     created(){
         this.recommend = moocgoodList
         this.goodList = this._initshopList();
+    },
+    activated(){
+        this.$refs.activated.refresh();
     },
     methods:{
         _initshopList(){

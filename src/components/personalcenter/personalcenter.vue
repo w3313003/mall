@@ -9,10 +9,10 @@
             <div class='h-content'>
                 <div class='l'>
                     <div class='img-wrap'>
-                        <img src='../.././assets/img/avatar.png'>
+                        <img :src='userInfo.avatar'>
                     </div>
                     <div class='nickname'>
-                        {{userInfo.nickname}}
+                        {{userInfo.nickName}}
                     </div>
                 </div>
                 <div class='r'>
@@ -109,7 +109,7 @@
                         </svg>
                     </div>
                 </router-link>
-                <router-link to='/personalcenter/my_comment' tag='li'>
+                <router-link to='/personalcenter/coupon' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_10.png" alt="">
                     </div>
@@ -178,9 +178,8 @@ import scroll from 'common/scroll'
 
 export default {
     created(){
-        this.axios.get("http://g.cn").then(res => {
-            this.userInfo = res.data;
-        })
+        let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        this.userInfo = userInfo;
     },
     data(){
         return {

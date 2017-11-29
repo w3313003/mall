@@ -13,6 +13,7 @@
                 发布
             </div>
         </div>
+        <scroll class='scroll'>
         <div class='middle'>
             <div class="banner">
                     <img src="../.././assets/img/banner.png" alt="">
@@ -76,18 +77,27 @@
                 </div>
             </div>
         </div>
+        </scroll>
         <div class="bottom">
-
+            <div class='input-wrap'>
+                <input type="text" placeholder="快来评论吧">
+            </div>
+            <div class='btn'>
+                评价
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import block from './sofratingblock'
+import scroll from 'common/scroll'
+
 
 export default {
     components:{
-        block
+        block,
+        scroll
     },
     methods:{
         back(){
@@ -234,37 +244,68 @@ export default {
         .l
             font-size 0.4rem
             transform rotate(180deg)
-    .middle
+    .scroll
         flex 1
-        overflow scroll
+        overflow hidden
         background #e7e7e7
-        .banner
-                width 100%
-                img 
+        .middle
+            .banner
                     width 100%
-        .content
-            background #fff
-            flex 1
-            box-sizing border-box
-            padding 0.1rem 0.2rem 0rem
-            .c-title
-                font-size 0.3333rem
-                line-height 0.45rem
-                margin 0.1rem 0
-            .page
-                font-size 0.3rem
-                line-height .35rem
-                word-break break-all
-            .hidden-btn
-                text-align center
-                font-size 0.3rem
-                margin 0.1333rem 0 0
-                color #666
-                .icon
-                    transform rotate(90deg)
-                    font-size 0.4rem
-            
-    .bottom
-        height 1.3333rem
-        border-top 0.0133rem solid #666
+                    img 
+                        width 100%
+            .content
+                background #fff
+                flex 1
+                box-sizing border-box
+                padding 0.1rem 0.2rem 0rem
+                .c-title
+                    font-size 0.3333rem
+                    line-height 0.45rem
+                    margin 0.1rem 0
+                    width 100%
+                    overflow hidden
+                    text-overflow ellipsis
+                    white-space nowrap
+                .page
+                    font-size 0.3rem
+                    line-height .35rem
+                    word-break break-all
+                .hidden-btn
+                    text-align center
+                    font-size 0.3rem
+                    margin 0.1333rem 0 0
+                    color #666
+                    .icon
+                        transform rotate(90deg)
+                        font-size 0.4rem
+
+.bottom
+    height 1.3333rem
+    border-top 0.0133rem solid #666
+    box-sizing border-box
+    padding .2rem 0.3333rem
+    display flex
+    justify-content space-between
+    .input-wrap
+        flex 1
+        background #f5f5f5
+        display flex
+        align-items center
+        box-sizing border-box
+        padding 0 .2rem
+        border-radius 0.1333rem
+        input
+            background transparent
+            font-size .4rem
+    .btn
+        flex 0 0 1.8933rem
+        background-color #fc7aa5
+        color #fff
+        font-size .45rem
+        height 100%
+        display flex
+        align-items center
+        justify-content center
+        margin-left 5vw
+        border-radius 0.2rem
 </style>
