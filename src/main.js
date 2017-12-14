@@ -1,8 +1,8 @@
 /*
  * @Author: ZhaoJie 
  * @Date: 2017-11-09 9:10:21 
- * @Last Modified by:   赵杰 
- * @Last Modified time: 2017-11-24 10:10:31 
+ * @Last Modified by: 赵杰
+ * @Last Modified time: 2017-12-12 16:36:30
  */
 import Vue from 'vue'
 import App from './App'
@@ -22,7 +22,11 @@ Vue.use(VueLazyload, {
 })
 
 
-Vue.prototype.axios = axios
+
+Vue.prototype.axios = axios.create({
+    timeout: 1000,
+    // headers:{'Content-type': 'application/x-www-form-urlencoded'}
+})
 
 Vue.config.productionTip = false
 
@@ -32,5 +36,18 @@ new Vue({
     router,
     template: '<App/>',
     components: { App },
-    store
+    store,
+    beforeCreate(){
+        const href = window.location.href;
+        console.log(href);
+        let reg = /\?(?=#)/;
+        if(!reg.exec(href)){
+            var split = href.split('#');
+            console.log(split)
+            let  url = '';
+            for(let i of split){
+                url += i
+            }
+        }
+    }
 })

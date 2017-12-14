@@ -56,10 +56,16 @@ export default {
         swiperSlide
     },
     created(){
-        this.axios.get('/api/getBedRoomVideo').then(res => {
+        this.axios.get('/api/bedroomDecoration/getBedRoomVideo').then(res => {
             console.log(res.data.obj)
-            this.videoSrc = res.data.obj[0].bedroomVideo = `http://10.0.0.22:8181${res.data.obj[0].bedroomVideo}`;
+            this.videoSrc = res.data.obj[0].bedroomVideo = `http://10.0.0.23:8181${res.data.obj[0].bedroomVideo}`;
             console.log(this.videoSrc)
+        });
+        this.axios.get('/api/bedroomDecoration/getZoneNavBar').then(res =>  {
+            console.log(res.obj);
+        });
+        this.axios.get('/api/bedroomDecoration/getZoneGoosList?zoneId=40171ea62c704a6b9f396a0cde7b0c5a').then(res => {
+            console.log(res.obj);
         })
     },
     methods:{

@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-21 16:55:21 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-11-24 00:42:35
+ * @Last Modified time: 2017-12-14 14:33:37
  */
 
 <template>
@@ -12,7 +12,8 @@
             <div class='choosetype' v-show='choosing' @click.stop='cancelBubble'>
                 <div class='header'>
                     <div class='img-wrap'>
-                        <img src=".././assets/img/goodimg.png" alt="">
+                        <!-- <img :src='img' alt=""> -->
+                        <img v-lazy='img' alt="">
                     </div>
                     <div class='disc'>
                         <div class='price'>
@@ -112,6 +113,9 @@ export default {
     computed:{
         totalPrice(){
             return this.goodPrice * this.amount;
+        },
+        img(){
+            return this.goodInfo.imgMain
         }
     },
     watch:{
@@ -126,12 +130,12 @@ export default {
                     this.otherType = diffSet(typeArr,choosedArr)[0];
                 } else if (typeLength  == choosedLength) {
                     this.otherType = '';
-                    let arr = [] ;
+                    let arr = [];
                     Object.values(this.choosed).forEach(v => {
                         arr.push(v.id)
                     });
-                    const queryStr = arr.join(','),
-                          reverseQueryStr = arr.reverse().join(',');
+                    const queryStr = arr.join(''),
+                          reverseQueryStr = arr.reverse().join('');
                     this.goodInfo.goodsPrices.forEach(v => {
                         if(v.specChileId == queryStr || v.specChileId == reverseQueryStr){
                             this.goodPrice = v.price;
@@ -155,8 +159,9 @@ export default {
         }
     },
     created(){
+        console.log(this.goodInfo)
         this.currentType = this.goodInfo.goodsPrices[0].specChileId.split(',');
-        this._formatGoodsTypeList(this.goodInfo)
+        this._formatGoodsTypeList(this.goodInfo);
     },
     methods:{
         _formatGoodsTypeList(arr){
@@ -196,6 +201,7 @@ export default {
                 id : item.id,
                 index : index
             });
+            console.log(this.choosed)
         },
         appendToShopCart(){
             let choosedTypeCount = Object.keys(this.choosed).length,
@@ -211,9 +217,9 @@ export default {
             let data = {
                 price : this.totalPrice,
                 stock : this.goodStock,
-                choosedType:str.slice(0,-1)
+                choosedType: str.slice(0,-1)
             };            
-            this.$emit('appendTo');
+            this.$emit('appendTo',data);
             this.close();
         },
         cancelBubble(e){

@@ -1,159 +1,165 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 const index = (resolve) => {
-    import('@/components/index/index').then((module) => {
+    import ('@/components/index/index').then((module) => {
         resolve(module)
     })
 }
 const classify = resolve => {
-    import('@/components/classify/classify').then(module => {
-        resolve(module)
-    })
-}
-// 他她圈
+        import ('@/components/classify/classify').then(module => {
+            resolve(module)
+        })
+    }
+    // 他她圈
 const sof = resolve => {
-    import('@/components/sof/sof').then(module => {
+    import ('@/components/sof/sof').then(module => {
         resolve(module)
     })
 }
 const sofcomment = resolve => {
-    import('@/components/sof/sofcomment').then(module => {
+    import ('@/components/sof/sofcomment').then(module => {
         resolve(module)
     })
 }
 const sofDetail = resolve => {
-    import('@/components/sof/sofDetail').then(module => {
-        resolve(module)
-    })
-}
-// end
+        import ('@/components/sof/sofDetail').then(module => {
+            resolve(module)
+        })
+    }
+    // end
 const shopcart = resolve => {
-    import('@/components/shopcart/shopcart').then(module => {
-        resolve(module)
-    })
-}
-// 个人中心
+        import ('@/components/shopcart/shopcart').then(module => {
+            resolve(module)
+        })
+    }
+    // 个人中心
 const personalcenter = resolve => {
-    import('@/components/personalcenter/personalcenter').then(module => {
+    import ('@/components/personalcenter/personalcenter').then(module => {
         resolve(module)
     })
 }
 const activities = resolve => {
-    import('@/components/personalcenter/activities').then(module => {
+    import ('@/components/personalcenter/activities').then(module => {
         resolve(module)
     })
 }
 const collection = resolve => {
-    import('@/components/personalcenter/collection').then(module => {
+    import ('@/components/personalcenter/collection').then(module => {
         resolve(module)
     })
 }
 const my_comment = resolve => {
-    import('@/components/personalcenter/comment').then(module => {
+    import ('@/components/personalcenter/comment').then(module => {
         resolve(module)
     })
 }
 const help = resolve => {
-    import('@/components/personalcenter/help').then(module => {
+    import ('@/components/personalcenter/help').then(module => {
         resolve(module)
     })
 }
 const my_coupon = resolve => {
-    import('@/components/personalcenter/coupon').then(module => {
+    import ('@/components/personalcenter/coupon').then(module => {
         resolve(module)
     })
 }
 const personalinfo = resolve => {
-    import('@/components/personalinfo/personalinfo').then(module => {
+    import ('@/components/personalinfo/personalinfo').then(module => {
         resolve(module)
     })
 }
 const feedback = resolve => {
-    import("@/components/personalcenter/feedback").then(module => {
-        resolve(module)
-    })
-}
-// end
+        import ("@/components/personalcenter/feedback").then(module => {
+            resolve(module)
+        })
+    }
+    // end
 const coupon = resolve => {
-    import('@/components/Coupon/coupon').then(module => {
+    import ('@/components/Coupon/coupon').then(module => {
         resolve(module)
     })
 }
 const bargain = resolve => {
-    import('@/components/bargain/bargain').then(module => {
+    import ('@/components/bargain/bargain').then(module => {
         resolve(module)
     })
 }
 const lover = resolve => {
-    import('@/components/lover/lover').then(module => {
+    import ('@/components/lover/lover').then(module => {
         resolve(module)
     })
 }
 const sales = resolve => {
-    import('@/components/sales/sales').then(module => {
+    import ('@/components/sales/sales').then(module => {
         resolve(module)
     })
 }
 const good_all = resolve => {
-    import('@/components/good_all/good_all').then(module => {
+    import ('@/components/good_all/good_all').then(module => {
         resolve(module)
     })
 }
 const gooddetail = resolve => {
-    import('@/components/gooddetail/gooddetail').then(module => {
+    import ('@/components/gooddetail/gooddetail').then(module => {
         resolve(module)
     })
 }
 
 const address = resolve => {
-    import('@/components/address/address').then(module => {
-        resolve(module)
-    })
-}
-// 寝室
+        import ('@/components/address/address').then(module => {
+            resolve(module)
+        })
+    }
+    // 寝室
 const dorm = resolve => {
-    import('@/components/index/dorm').then(module => {
+    import ('@/components/index/dorm').then(module => {
         resolve(module)
     })
 }
 const fashion = resolve => {
-    import('@/components/index/fashion').then(module => {
+    import ('@/components/index/fashion').then(module => {
         resolve(module)
     })
 }
 const fDetail = resolve => {
-    import('@/components/index/fashionDetail').then(module => {
+    import ('@/components/index/fashionDetail').then(module => {
         resolve(module)
     })
 }
 const order = resolve => {
-    import('@/components/order/ordercenter').then(module => {
+    import ('@/components/order/ordercenter').then(module => {
         resolve(module)
     })
 }
 const orderdetail = resolve => {
-    import('@/components/order/detail').then(module => {
+    import ('@/components/order/detail').then(module => {
         resolve(module)
     })
 }
 const returnGoods = resolve => {
-    import('@/components/returnGoods/returnGoods').then(module => {
+    import ('@/components/returnGoods/returnGoods').then(module => {
         resolve(module)
     })
 }
 const seller = resolve => {
-    import('@/components/seller/seller').then(module => {
+    import ('@/components/seller/seller').then(module => {
         resolve(module)
     })
 }
 const sellerTypes = resolve => {
-    import('@/components/seller/sellerTypes').then(module => {
+    import ('@/components/seller/sellerTypes').then(module => {
         resolve(module)
     })
 }
 
 const hyh = resolve => {
-    import('@/components/index/hyh').then(module => {
+    import ('@/components/index/hyh').then(module => {
+        resolve(module)
+    })
+}
+
+const test = resolve => {
+    import ('@/components/test').then(module => {
         resolve(module)
     })
 }
@@ -164,16 +170,16 @@ Vue.use(Router)
 
 
 export const router = new Router({
+    base:'/frontend/',
     routes: [
         {
-            path: '/',
+            path : '/',
+            redirect : '/test/oauth',
+        },
+        {
+            path: '/test/oauth',
             component: oauth,
             beforeEnter(to, from, next) {
-                // if(!location.href.match(/\/\?(?=#)/)){
-                //     let arr = location.href.split('#');
-                //     location.href = `${arr[0]}?#/`;
-                //     return;
-                // };
                 next()
             }
         }, {
@@ -286,6 +292,23 @@ export const router = new Router({
         {
             path: '/hyh',
             component: hyh
+        },
+        {
+            path : '/test',
+            component : test
         }
     ]
+});
+router.beforeEach((a,b,c) => {
+    let url = location.href.split('#');
+    console.log(url[0])
+    if(!/\?$/.test(url[0])){
+        url[0] = url[0]+'?#';
+        let urls = ''
+        for(let i of url){
+            urls += i
+        }
+        location.href = urls;
+    }
+    c();
 })

@@ -15,7 +15,7 @@
                     </div>
                     <img v-lazy="item.imgMain" alt="">
                     <div class='title'>
-                        <div class='t'>{{item.keyword}}</div>
+                        <div class='t'>{{item.name}}</div>
                         <div class='b'>
                             ￥<span>{{item.sellingPrice}}</span><span>{{item.marketPrice}}</span>
                         </div>
@@ -32,7 +32,7 @@
                     </div>
                     <img v-lazy="item.imgMain" alt="">
                     <div class='title'>
-                        <div class='t'>{{item.keyword}}</div>
+                        <div class='t'>{{item.name}}</div>
                         <div class='b'>
                             ￥<span>{{item.sellingPrice}}</span><span>{{item.marketPrice}}</span>
                         </div>
@@ -53,17 +53,14 @@ export default {
     },
     created(){
         this.axios.get('/api/activity/getActivityList?hyhType=1').then(res => {
-            for(let i of res.data.obj){
-                i.imgMain = `http://10.0.0.22:8181${i.imgMain}`;
-            }
-            console.log(res.data)
+
             this.maleList = res.data.obj;
+            console.log(this.maleList)
         });
         this.axios.get('/api/activity/getActivityList?hyhType=2').then(res => {
-            for(let i of res.data.obj){
-                i.imgMain = `http://10.0.0.22:8181${i.imgMain}`;
-            }
+
             this.fmaleList = res.data.obj;
+            console.log(this.fmaleList)
         });
     },
     data(){

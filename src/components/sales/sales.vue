@@ -8,7 +8,7 @@
                     </div>
                     <div class='content'>
                         <div class='title'>
-                            {{item.keyword}}
+                            {{item.name}}
                         </div>
                         <div class='disc'>
                             <div class='l'>
@@ -17,7 +17,7 @@
                                 </div>
                             </div>
                             <div class='r'>
-                                ￥{{item.marketPrice}}件
+                                ￥{{item.marketPrice}}
                             </div>
                         </div>
                         <div class='acount'>
@@ -25,7 +25,7 @@
                                 限量<span>{{item.stockNum}}</span>件
                             </div>
                             <div>
-                                月销{{item.totalcount}}件
+                                月销{{item.xiaoshou_num}}件
                             </div>
                         </div>
                     </div>
@@ -43,11 +43,11 @@ export default {
     },
     created(){
         this.axios.get('/api/activity/getActivityList?type=3').then(res => {
-            console.table(res.data);
             res.data.obj.forEach(v => {
                 v.imgMain = `http://10.0.0.22:8181/${v.imgMain}`
             });
-            this.goodList = res.data.obj
+            this.goodList = res.data.obj;
+            console.log(this.goodList)
         })
     },
     data(){

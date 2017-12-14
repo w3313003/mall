@@ -21,10 +21,9 @@ export default {
         //     this.info = res.data.obj;
         //     console.log(this.info)
         // });
-        this.axios.post('/api/outFit/getOutfitDetali',{
-            outId : id.id
-        }).then(res => {
+        this.axios.get(`/api/outFit/getOutfitDetali?outId=${id.id}`).then(res => {
             console.log(res.data)
+            this.info = res.data.obj
         })
     },
     data(){

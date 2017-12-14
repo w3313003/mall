@@ -33,10 +33,8 @@ export default {
     },
     created(){
         this.axios.get('/api/activity/getActivityList?type=2').then(res => {
-            res.data.obj.forEach(v => {
-                v.imgMain = `http://10.0.0.22:8181${v.imgMain}`
-            });
-            this.goodList = res.data.obj
+            this.goodList = res.data.obj;
+            console.log(this.goodList)
         })
     },
     methods:{

@@ -8,19 +8,19 @@
                     </div>
                     <div class='content'>
                         <div class='title'>
-                            {{item.keyword}}
+                            {{item.name}}
                         </div>
                         <div class='disc'>
                             <div class='l'>
                                 <div>￥
-                                    <span>{{item.kjPrice}}</span>
+                                    <span>{{item.sellingPrice}}</span>
                                 </div>
                             </div>
                             <div class='r'>
-                                限量{{item.stockNum}}件
+                                限量{{item.limited}}件
                             </div>
                         </div>
-                        <div style='color:#ff8989'>[{{item.kjNum}}人帮砍，立减{{item.kjPrice * item.kjNum}}元]</div>
+                        <div style='color:#ff8989'>[{{item.kjNum}}人帮砍，立减{{item.kjNum * item.kjPrice}}元]</div>
                         <div class='btn'>
                             发起砍价
                         </div>
@@ -39,7 +39,7 @@ export default {
         scroll
     },
     created(){
-        this.axios.get('/api/activity/getActivityList   ?type=1').then(res => {
+        this.axios.get('/api/activity/getActivityList?type=1').then(res => {
             res.data.obj.forEach(v => {
                 v.imgMain = `http://10.0.0.22:8181${v.imgMain}`
             });

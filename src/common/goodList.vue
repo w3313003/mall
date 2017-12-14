@@ -17,7 +17,7 @@
                             ￥{{item.marketPrice}}
                         </div>
                         <div class='acount'>
-                            月销{{item.count}}件
+                            月销{{item.xiaoshou_num}}件
                         </div>
                     </div>
                 </div>
@@ -85,6 +85,9 @@ export default {
             }
         }
     },
+    mounted(){
+        console.log(this.goodList)
+    },
     computed:{
         ...mapGetters([
             'get_good_detailshow'
@@ -92,7 +95,9 @@ export default {
     },
     methods:{
         getTodetail(item){
-            this.$emit('getTodetail',item);
+            this.$router.push({
+                path : `/good/${item.id}`
+            });
         }
     }
 }

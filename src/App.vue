@@ -5,7 +5,7 @@
     </keep-alive>
     <footer>
       <div class='nav-wrap'>
-          <router-link to='/' tag="div">
+          <router-link to='/index' tag="div">
             <svg class="icon indexicon" aria-hidden="true">
                 <use xlink:href="#icon-shouye"></use>
             </svg>

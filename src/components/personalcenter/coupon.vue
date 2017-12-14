@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-28 14:35:40 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-11-28 15:06:43
+ * @Last Modified time: 2017-12-14 15:31:28
  */
 <template>
     <div class="coupon-wrap">
@@ -14,22 +14,25 @@
         </div> 
         <scroll class='scroll'>
             <ul>
-                <li class='item'> 
+                <li class='item' v-for='(item,index) in couponList' :key="index"> 
                     <div class='l'>
                         <div class='t'>
                             <div class='price'>
-                                ￥<span>30</span>.0元
+                                ￥<span>
+                                    {{item.money}}</span>.0元
                             </div>
                             <div class='seller_name'>
-                                墨刀旗舰店
+                                {{item.shopName}}
                             </div>
                         </div>
                         <div class='b'>
                             <div class='disc'>
-                                满199-20元
+                                满
+                                    {{item.fullAmount}}-
+                                    {{item.money}}元
                             </div>
                             <div class='date'>
-                                2017-6-6到期
+                                {{item.remainingTime}}后到期
                             </div>
                         </div>
                     </div>
@@ -44,14 +47,30 @@
 
 <script>
 import scroll from 'common/scroll'
+
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+
 export default {
     data(){
         return {
-            
+            couponList:[]
         }
     },
     components:{
         scroll
+    },
+    created(){
+        let data = new URLSearchParams();
+        data.append("userId", userInfo.userid);
+        this.axios.post("/api/wsc/user/userPacketList", data).then(res => {
+            if(res.data.code !== 'success') throw new Error('error');
+            res.data.obj.forEach(v => {
+                if (!v.shopName && v.type == 1) {
+                    this.$set(v, "shopName", "平台红包");
+                }
+            })
+            this.couponList = res.data.obj;
+        });
     },
     methods:{
         back(){

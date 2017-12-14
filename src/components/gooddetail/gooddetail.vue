@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-11-24 00:26:06
+ * @Last Modified time: 2017-12-14 15:23:40
  */
 
 <template>
@@ -28,15 +28,10 @@
                 <div>
                 <div class='img-wrap'>
                     <swiper :options="soption" :not-next-tick="notNextTick" ref="swiper">
-                        <swiper-slide>
-                            <img src='../.././assets/img/goodimg.png' alt="">
+                        <swiper-slide v-for='(item,index) in imgs' :key="index">
+                            <img v-lazy='item' alt="">
                         </swiper-slide>
-                        <swiper-slide>
-                            <img src='../.././assets/img/goodimg.png' alt="">
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src='../.././assets/img/goodimg.png' alt="">
-                        </swiper-slide>
+                        
                         <div class="swiper-pagination"  slot="pagination"></div>
                     </swiper>
                 </div>
@@ -56,18 +51,17 @@
                         运费：{{sourcegood.freight}}
                     </div>
                     <div class='count'>
-                        月销 {{sourcegood.orderNum}}件
+                        月销 {{sourcegood.xiaoshou_num}}件
                     </div>
-                    <div class='place'>
+                    <!-- <div class='place'>
                         {{sourcegood.place}}发货
-                    </div>
+                    </div> -->
                 </div>
                 </div>
                 <div class='good-server'>
-                    <div>极速退货</div>
-                    <div>正品保证</div>
-                    <div>赠运费险</div>
-                    <div>极速退款</div>
+                    <div v-for='(item,index) in sourcegood.labels' :key="index">
+                        {{item}}
+                    </div>
                 </div>
                 <div class='box'></div>
                 <div class='choose' @click='shopcartShow'>
@@ -79,17 +73,18 @@
                 </div>
                 </div>
                 <div class='coupon'>
-                <div class='first'>
-                    立即领红包
-                </div>
-                <div class='coupon-item'>
-                    <div>
-                        满100减20
+                    <div class='first'>
+                        立即领红包
                     </div>
-                </div>
-                <div class='coupon-item'>
-                    <div>满100减20</div>
-                </div>
+                    <div class='coupon-item' :key="index" v-for='(item,index) in couponList'
+                    @click='receiveCoupon(item)'>
+                        <div>
+                            满
+                                {{item.fullAmount}}
+                            减
+                                {{item.money}}
+                        </div>
+                    </div>
                 </div>
                 <!-- <div class='rating-block'>
                 <div class='title'>商品评价({{ratingNum}})</div>
@@ -129,14 +124,18 @@
             </scroll>
             </swiper-slide>
             <swiper-slide>
-            <scroll class='scroll scroll-m' ref='scrollM'>
+               
+                <scroll class='scroll scroll-m' ref='scrollM' :data='sourcegood.goodsPrices'>
+                 <div v-html="sourcegood.details" id='details' class="details">
+
+                </div>
                 <good-list :goodList='tests' @nowTrue='nowIsTrue'></good-list>
-            </scroll>
+                </scroll>
             </swiper-slide>
             <swiper-slide>
-                <!-- <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
-                    <div class='ratingblock'>
-                        <div class='rating-nav'>
+                <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
+                <div class='ratingblock'>
+                      <!-- <div class='rating-nav'>
                             <div @click='getAllComment'>全部()</div>
                             <div @click='getGoodComment'>好评()</div>
                             <div @click='getImageComment'>有图()</div>
@@ -178,9 +177,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
-                </scroll> -->
+                </scroll>
             </swiper-slide>
             </swiper>
         </div>
@@ -225,529 +224,715 @@
 </template>
 
 <script>
-import scroll from 'common/scroll'
+import scroll from "common/scroll";
 // import { obj } from 'common/util'
-import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import { swiper, swiperSlide } from "vue-awesome-swiper";
 import { mapGetters } from "vuex";
-import { mapMutations } from 'vuex'
-import goodList from 'common/goodList'
-import shopChoosing from 'common/shopChoosing'
-import confirm from 'common/confirm'
+import { mapMutations } from "vuex";
+import goodList from "common/goodList";
+import shopChoosing from "common/shopChoosing";
+import confirm from "common/confirm";
+import good from "common/mock";
+import wx from "weixin-js-sdk";
+const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 
 export default {
-    created(){
-        let id = this.$route.params.id;
-        this.axios.get('http://192.168.31.205:6060/tests').then(res => {
-            let price = res.data.obj.goodsPrices.map(v => {
-                return Number(v.price);
-            });
-            this.sourcegood = res.data.obj;
-            this.maxPrice = Math.max(...price);
-            this.minPrice = Math.min(...price);
-            console.log(this.sourcegood);
-        })
-        // this.axios.get(`/api/wsc/goods/getById?goodsId=578fdfc60bad4d20a16507b0813f8ce2`).then(res => {
-        //     this.sourcegood = res.data.obj;
-        //     console.log(this.sourcegood);
-        // });
-        // if(Object.keys(this.get_current_good).length === 0){
-        //     this.sourcegood = moocgoodList[0];
-        // } else {
-        //     this.refresh();
-        // }
-    },
-    computed:{
-        ratingNum(){
-            return this.sourcegood.ratingList.length
-        },
-        // type 1 好评
-        goodRating(){
-            //  return this.sourcegood.ratingList.filter(v => {
-            //     return v.type == 1;
-            // }).length;
-        },
-        badRating(){
-            // return this.sourcegood.ratingList.filter(v => {
-            //     return v.type != 1
-            // }).length
-        },
-        hasImage(){
-            // return this.sourcegood.ratingList.filter(v => {
-            //     return v.img.length != 0
-            // }).length
-        },
-        cartLength(){
-            // return this.shopcartList.length
-        },
-        ...mapGetters([
-            'get_current_good',
-            'get_good_detailshow',
-            'shopcartList'
-        ])
-    },
-    components:{
-        scroll,
-        goodList,
-        shopChoosing,
-        confirm
-    },
-    methods:{
-        calcheight(){
-            let tH = this.$refs.nav.offsetHeight,
-                bH = this.$refs.bottom.offsetHeight,
-                wh = window.innerHeight;
-            this.$refs.content.style.height = (wh - tH - bH) + 'px';
-        },
-        nowIsTrue(){
-            this.$refs.mySwiper.swiper.slideTo(0);
-            this.index = 0;
-            this.refresh();
-        },
-        // 商品信息更新
-        refresh(){
-            this.sourcegood = this.get_current_good;
-            this.size = this.sourcegood.size[0];
-            this.color = this.sourcegood.color[0];
-            this.good = JSON.parse(JSON.stringify(this.sourcegood));
-            setTimeout(() => {
-                console.log('update')
-                this.calcheight();
-                this.tests = moocgoodList;
-                this.$refs.scroll.refresh();
-                this.$refs.scrollR.refresh();
-                this.$refs.scrollM.refresh();
-            },20);
-        },
-        // nav切换
-        getinfo(){
-            this.currentIndex = 0;
-            console.log(this.$refs.mySwiper.swiper.slideTo)
-            this.$refs.mySwiper.swiper.slideTo(0)
-        },
-        getDetail(){
-            this.currentIndex = 1;
-            this.$refs.mySwiper.swiper.slideTo(1)
-        },
-        getRating(){
-            this.currentIndex = 2;
-            this.$refs.mySwiper.swiper.slideTo(2)
-        },
-        // 评价过滤
-        getAllComment(){
-            this.good = JSON.parse(JSON.stringify(this.sourcegood));
-        },
-        getGoodComment(){
-            this.good = JSON.parse(JSON.stringify(this.sourcegood));
-            this.good.ratingList = this.good.ratingList.filter(v => {
-                    return v.type === 1;
-            })
-        },
-        getImageComment(){
-            this.good = JSON.parse(JSON.stringify(this.sourcegood));
-            this.good.ratingList = this.good.ratingList.filter(v => {
-                return v.img.length !== 0;
-            })
-        },
-        stop(e){
-            e.stopPropagation();
-        },
-        shopcartShow(){
-            this.choosing = true;
-            setTimeout(() => {
-                this.$refs.shopcart.choosing = true;
-            },20)
-        },
-        shopclose(){
-            this.choosing = false;
-        },
-        add(){
-            this.sourcegood.amount++
-        },
-        less(){
-            if(this.sourcegood == 1) return;
-            this.sourcegood.amount--
-        },
-        backs(){
-            this.choosing = false;
-            this.back(false)
-        },
-        appendTo(){
-            
-        },
-        getComment(){
-            this.currentIndex = 2;
-            this.$refs.mySwiper.swiper.slideTo(2)
-        },
-        ...mapMutations({
-            back:'SET_GOODDETAIL_SHOW',
-            append:'ADD_SHOPCART'
-        })
-    },
-    watch:{
-        get_good_detailshow(){
-            this.refresh();
+  async created() {
+    var a = 0;
+    for (let i = 0; i < 10; i++) {
+      if (i === 5)
+        top: {
+          break top;
         }
+      a++;
+    }
+    a += 10;
+    console.log(a);
+    await this._getGoodInfo();
+    this._getCoupon();
+  },
+  mounted() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        let el = document.getElementById("details").childNodes[0];
+        el.style.fontSize = ".3rem";
+        let elList = [...el.getElementsByTagName("*")];
+        for (let i of elList) {
+          i.style.height = "auto";
+          i.style.lineHeight = "auto";
+        }
+        console.log(elList);
+      }, 203);
+    });
+  },
+  computed: {
+    ratingNum() {
+      return this.sourcegood.ratingList.length;
     },
-    data(){
-        return {
-            tests:[],
-            sourcegood:{},
-            good:{},
-            maxPrice:0,
-            minPrice:0,
-            index:0,
-            notNextTick: true,
-            rAll:true,
-            choosing:false,
-            rGood:false,
-            rBad:false,
-            swiperOption:{
-                preventClicks:true,
-                onSlideChangeEnd:s => {
-                    this.index = s.activeIndex;
-                },
-            },
-            soption:{
-                pagination: '.swiper-pagination',
-                paginationClickable: true,
+    // type 1 好评
+    goodRating() {
+      //  return this.sourcegood.ratingList.filter(v => {
+      //     return v.type == 1;
+      // }).length;
+    },
+    badRating() {
+      // return this.sourcegood.ratingList.filter(v => {
+      //     return v.type != 1
+      // }).length
+    },
+    hasImage() {
+      // return this.sourcegood.ratingList.filter(v => {
+      //     return v.img.length != 0
+      // }).length
+    },
+    cartLength() {
+      // return this.shopcartList.length
+    },
+    ...mapGetters(["get_current_good", "get_good_detailshow", "shopcartList"])
+  },
+  components: {
+    scroll,
+    goodList,
+    shopChoosing,
+    confirm
+  },
+  methods: {
+    calcheight() {
+      let tH = this.$refs.nav.offsetHeight,
+        bH = this.$refs.bottom.offsetHeight,
+        wh = window.innerHeight;
+      this.$refs.content.style.height = wh - tH - bH + "px";
+    },
+    nowIsTrue() {
+      this.$refs.mySwiper.swiper.slideTo(0);
+      this.index = 0;
+      this.refresh();
+    },
+    // 商品信息更新
+    refresh() {
+      this.sourcegood = this.get_current_good;
+      this.size = this.sourcegood.size[0];
+      this.color = this.sourcegood.color[0];
+      this.good = JSON.parse(JSON.stringify(this.sourcegood));
+      setTimeout(() => {
+        console.log("update");
+        this.calcheight();
+        this.tests = moocgoodList;
+        this.$refs.scroll.refresh();
+        this.$refs.scrollR.refresh();
+        this.$refs.scrollM.refresh();
+      }, 20);
+    },
+    // nav切换
+    getinfo() {
+      this.currentIndex = 0;
+      console.log(this.$refs.mySwiper.swiper.slideTo);
+      this.$refs.mySwiper.swiper.slideTo(0);
+    },
+    getDetail() {
+      this.currentIndex = 1;
+      this.$refs.mySwiper.swiper.slideTo(1);
+    },
+    getRating() {
+      this.currentIndex = 2;
+      this.$refs.mySwiper.swiper.slideTo(2);
+    },
+    // 评价过滤
+    getAllComment() {
+      this.good = JSON.parse(JSON.stringify(this.sourcegood));
+    },
+    getGoodComment() {
+      this.good = JSON.parse(JSON.stringify(this.sourcegood));
+      this.good.ratingList = this.good.ratingList.filter(v => {
+        return v.type === 1;
+      });
+    },
+    getImageComment() {
+      this.good = JSON.parse(JSON.stringify(this.sourcegood));
+      this.good.ratingList = this.good.ratingList.filter(v => {
+        return v.img.length !== 0;
+      });
+    },
+    stop(e) {
+      e.stopPropagation();
+    },
+    shopcartShow() {
+      this.choosing = true;
+      setTimeout(() => {
+        this.$refs.shopcart.choosing = true;
+      }, 20);
+    },
+    shopclose() {
+      this.choosing = false;
+    },
+    add() {
+      this.sourcegood.amount++;
+    },
+    less() {
+      if (this.sourcegood == 1) return;
+      this.sourcegood.amount--;
+    },
+    backs() {
+      this.choosing = false;
+      this.back(false);
+    },
+    appendTo() {},
+    getComment() {
+      this.currentIndex = 2;
+      this.$refs.mySwiper.swiper.slideTo(2);
+    },
+    receiveCoupon(item) {
+      let data = new URLSearchParams();
+      data.append("userId", userInfo.userid);
+      data.append("redpacketId", item.id);
+      this.axios.post("/api/redpacket/redEnvelope", data).then(res => {
+        if (res.data.code === "success") {
+            Toast("领取成功");
+        }
+      });
+    },
+    _getGoodInfo() {
+      let id = this.$route.params.id,
+        data = new URLSearchParams();
+      data.append("goodsId", id);
+      this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
+        let price = res.data.obj.goodsPrices.map(v => {
+          return Number(v.price);
+        });
+        this.sourcegood = res.data.obj;
+        this.maxPrice = Math.max(...price);
+        this.minPrice = Math.min(...price);
+        this.imgs = res.data.obj.imgShow.split("|");
+      });
+    },
+    _getCoupon() {
+      let id = this.sourcegood.shopId,
+            data = new URLSearchParams();
+      data.append('userId',userInfo.userid);
+      data.append("shopId", id);
+      this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
+        if (res.data.code !== "success") throw new Error("接口获取失败");
+        this.couponList = res.data.obj;
+      });
+    },
+    ...mapMutations({
+      back: "SET_GOODDETAIL_SHOW",
+      append: "ADD_SHOPCART"
+    })
+  },
+  watch: {
+    get_good_detailshow() {
+      this.refresh();
+    }
+  },
+  data() {
+    return {
+      tests: [],
+      sourcegood: {},
+      good: {},
+      maxPrice: 0,
+      minPrice: 0,
+      index: 0,
+      notNextTick: true,
+      rAll: true,
+      choosing: false,
+      rGood: false,
+      rBad: false,
+      swiperOption: {
+        preventClicks: true,
+        onSlideChangeEnd: s => {
+          this.index = s.activeIndex;
+          this.$refs.scrollR.refresh();
+          this.$refs.scrollM.refresh();
+          this.$refs.scroll.refresh();
+        }
+      },
+      soption: {
+        pagination: ".swiper-pagination",
+        paginationClickable: true
+      },
+      imgs: [],
+      couponList: []
+    };
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+.details {
+    font-size: 0.35rem !important;
+
+    img {
+        width: 100vw;
+    }
+}
+
+.scroll {
+    height: 100%;
+    overflow: hidden;
+}
+
+.scroll-wrap {
+    height: 100%;
+    overflow: hidden;
+}
+
+.gooddetail-wrap {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background-color: #Fff;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+
+    .nav {
+        height: 1.2rem;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        box-sizing: border-box;
+        font-size: 0.4rem;
+        border-top: 2px solid #e7e7e7;
+        border-bottom: 2px solid #e7e7e7;
+
+        & > div {
+            height: 100%;
+            line-height: 1.2rem;
+            position: relative;
+            width: 100%;
+            text-align: center;
+            border-right: 0.0267rem solid #e7e7e7;
+            transition: all 0.1s;
+
+            &:last-child {
+                border: none;
+            }
+
+            &.active, &.before {
+                color: #fc7aa5;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    height: 0.0267rem;
+                    top: 0;
+                    width: 100%;
+                    background-color: #fc7aa5;
+                }
+            }
+        }
+
+        .svg-wrap {
+            .icon {
+                font-size: 0.5rem;
+            }
+        }
+    }
+
+    .content {
+        height: 100%;
+        overflow: hidden;
+        background-color: #e7e7e7;
+        flex: 1;
+        position: relative;
+
+        .back {
+            width: 0.5333rem;
+            height: 0.5333rem !important;
+            background-color: #fff;
+            position: absolute;
+            top: 0.5333rem;
+            left: 0.5333rem;
+            z-index: 99999;
+        }
+
+        .img-wrap {
+            width: 100%;
+            height: 10rem;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+
+            & > div {
+                height: 100%;
+            }
+        }
+
+        .title {
+            box-sizing: border-box;
+            padding: 0.1333rem;
+            font-size: 0.4rem;
+            line-height: 0.45rem;
+            background: #fff;
+        }
+
+        .module-price {
+            box-sizing: border-box;
+            padding: 0.1333rem;
+            color: #989898;
+            font-size: 0.3333rem;
+            background: #fff;
+
+            .price {
+                color: #FF0036;
+
+                span {
+                    font-size: 0.4667rem;
+                }
+            }
+
+            .oldprice {
+                margin: 0.2rem 0;
+
+                span {
+                    text-decoration: line-through;
+                }
+            }
+
+            .disc {
+                display: flex;
+                justify-content: space-between;
+                margin: 0.2rem 0;
+            }
+        }
+
+        .good-server {
+            background: #fff;
+            display: flex;
+            width: 100%;
+            border-top: 0.0133rem solid #e7e7e7;
+            height: 1rem;
+            justify-content: space-around;
+            font-size: 0.3333rem;
+            align-items: center;
+        }
+
+        .choose {
+            background: #fff;
+            height: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 0.2rem;
+            font-size: 0.4rem;
+
+            .s {
+                width: 0.6667rem;
+
+                img {
+                    width: 100%;
+                }
+            }
+        }
+
+        .coupon {
+            background: #fff;
+            font-size: 0.4rem;
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            align-items: center;
+            font-size: 0.4rem;
+            border-top: 0.0267rem solid #e7e7e7;
+            border-bottom: 0.0267rem solid #e7e7e7;
+
+            div {
+                width: 33%;
+                height: 0.6667rem;
+                line-height: 0.6667rem;
+
+                &.first {
+                    text-indent: 0.4rem;
+                }
+
+                &.coupon-item {
+                    color: #fc7ba6;
+                    font-size: 0.3333rem;
+                    text-align: center;
+                    margin: 0.15rem 0;
+
+                    div {
+                        display: inline-block;
+                        text-align: center;
+                        border: 1px solid #fc7ba6;
+                        width: 2.6667rem;
+                        border-radius: 0.3333rem;
+                    }
+                }
+            }
+        }
+
+        .rating-block {
+            background: #fff;
+            box-sizing: border-box;
+            padding: 0.1rem;
+
+            .rating-nav {
+                display: flex;
+                width: 100%;
+                height: 0.6667rem;
+                font-size: 0.4rem;
+                height: 0.9333rem;
+                align-items: center;
+                justify-content: space-around;
+                margin: 0.2rem 0;
+
+                div {
+                    width: 2.6667rem;
+                    text-align: center;
+                    background: #ffe2cf;
+                    height: 0.6667rem;
+                    line-height: 0.6667rem;
+                    font-size: 0.3333rem;
+                    border-radius: 0.333rem;
+                }
+            }
+
+            .r-btn {
+                width: 3.2933rem;
+                height: 0.6667rem;
+                margin: 0 auto 0.4rem;
+                line-height: 0.6667rem;
+                text-align: center;
+                font-size: 0.3333rem;
+                color: #fc7aa5;
+                border: 0.0133rem solid #fc7aa5;
+                border-radius: 0.333rem;
+            }
+        }
+    }
+
+    .bottom {
+        background: #fff;
+        width: 100%;
+        height: 1.3333rem;
+        display: flex;
+        border-top: 0.0133rem solid #e7e7e7;
+
+        .l {
+            flex: 0 0 5.0667rem;
+            display: flex;
+
+            div {
+                flex: 1;
+                color: #5a5a5a;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                align-items: center;
+                font-size: 0.3333rem;
+                box-sizing: border-box;
+                padding: 0.15rem 0;
+                border-right: 1px solid #e7e7e7;
+
+                .icon {
+                    font-size: 0.5333rem;
+
+                    &.kefu {
+                        color: #19b5f9;
+                    }
+                }
+            }
+        }
+
+        .r, .m {
+            flex: 1;
+            font-size: 0.3467rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .m {
+            background-color: #fcb17b;
+            color: #fff;
+        }
+
+        .r {
+            background-color: #fc7ba6;
+            color: #fff;
+        }
+    }
+}
+
+.rating-content {
+    box-sizing: border-box;
+    padding: 0.2rem;
+
+    .rating-item {
+        font-size: 0.3333rem;
+
+        .r-header {
+            display: flex;
+            align-items: center;
+
+            .avatar {
+                width: 0.88rem;
+                height: 0.88rem;
+                border-radius: 0.44rem;
+                overflow: hidden;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+
+            .username {
+                font-size: 0.4rem;
+                margin-left: 0.3333rem;
+            }
+        }
+
+        .r-content {
+            height: 0.6667rem;
+            overflow: hidden;
+        }
+
+        .info {
+            display: flex;
+            font-size: 0.3333rem;
+            height: 0.9333rem;
+            line-height: 0.9333rem;
+            color: #777;
+
+            .disc {
+                margin-left: 0.2667rem;
             }
         }
     }
 }
-</script>
 
-<style lang="stylus" scoped>
-.scroll
-    height 100%
-    overflow hidden
+.scroll-r {
+    .ratingblock {
+        background: #fff;
 
-.scroll-wrap
-    height 100%
-    overflow hidden
+        .rating-nav {
+            display: flex;
+            width: 100%;
+            height: 0.6667rem;
+            font-size: 0.4rem;
+            height: 0.9333rem;
+            align-items: center;
+            justify-content: space-around;
+            border-bottom: 0.0133rem solid #e7e7e7;
+            padding: 0.1333rem;
 
+            div {
+                width: 2.6667rem;
+                text-align: center;
+                background: #ffe2cf;
+                height: 0.6667rem;
+                line-height: 0.6667rem;
+                font-size: 0.3333rem;
+                border-radius: 0.333rem;
+            }
+        }
 
-.gooddetail-wrap
-    position fixed
-    width 100%
-    top 0
-    left 0
-    height 100vh
-    background-color #Fff
-    z-index 1000
-    display flex
-    flex-direction column
-    .nav
-        height 1.2rem
-        width 100%
-        display flex
-        justify-content space-around
-        box-sizing border-box
-        font-size 0.4rem
-        border-top 2px solid #e7e7e7
-        border-bottom 2px solid #e7e7e7
-        & > div
-            height 100%
-            line-height 1.2rem
-            position relative
-            width 100%
-            text-align center
-            border-right 0.0267rem solid #e7e7e7
-            transition all .1s
-            &:last-child
-                border none
-            &.active,&.before
-                color #fc7aa5
-                &:before
-                    content ''
-                    position absolute
-                    left 0
-                    height 0.0267rem
-                    top 0
-                    width 100%
-                    background-color #fc7aa5
-        .svg-wrap
-            .icon 
-                font-size 0.5rem
-    .content
-        height 100%
-        overflow hidden
-        background-color #e7e7e7
-        flex 1
-        position relative
-        .back
-            width 0.5333rem
-            height 0.5333rem !important
-            background-color #fff
-            position absolute
-            top 0.5333rem
-            left 0.5333rem
-            z-index 99999
-        .img-wrap
-            width 100%
-            height 10rem
-            overflow hidden
-            img
-                width 100%
-                height 100%
-            & > div
-                height 100%
-        .title
-            box-sizing border-box
-            padding 0.1333rem
-            font-size 0.4rem
-            line-height 0.45rem
-            background #fff
-        .module-price
-            box-sizing border-box
-            padding 0.1333rem
-            color #989898
-            font-size 0.3333rem
-            background #fff
-            .price  
-                color #FF0036
-                span 
-                    font-size 0.4667rem
-            .oldprice
-                margin 0.2rem 0
-                span 
-                    text-decoration: line-through
-            .disc
-                display flex
-                justify-content space-between
-                margin 0.2rem 0
-        .good-server
-            background #fff
-            display flex
-            width 100%
-            border-top 0.0133rem solid #e7e7e7
-            height 1rem 
-            justify-content space-around
-            font-size 0.3333rem
-            align-items center
-        .choose
-            background #fff
-            height 1.2rem
-            display flex
-            justify-content space-between
-            align-items center
-            box-sizing border-box
-            padding 0.2rem
-            font-size 0.4rem
-            .s
-                width 0.6667rem
-                img
-                    width 100%
-        .coupon
-            background #fff
-            font-size 0.4rem
-            height 1.2667rem
-            display flex
-            justify-content flex-start
-            flex-wrap wrap
-            align-items center
-            font-size 0.4rem
-            border-top 0.0267rem solid #e7e7e7
-            border-bottom 0.0267rem solid #e7e7e7
-            div
-                width 33%
-                height 0.6667rem
-                line-height 0.6667rem
-                &.first
-                    text-indent 0.4rem
-                &.coupon-item
-                    color #fc7ba6
-                    font-size 0.3333rem
-                    text-align center
-                    div
-                        display inline-block
-                        text-align center
-                        border 1px solid #fc7ba6
-                        width 2.6667rem
-                        border-radius 0.3333rem
-        .rating-block
-            background #fff
-            box-sizing border-box
-            padding 0.1rem
-            .rating-nav
-                display flex
-                width 100%
-                height 0.6667rem
-                font-size 0.4rem
-                height 0.9333rem
-                align-items center
-                justify-content space-around
-                margin 0.2rem 0
-                div 
-                    width 2.6667rem
-                    text-align center
-                    background #ffe2cf
-                    height 0.6667rem
-                    line-height 0.6667rem
-                    font-size 0.3333rem
-                    border-radius 0.333rem
-            .r-btn
-                width 3.2933rem
-                height 0.6667rem
-                margin 0 auto 0.4rem
-                line-height 0.6667rem
-                text-align center
-                font-size 0.3333rem
-                color #fc7aa5
-                border 0.0133rem solid #fc7aa5
-                border-radius 0.333rem
-    .bottom
-        background #fff
-        width 100%
-        height 1.3333rem
-        display flex
-        border-top 0.0133rem solid #e7e7e7
-        .l
-            flex 0 0 5.0667rem
-            display flex 
-            div
-                flex 1 
-                color #5a5a5a
-                display flex
-                flex-direction column
-                justify-content space-around
-                align-items center
-                font-size 0.3333rem
-                box-sizing border-box
-                padding 0.15rem 0
-                border-right 1px solid #e7e7e7
-                .icon 
-                    font-size 0.5333rem
-                    &.kefu
-                        color #19b5f9
-        .r,.m
-            flex 1
-            font-size 0.3467rem
-            display flex
-            justify-content center
-            align-items center
-        .m
-            background-color #fcb17b
-            color #fff
-        .r
-            background-color #fc7ba6
-            color #fff
+        .rating-detail {
+            .rating-item {
+                font-size: 0.3333rem;
+                margin: 0.1333rem;
+                border-bottom: 0.0267rem solid #e5e5e5;
+                padding-bottom: 0.2667rem;
 
-.rating-content
-    box-sizing border-box
-    padding 0.2rem
-    .rating-item
-        font-size 0.3333rem
-        .r-header
-            display flex
-            align-items center
-            .avatar
-                width 0.88rem
-                height 0.88rem
-                border-radius 0.44rem
-                overflow hidden
-                img 
-                    width 100%
-                    height 100%
-            .username 
-                font-size 0.4rem
-                margin-left 0.3333rem    
-        .r-content
-            height 0.6667rem
-            overflow hidden
-        .info
-            display flex
-            font-size 0.3333rem
-            height 0.9333rem
-            line-height 0.9333rem
-            color #777
-            .disc
-                margin-left 0.2667rem
+                .r-t {
+                    box-sizing: border-box;
+                    padding: 0.1rem 0.3rem;
 
-.scroll-r
-    .ratingblock
-        background #fff
-        .rating-nav
-            display flex
-            width 100%
-            height 0.6667rem
-            font-size 0.4rem
-            height 0.9333rem
-            align-items center
-            justify-content space-around
-            border-bottom 0.0133rem solid #e7e7e7
-            padding 0.1333rem
-            div 
-                width 2.6667rem
-                text-align center
-                background #ffe2cf
-                height 0.6667rem
-                line-height 0.6667rem
-                font-size 0.3333rem
-                border-radius 0.333rem
-        .rating-detail
-            .rating-item
-                font-size 0.3333rem
-                margin 0.1333rem
-                border-bottom 0.0267rem solid #e5e5e5
-                padding-bottom 0.2667rem
-                .r-t
-                    box-sizing border-box
-                    padding 0.1rem 0.3rem
-                    .r-header
-                        display flex
-                        align-items center
-                        .avatar
-                            width 0.88rem
-                            height 0.88rem
-                            border-radius 0.44rem
-                            overflow hidden
-                            img 
-                                width 100%
-                                height 100%
-                        .username 
-                            font-size 0.4rem
-                            margin-left 0.3333rem    
-                            flex 1
-                            display flex
-                            justify-content space-between
-                            .date
-                                color #666
-                                font-size 0.3333rem
-                    .r-content
-                        img 
-                            display inline- block 
-                            margin 0.1333rem
-                    .info
-                        display flex
-                        font-size 0.3333rem
-                        height 0.9333rem
-                        line-height 0.9333rem
-                        color #777
-                        .disc
-                            margin-left 0.2667rem
-                .seller-Reply
-                    background-color #f5f5f5
-                    box-sizing border-box
-                    padding 0.1rem 0.3rem
-                    div:first-child
-                        margin 0.1333rem 0
-                        display flex
-                        justify-content space-between
-                        span:last-child
-                            color #666
-                    div:last-child
-                        margin-bottom 0.1333rem
-                        img 
-                            width 2rem
+                    .r-header {
+                        display: flex;
+                        align-items: center;
 
-.box
-    height 10px 
-    background #e7e7e7
-    width 100%
+                        .avatar {
+                            width: 0.88rem;
+                            height: 0.88rem;
+                            border-radius: 0.44rem;
+                            overflow: hidden;
 
+                            img {
+                                width: 100%;
+                                height: 100%;
+                            }
+                        }
 
+                        .username {
+                            font-size: 0.4rem;
+                            margin-left: 0.3333rem;
+                            flex: 1;
+                            display: flex;
+                            justify-content: space-between;
 
-@css{
+                            .date {
+                                color: #666;
+                                font-size: 0.3333rem;
+                            }
+                        }
+                    }
+
+                    .r-content {
+                        img {
+                            display: inline- block;
+                            margin: 0.1333rem;
+                        }
+                    }
+
+                    .info {
+                        display: flex;
+                        font-size: 0.3333rem;
+                        height: 0.9333rem;
+                        line-height: 0.9333rem;
+                        color: #777;
+
+                        .disc {
+                            margin-left: 0.2667rem;
+                        }
+                    }
+                }
+
+                .seller-Reply {
+                    background-color: #f5f5f5;
+                    box-sizing: border-box;
+                    padding: 0.1rem 0.3rem;
+
+                    div:first-child {
+                        margin: 0.1333rem 0;
+                        display: flex;
+                        justify-content: space-between;
+
+                        span:last-child {
+                            color: #666;
+                        }
+                    }
+
+                    div:last-child {
+                        margin-bottom: 0.1333rem;
+
+                        img {
+                            width: 2rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.box {
+    height: 10px;
+    background: #e7e7e7;
+    width: 100%;
+}
+
+@css {
     .normal-enter-active, .normal-leave-active{
         transition:all .5s;
     }
@@ -765,5 +950,4 @@ export default {
         z-index : 1002;
     }
 }
-
 </style>

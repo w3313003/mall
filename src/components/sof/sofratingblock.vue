@@ -1,28 +1,38 @@
 <template>
     <div class='wrap'>
-        <div class='item' v-for='item in 2' :key="item">
+        <div class='item' v-for='(item,i) in commentList' :key="i">
             <div class='header'>
                 <img src="../.././assets/img/avatar.png" alt="">
-                <div class='nickname'>壳斗马蒂</div>
+                <div class='nickname'>
+                    {{item.wscUserName}}
+                </div>
                 <div class='time'>20分钟前</div>
             </div>
             <div class='content'>
-                壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂壳斗马蒂
+                {{item.content}}
             </div>
             <div class='seller-rating'>
-                <div>
-                    回复
+                <div class='r' v-if='item.list'>
+                    <span>回复</span>
                 </div>
-                <div>
-                    满江红:肯德基富士康放假少会计法
+                <div class='l'>
+                    <div v-for='(items,index) in item.list' :key='index'>
+                        {{items.wscUserName}}:{{items.content}}
+                    </div>
                 </div>
+                <div class='btn' @click='choose(item)'>
+                    <svg class="icon fenlei" aria-hidden="true">
+                        <use xlink:href="#icon-pingjia"></use>
+                    </svg>
+                </div> 
             </div>
-            <p class='iconwrap'>
+            
+            <!-- <p class='iconwrap'>
                <svg class="icon fenlei" aria-hidden="true">
                     <use xlink:href="#icon-dianzan"></use>
                 </svg>
                 123             
-            </p>
+            </p> -->
         </div>
     </div>
 </template>
@@ -30,17 +40,34 @@
 <script>
 export default {
     props:{
-        ratingList:{
-            type:Object,
+        commentList:{
+            type: Array,
             default(){
                 return {}
             }
+        }
+    },
+    mounted(){
+        setTimeout(() => {
+            console.log(this.commentList)
+        },100);
+    },
+    methods : {
+        choose(item){
+            this.$emit('deepComment',item)
         }
     }
 }
 </script>
 
 <style lang="stylus" scoped>
+.btn
+    position absolute
+    bottom 0
+    right 0
+    .icon 
+        font-size .5rem
+        color #666
 
 .wrap
     width 100%
@@ -77,10 +104,13 @@ export default {
         .seller-rating
             display flex
             font-size 0.3333rem
-            align-items center
             height auto
-            div
-                &:first-child
+            margin-top .35rem
+            position relative
+            .r
+                height 100%
+                span
+                    display block
                     width 1rem
                     height 0.4667rem
                     text-align center
@@ -88,8 +118,13 @@ export default {
                     background #fc7aa5
                     color #ffffff
                     border-radius 0.1067rem
-                &:last-child
-                    margin-left 0.2rem
+            .l
+                margin-left 0.2rem
+                flex 1
+                padding-right .4rem
+                div
+                    font-size .35rem
+                    margin-bottom .15rem
         .iconwrap
             margin-top 0.1333rem
             font-size: 0.4rem

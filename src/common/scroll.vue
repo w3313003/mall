@@ -79,7 +79,9 @@ export default {
       this.scroll && this.scroll.enable()
     },
     refresh() {
-      this.scroll && this.scroll.refresh()
+      this.scroll && this.scroll.refresh();
+      console.log('refresh')
+    
     },
     scrollTo() {
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)

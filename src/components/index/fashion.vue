@@ -40,10 +40,7 @@
 export default {
     created(){
         this.axios.get('/api/outFit/getOutfitList').then(res => {
-            res.data.obj.forEach(v => {
-                v.img = `http://10.0.0.22:8181${v.img}`;
-                v.headImg = `http://10.0.0.22:8181${v.headImg}`
-            });
+
             this.itemList = res.data.obj
             console.log(this.itemList)
         })

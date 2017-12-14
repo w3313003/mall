@@ -59,7 +59,7 @@
                 </div>
             </div>  
         </transition>
-        <scroll :data='fmaleitem || maleitem' class='index-scroll' ref='scroll'>
+        <scroll :data='maleitem' class='index-scroll' ref='scroll'>
             <div>
                 <div class='swipe-wrap'>
                     <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
@@ -146,12 +146,12 @@
                     </div>
                     <div class='update-content'>
                         <div class='nav'>
-                            <div class='navitem' @click='ismale = true'>
+                            <div class='navitem' data-type='1' @click='toggle(1)'>
                                 <span :class='{"active":ismale}'>
                                     男生精选
                                 </span>
                             </div>
-                            <div class="navitem" @click='ismale = false'>
+                            <div class="navitem" date-type='2' @click='toggle(2)'>
                                 <span :class='{"active":!ismale}'>女生精选</span>
                             </div>
                         </div>
@@ -162,20 +162,20 @@
                                         <img v-lazy="v.img" alt="">
                                     </div>
                                     <swiper :options='hOptions' class='h-show'>
-                                        <swiper-slide class='showitem' v-for='(item,index) in v.items' :key="index" @click.native='goToGoodsDetail(item)'>
-                                            <img v-lazy="item.img_main">
-                                            <span>￥{{item.selling_price}}</span>
+                                        <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index" @click.native='goToGoodsDetail(item)'>
+                                            <img v-lazy="item.imgMain">
+                                            <span>￥{{item.sellingPrice}}</span>
                                         </swiper-slide>
                                         <swiper-slide class='showitem last'>
                                             <router-link to='/' tag='div' class='box'>
-                                            <div class='red'>
-                                                查看全部
-                                            </div>
-                                            <div class='gray'>
-                                                See more
-                                            </div>
+                                                    <div class='red'>
+                                                        查看全部
+                                                    </div>
+                                                    <div class='gray'>
+                                                        See more
+                                                    </div>
                                             </router-link> 
-                                            </swiper-slide>
+                                        </swiper-slide>
                                     </swiper>
                                 </div> 
                             </div>
@@ -188,9 +188,9 @@
                                         <img v-lazy="v.img" alt="">
                                     </div>
                                     <swiper :options='hOptions' class='h-show'>
-                                        <swiper-slide class='showitem' v-for='(item,index) in v.items' :key="index">
-                                            <img v-lazy="item.img_main">
-                                            <span>￥{{item.selling_price}}</span>
+                                        <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index">
+                                            <img v-lazy="item.imgMain">
+                                            <span>￥{{item.sellingPrice}}</span>
                                         </swiper-slide>
                                         <swiper-slide class='showitem last'>
                                             <router-link to='/' tag='div' class='box'>
@@ -227,21 +227,24 @@ export default {
       swiper,
       swiperSlide
     },
+    activated(){
+        this.$refs.scroll.refresh()
+    },
     created(){
-        this.axios.get('/api/index/getBaannerList').then(res => {
-            res.data.obj.forEach(v => {
-                  v.banner = `http://10.0.0.22:8181${v.banner}`
-            });
-            this.banner = res.data.obj
-        });
+        this.axios.get('/api/index/getBaannerList?type=1').then(res => {
+            this.banner = res.data.obj;
+        })
         this.axios.get('/api/index/getProGoodsList?type=0').then(res => {
             if(res.data.code !== 'success') return false;
-            this.maleitem = this._formatProGoodsList(res.data.obj);
-            console.log(this.maleitem)
+            this.maleitem = res.data.obj.filter(v => {
+                return v.goodsList && v.goodsList.length > 0    
+            });
         })
         this.axios.get('/api/index/getProGoodsList?type=1').then(res => {
             if(res.data.code !== 'success') return false;
-            this.fmaleitem = this._formatProGoodsList(res.data.obj);
+            this.fmaleitem = res.data.obj.filter(v => {
+                return v.goodsList && v.goodsList.length > 0
+            })
         })
     },
     methods:{
@@ -262,18 +265,27 @@ export default {
             _arr.forEach(v => {
                 for(let i of arr){
                     if(i.pro_id == v.pro_id){
-                        i.img_main = `http://10.0.0.22:8181${i.img_main}`
-                        v.img = `http://10.0.0.22:8181${i.img}`;
                         v.items.push(i);
                     }
                 }
             });
-            return _arr;
+         ;
         },
         goToGoodsDetail(item){
             this.$router.push({
                 path:`/good/${item.id}`
             })
+        },
+        toggle(i){
+            setTimeout(() => {
+                 this.$refs.scroll.refresh();
+            },700)
+            if(i == 1){
+                this.ismale = true;
+            } else if(i == 2) {
+                this.ismale = false;                
+            };
+            
         }
     },
     data() {
@@ -283,6 +295,8 @@ export default {
         swiperOption:{
             pagination: '.swiper-pagination',
             paginationClickable: true,
+            loop:true,
+            autoplay:2000
         },
         hOptions:{
             slidesPerView:'auto',
@@ -298,6 +312,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.swiper-slide
+    height 4.4rem!important
+
 @css{
     .indexBox-enter-active, .indexBox-leave-active {
         transition: opacity .5s
@@ -424,9 +441,13 @@ export default {
         overflow hidden
         .swipe-wrap
             width 100vw
+            height 4.4rem
             overflow hidden 
-            img 
+            .swiper-wrapper
                 width 100%
+                img 
+                    width 100%
+                    height 100%
         .n-h-s
             height 2.8rem
             width : 100vw

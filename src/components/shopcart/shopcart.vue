@@ -55,7 +55,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class='input-wrap'>
-                                                    <input type="text" v-model='item.amount' maxlength='3'>
+                                                    <input type="number" v-model='item.amount' maxlength='3'>
                                                 </div>
                                                 <div class='btn' @click='add(item)'>
                                                     <svg class="icon indexicon" aria-hidden="true">
@@ -152,7 +152,7 @@ export default {
         this.goodList = this._initshopList();
     },
     activated(){
-        this.$refs.activated.refresh();
+        this.$refs.scroll.refresh();
     },
     methods:{
         _initshopList(){
@@ -436,7 +436,7 @@ export default {
                                 display flex
                                 justify-content space-around
                                 .btn
-                                    width 0.8rem
+                                    flex 0 0 0.8rem
                                     height 0.8rem
                                     border 0.0133rem solid #e7e7e7
                                     line-height 0.8rem

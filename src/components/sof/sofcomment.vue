@@ -22,6 +22,7 @@
 
 <script>
 import block from './sofratingblock'
+
 export default {
     methods:{
         back(){

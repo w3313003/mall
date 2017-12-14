@@ -59,7 +59,7 @@
                         </div>
                     </div>  
                 </transition>
-        <scroll class='scroll'>
+        <scroll class='scroll' ref='scroll'>
             <div>
                 <div class='content'>
                     <div class='male'>
@@ -103,6 +103,17 @@
 <script>
 import scroll from "common/scroll";
 export default {
+    created(){
+        this.axios.get('/api/waresClass/getWaresClassList?sexType=0').then(res => {
+            console.log(res.data.obj)
+        })
+        this.axios.get('/api/waresClass/getWaresClassList?sexType=1').then(res => {
+            console.log(res.data.obj)
+        })
+    },
+    activated(){
+        this.$refs.scroll.refresh()
+    },
     data() {
         return {
             isSearching:false

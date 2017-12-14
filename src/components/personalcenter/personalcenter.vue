@@ -172,14 +172,29 @@
 </template>
 
 <script>
-import { userdata } from 'common/mock'
 import scroll from 'common/scroll'
-
+import wx from 'weixin-js-sdk'
 
 export default {
     created(){
-        let userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        this.userInfo = userInfo;
+        // let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        // this.userInfo = userInfo;
+        let data = new URLSearchParams();
+        data.append('userId','2013267482f84b3fb098f05e003cb263');
+        this.axios.post("/api/wsc/user/userDeatil",data).then(res => {
+            console.log(res.data.obj);
+            let obj = {
+              userid : res.data.obj.id,
+              openid : res.data.obj.openid,
+              nickName : res.data.obj.nikeName,
+              avatar : res.data.obj.img
+          };
+            sessionStorage.setItem('userInfo',JSON.stringify(obj));
+            this.userInfo = obj;
+        });
+        setTimeout(() => {
+            console.log(WeixinJSBridge)
+        },20)
     },
     data(){
         return {
