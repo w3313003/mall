@@ -123,11 +123,10 @@ export default {
 
     .content {
         div {
-            height: 90px;
             display: flex;
             background: #fff;
             box-sizing: border-box;
-            padding: 0 0.3rem;
+            padding: 0.3rem 0.3rem;
             font-size: 0.4rem;
             align-items: center;
             border-bottom: 0.0267rem solid #e7e7e7;

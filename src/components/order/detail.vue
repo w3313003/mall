@@ -15,11 +15,11 @@
                 </div>
                 <div class="m">
                     <div>
-                        <span>收货人：去去去</span>
-                        <span>15687782523</span>    
+                        <span>收货人:{{orderMsg.memberName}}</span>
+                        <span>{{orderMsg.memberPhone}}</span>    
                     </div>
                     <div>
-                        收货地址:合肥合肥黄飞飞飞飞飞飞而发分
+                        收货地址:{{orderMsg.memberAddress}}
                     </div>
                 </div>
             </div>
@@ -30,24 +30,28 @@
                             <svg class="icon fenlei" aria-hidden="true">
                                 <use xlink:href="#icon-shangjia"></use>
                             </svg>
-                            <span>墨刀旗舰店</span>   
+                            <span>
+                                {{orderMsg.title}}
+                            </span>   
                             </div>
                         <div class='type'>
-                            等待买家付款
+                            {{orderMsg.stateName}}
                         </div> 
                     </div>
-                    <div class='goodinfo'>
-                        <img src="../.././assets/img/goodimg.png" alt="" />
-                        <div class='text'>
-                            <div class='g-title'>
-                                单身快乐大胜靠德受打击as肯德基a阿达大厦的
-                            </div>
-                            <div class='g-type'>
-                                颜色颜色颜色颜色颜色
-                            </div>
-                            <div class='g-price'>
-                                <div>￥66.00</div>
-                                <div>X1</div>
+                    <div v-for='(item,index) in orderMsg.orderGoods' :key="index" class="gooditem">
+                        <div class='goodinfo'>
+                            <img src="../.././assets/img/goodimg.png" alt="" />
+                            <div class='text'>
+                                <div class='g-title'>
+                                    {{item.goodsName}}
+                                </div>
+                                <div class='g-type'>
+                                    颜色颜色颜色颜色颜色
+                                </div>
+                                <div class='g-price'>
+                                    <div>￥{{item.goodsPrice}}</div>
+                                    <div>X {{item.goodsNum}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -66,10 +70,8 @@
                     <div>
                         优惠券
                     </div>
-                    <div>
-                        <svg class="icon fenlei" aria-hidden="true">
-                            <use xlink:href="#icon-jiantou"></use>
-                        </svg>
+                    <div style="color:#fc7aa5">
+                        -{{orderMsg.redpacketMoney}}元
                     </div>  
                 </div>
                 <div class="item">
@@ -77,7 +79,7 @@
                         实付款
                     </div>
                     <div class='price'>
-                        ￥66.00
+                        ￥{{orderMsg.payPrice}}
                     </div>
                 </div>
                 <div class="item">
@@ -85,7 +87,7 @@
                         买家留言
                     </div>
                     <div class='input-wrap'>
-                        <input type="text" placeholder="选填">
+                        {{orderMsg.memberMessage}}
                     </div>
                 </div>
             </div>
@@ -120,10 +122,23 @@
 <script>
 import comment from './comment'
 import returngoods from './return'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 
 export default {
     created(){
+        const id = this.$route.params.id;
+        console.log(id);
+        let params = new URLSearchParams();
+            params.append('memberCode',userInfo.userid);
+        this.axios.post('/api/order/getOrderList',params).then(res => {
+            if(res.data.code !== 'success') throw new Error('error');
+            this.orderMsg = res.data.obj.filter(v => {
+                return v.id === id;
+            })[0];
+            this.$set(this.orderMsg,'title',this.orderMsg.orderGoods[0].shopName)
+            console.log(this.orderMsg)
+        });
     },
     methods:{
         back(){
@@ -136,7 +151,8 @@ export default {
     data(){
         return {
             goTocomment:false,
-            gotorefund:false
+            gotorefund:false,
+            orderMsg:{}
         }
     },
     components:{
@@ -268,10 +284,11 @@ export default {
                     color #fc7ba5
                 .input-wrap
                     flex 1
-                    input
-                        width 100%
-                        padding-left 0.2rem
-                        font-size .4rem
+                    overflow hidden
+                    text-align right 
+                    text-overflow ellipsis
+                    white-space nowrap
+                    word-wrap none
     .bottom
         height 1.3333rem
         display flex
@@ -298,4 +315,10 @@ export default {
                 &.pay,&.tips,&.comment
                     color #fff
                     background #fc7ba6
+
+.gooditem
+    margin-bottom 0.1333rem
+    &:last-child
+        margin-bottom 0
+        word-break none
 </style>

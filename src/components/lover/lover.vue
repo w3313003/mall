@@ -37,6 +37,9 @@ export default {
             console.log(this.goodList)
         })
     },
+    activated(){
+        this.$refs.scroll.refresh()
+    },
     methods:{
         calcheight(){
             const wHeight = window.innerHeight,

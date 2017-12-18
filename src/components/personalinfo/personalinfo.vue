@@ -28,8 +28,8 @@
                 <div class='item-title'>
                     性别
                 </div>
-                <div class='item-value'>
-                    男
+                <div class='item-value' @click="chooseSex">
+                    {{userInfo.sex}}
                 </div>
             </div>
             <div class='item'>
@@ -37,7 +37,7 @@
                     电话
                 </div>
                 <div class='item-value' @click='changePhone'>
-                    {{ userInfo.phone || 0 }}
+                    {{ userInfo.phone || '请输入号码' }}
                 </div>
             </div>
             <div class='item' @click='address'>
@@ -55,7 +55,13 @@
             @close='editing = false'>
             </nickname>   
         </div> 
+            <Actionsheet
+        :actions="sexList"
+        v-model="sexShow">
+    </Actionsheet>
+
     </div>
+
     </transition>
 </template>
 
@@ -63,17 +69,33 @@
 import { area } from "common/util";
 import nickname from "common/nickname";
 import { MessageBox } from "mint-ui";
-import { Toast } from "mint-ui";
+import { Toast , Actionsheet} from "mint-ui";
 const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 
 export default {
   components: {
-    nickname
+    nickname,
+    Actionsheet
   },
   data() {
     return {
       userInfo: {},
-      editing: false
+      editing: false,
+      sexList:[
+          {
+             name : '男',
+             method(){
+                 console.log(65665)
+             }
+          },
+          {
+              name : '女',
+              method(){
+                  console.log(6666554545)
+              }
+          }
+      ],
+      sexShow:false
     };
   },
   created() {
@@ -90,6 +112,9 @@ export default {
     },
     back() {
       this.$router.back();
+    },
+    chooseSex(){
+        this.sexShow = true;
     },
     editnickname() {
       MessageBox.prompt("请输入昵称", "").then(({ value, action }) => {

@@ -123,12 +123,36 @@
                         <div class='icon'>
                             <div>
                             <svg class="icon" aria-hidden="true">
-                                <use xlink:href="#icon-hongbao"></use>
+                                <use xlink:href="#icon-xiaoyuan"></use>
                             </svg>
                             </div>
                         </div>
                         <div class='txt'>滑一滑</div>
                     </router-link>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
+                        <router-link tag='div' to='/movie' class='h-wiper-item'>
+                            <div class='icon'>
+                                <div>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-xiaoyuan"></use>
+                                </svg>
+                                </div>
+                            </div>
+                            <div class='txt'>微电影</div>
+                        </router-link>
+                    </swiper-slide>
+                    <swiper-slide class='wrap'>
+                        <router-link tag='div' to='/tkl' class='h-wiper-item'>
+                            <div class='icon'>
+                                <div>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-xiaoyuan"></use>
+                                </svg>
+                                </div>
+                            </div>
+                            <div class='txt'>淘口令</div>
+                        </router-link>
                     </swiper-slide>
                 </swiper>
                 <div class='line'></div>
@@ -467,9 +491,22 @@ export default {
                     .icon
                         background #f78db7
                         color #fff
-                &:nth-child(4) .icon
-                    background #f89a67
-                    color #fff
+                &:nth-child(4) 
+                    .icon
+                        background #f89a67
+                        color #fff
+                &:nth-child(5) 
+                    .icon
+                        background #bb67f8
+                        color #fff
+                &:nth-child(6) 
+                    .icon
+                        background #e3c734
+                        color #fff
+                &:nth-child(7) 
+                    .icon
+                        background #34b1e3
+                        color #fff
                 .h-wiper-item
                     width 1.3333rem 
                     height 2.8rem
@@ -549,8 +586,8 @@ export default {
         margin 0.2667rem 0
         .showitem
             font-size: 0.3333rem;
-            flex 0 0 1.8rem
-            height 2.3067rem
+            width 1.8rem
+            height 2.3067rem !important
             margin-right 0.2rem
             display flex 
             flex-direction column

@@ -10,7 +10,7 @@
             <div class='textarea'>
                 <textarea v-model.trim='content' @keyup='change'>
                 </textarea>
-                <div class="">
+                <div class="count">
                     {{contentLength}}/200
                 </div>
             </div>

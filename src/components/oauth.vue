@@ -11,6 +11,8 @@
 
 <script>
 import wx from "weixin-js-sdk";
+import { Toast } from "mint-ui";
+
 export default {
   data() {
     return {
@@ -47,6 +49,11 @@ export default {
     }
   },
   created() {
+    Toast({
+      message: "提示复制成功",
+      duration: -1
+    });
+
     let data = new URLSearchParams(),
       url = location.href.split("?#")[0];
     data.append("url", url);
@@ -55,10 +62,10 @@ export default {
       .then(res => {
         if (res.data.code == "success") {
           console.log(res.data.obj);
-                (this.nonceStr = res.data.obj.nonce),
-                (this.timestamp = res.data.obj.timestamp);
-                console.log(`随机字符串:${this.nonceStr}`);
-                console.log(`时间戳:${this.timestamp}`);
+          (this.nonceStr = res.data.obj.nonce),
+            (this.timestamp = res.data.obj.timestamp);
+          console.log(`随机字符串:${this.nonceStr}`);
+          console.log(`时间戳:${this.timestamp}`);
           this.config = {
             debug: true,
             appId: "wx8a2df9136c4a762a",

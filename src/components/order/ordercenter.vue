@@ -7,17 +7,18 @@
                 </svg>
         </div> 
         <div class='nav'>
-            <div :class='{"active": currentIndex == 0}'  data-index='0'    @click='navToggle'>全部</div>
-            <div :class='{"active": currentIndex == 1}'  data-index='1'    @click='navToggle'>待付款</div>
-            <div :class='{"active": currentIndex == 2}'  data-index='2'    @click='navToggle'>待发货</div>
-            <div :class='{"active": currentIndex == 3}'  data-index='3'    @click='navToggle'>待收货</div>
-            <div :class='{"active": currentIndex == 4}'  data-index='4'    @click='navToggle'>待评价</div> 
+            <div v-for='(item,index) in navList' :key="index"
+                :class='{"active":currentIndex == index}' 
+                :data-index='index' 
+                @click="navToggle">
+                {{item}}
+            </div>
         </div>
         <div class='content'>
             <swiper class='swiper' ref='swiper':options="swiperOption" :not-next-tick="notNextTick" >
                 <swiper-slide>
-                    <scroll :data='orderList' class='scroll'>
-                        <div>
+                    <scroll :data='orderList' ref="scroll1" class='scroll'>
+                        <div v-if="currentOrder && currentOrder.length > 0">
                             <div class='order-item' v-for='(item,index) in currentOrder' :key="index" @click='getDetail(item)'>
                                 <div class='header'> 
                                     <div class='icon-wrap'>  
@@ -26,73 +27,78 @@
                                         </svg>
                                     </div> 
                                     <div class='seller-name'>
-                                        {{item.sellername}}
+                                        {{item.orderGoods[0].shopName}}
                                     </div>
                                     <div class='type'>
-                                        <span v-if='item.type == 1'>等待买家付款</span>
-                                        <span v-if='item.type == 2'>待发货</span>
-                                        <span v-if='item.type == 3'>待评价</span>
-                                        <span v-if='item.type == 4'>待收货</span>
+                                        <span v-if='item.state == 1'>等待买家付款</span>
+                                        <span v-if='item.state == 2'>待发货</span>
+                                        <span v-if='item.state == 3'>待收货</span>
+                                        <span v-if='item.state == 4'>待评价</span>
                                     </div>
                                 </div>
-                                <div class="content">
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <div class='gooddisc'>
-                                        <div class="t">
-                                            {{item.good.title}}
-                                        </div>
-                                        <div class="m">
-                                            {{item.good.color}}
-                                        </div>
-                                        <div class="b">
-                                            <span>￥{{item.good.price}}</span>
-                                            <span>X{{item.good.count}}</span>
+                                <div class="content-wrap" v-for='(items,i) in item.orderGoods' :key="i">
+                                    <div class="content">
+                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <div class='gooddisc'>
+                                            <div class="t">
+                                                {{items.goodsName}}
+                                            </div>
+                                            <div class="m">
+                                                {{items.showSpecName.join(',')}}
+                                            </div>
+                                            <div class="b">
+                                                <span>￥{{items.goodsPrice}}</span>
+                                                <span>X{{items.goodsNum}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='t-price'>
                                     <div  class='t'>
                                         <span>商品总价</span>
-                                        <span>￥{{item.good.price * item.good.count}}</span>
+                                        <span>￥{{item.payPrice}}</span>
                                     </div>
                                     <div  class='m'>
                                         <span>运费</span>
-                                        <span>￥{{item.good.expressFee}}</span>
+                                        <span>￥{{item.freight}}</span>
                                     </div>
                                     <div  class='b'>
                                         <span>订单总价</span>
-                                        <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                        <span>￥{{item.goodsPriceSum}}</span>
                                     </div>
                                 </div>
                                 <div class='b-price'>
                                     <span>实付款</span>
-                                    <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                    <span>￥{{item.payPrice}}</span>
                                 </div>
                                 <div class='control'>
-                                    <div class='cancel' v-if='item.type == 1'>
+                                    <div class='cancel' v-if='item.state == 1'>
                                         取消订单
                                     </div>
-                                    <div class='pay' v-if='item.type == 1'>
+                                    <div class='pay' v-if='item.state == 1'>
                                         付款
                                     </div>
-                                    <div class='express' v-if='item.type == 4'>
+                                    <div class='express' v-if='item.state == 4'>
                                         查看物流
                                     </div>
-                                    <div class='comment' v-if='item.type == 3'>
+                                    <div class='comment' v-if='item.state == 3'>
                                         评价
                                     </div>
-                                    <div class='tips'  v-if='item.type == 2'>
+                                    <div class='tips'  v-if='item.state == 2'>
                                         提醒发货
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div v-else>
+                            暂无内容
+                        </div>
                     </scroll>
                 </swiper-slide>
                 <swiper-slide>
-                    <scroll class='scroll' :data='orderList'>
-                    <div>
-                        <div class='order-item' v-for='(item,index) in pendingPayList' :key="index">
+                    <scroll class='scroll' ref='scroll2' :data='watingPayList'>
+                    <div v-if='watingPayList && watingPayList.length > 0'>
+                        <div class='order-item' v-for='(item,index) in watingPayList' :key="index" @click='getDetail(item)'>
                                 <div class='header'> 
                                     <div class='icon-wrap'>  
                                         <svg class="icon fenlei" aria-hidden="true">
@@ -100,73 +106,78 @@
                                         </svg>
                                     </div> 
                                     <div class='seller-name'>
-                                        {{item.sellername}}
+                                        {{item.orderGoods[0].shopName}}
                                     </div>
                                     <div class='type'>
-                                        <span v-if='item.type == 1'>等待买家付款</span>
-                                        <span v-if='item.type == 2'>待发货</span>
-                                        <span v-if='item.type == 3'>待评价</span>
-                                        <span v-if='item.type == 4'>待收货</span>
+                                        <span v-if='item.state == 1'>等待买家付款</span>
+                                        <span v-if='item.state == 2'>待发货</span>
+                                        <span v-if='item.state == 3'>待收货</span>
+                                        <span v-if='item.state == 4'>待评价</span>
                                     </div>
                                 </div>
-                                <div class="content">
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <div class='gooddisc'>
-                                        <div class="t">
-                                            {{item.good.title}}
-                                        </div>
-                                        <div class="m">
-                                            {{item.good.color}}
-                                        </div>
-                                        <div class="b">
-                                            <span>￥{{item.good.price}}</span>
-                                            <span>X{{item.good.count}}</span>
+                                <div class="content-wrap" v-for='(items,i) in item.orderGoods' :key="i">
+                                    <div class="content">
+                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <div class='gooddisc'>
+                                            <div class="t">
+                                                {{items.goodsName}}
+                                            </div>
+                                            <div class="m">
+                                                {{items.showSpecName.join(',')}}
+                                            </div>
+                                            <div class="b">
+                                                <span>￥{{items.goodsPrice}}</span>
+                                                <span>X{{items.goodsNum}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='t-price'>
                                     <div  class='t'>
                                         <span>商品总价</span>
-                                        <span>￥{{item.good.price * item.good.count}}</span>
+                                        <span>￥{{item.payPrice}}</span>
                                     </div>
                                     <div  class='m'>
                                         <span>运费</span>
-                                        <span>￥{{item.good.expressFee}}</span>
+                                        <span>￥{{item.freight}}</span>
                                     </div>
                                     <div  class='b'>
                                         <span>订单总价</span>
-                                        <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                        <span>￥{{item.goodsPriceSum}}</span>
                                     </div>
                                 </div>
                                 <div class='b-price'>
                                     <span>实付款</span>
-                                    <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                    <span>￥{{item.payPrice}}</span>
                                 </div>
                                 <div class='control'>
-                                    <div class='cancel' v-if='item.type == 1'>
+                                    <div class='cancel' v-if='item.state == 1'>
                                         取消订单
                                     </div>
-                                    <div class='pay' v-if='item.type == 1'>
+                                    <div class='pay' v-if='item.state == 1'>
                                         付款
                                     </div>
-                                    <div class='express' v-if='item.type == 4'>
+                                    <div class='express' v-if='item.state == 4'>
                                         查看物流
                                     </div>
-                                    <div class='comment' v-if='item.type == 3'>
+                                    <div class='comment' v-if='item.state == 3'>
                                         评价
                                     </div>
-                                    <div class='tips'  v-if='item.type == 2'>
+                                    <div class='tips'  v-if='item.state == 2'>
                                         提醒发货
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                    </div>
+                    <div v-else>
+                        暂无内容
+                    </div>
                     </scroll>
                 </swiper-slide>
                 <swiper-slide>
-                    <scroll class='scroll' :data='watingShipment'>
-                        <div>
-                            <div class='order-item' v-for='(item,index) in watingShipment' :key="index">
+                    <scroll class='scroll' ref='scroll3' :data='watingShipment'>
+                        <div v-if='watingShipment && watingShipment.length > 0'>
+                            <div class='order-item' v-for='(item,index) in watingShipment' :key="index" @click='getDetail(item)'>
                                 <div class='header'> 
                                     <div class='icon-wrap'>  
                                         <svg class="icon fenlei" aria-hidden="true">
@@ -174,73 +185,78 @@
                                         </svg>
                                     </div> 
                                     <div class='seller-name'>
-                                        {{item.sellername}}
+                                        {{item.orderGoods[0].shopName}}
                                     </div>
                                     <div class='type'>
-                                        <span v-if='item.type == 1'>等待买家付款</span>
-                                        <span v-if='item.type == 2'>待发货</span>
-                                        <span v-if='item.type == 3'>待评价</span>
-                                        <span v-if='item.type == 4'>待收货</span>
+                                        <span v-if='item.state == 1'>等待买家付款</span>
+                                        <span v-if='item.state == 2'>待发货</span>
+                                        <span v-if='item.state == 3'>待收货</span>
+                                        <span v-if='item.state == 4'>待评价</span>
                                     </div>
                                 </div>
-                                <div class="content">
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <div class='gooddisc'>
-                                        <div class="t">
-                                            {{item.good.title}}
-                                        </div>
-                                        <div class="m">
-                                            {{item.good.color}}
-                                        </div>
-                                        <div class="b">
-                                            <span>￥{{item.good.price}}</span>
-                                            <span>X{{item.good.count}}</span>
+                                <div class="content-wrap" v-for='(items,i) in item.orderGoods' :key="i">
+                                    <div class="content">
+                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <div class='gooddisc'>
+                                            <div class="t">
+                                                {{items.goodsName}}
+                                            </div>
+                                            <div class="m">
+                                                {{items.showSpecName.join(',')}}
+                                            </div>
+                                            <div class="b">
+                                                <span>￥{{items.goodsPrice}}</span>
+                                                <span>X{{items.goodsNum}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='t-price'>
                                     <div  class='t'>
                                         <span>商品总价</span>
-                                        <span>￥{{item.good.price * item.good.count}}</span>
+                                        <span>￥{{item.payPrice}}</span>
                                     </div>
                                     <div  class='m'>
                                         <span>运费</span>
-                                        <span>￥{{item.good.expressFee}}</span>
+                                        <span>￥{{item.freight}}</span>
                                     </div>
                                     <div  class='b'>
                                         <span>订单总价</span>
-                                        <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                        <span>￥{{item.goodsPriceSum}}</span>
                                     </div>
                                 </div>
                                 <div class='b-price'>
                                     <span>实付款</span>
-                                    <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                    <span>￥{{item.payPrice}}</span>
                                 </div>
                                 <div class='control'>
-                                    <div class='cancel' v-if='item.type == 1'>
+                                    <div class='cancel' v-if='item.state == 1'>
                                         取消订单
                                     </div>
-                                    <div class='pay' v-if='item.type == 1'>
+                                    <div class='pay' v-if='item.state == 1'>
                                         付款
                                     </div>
-                                    <div class='express' v-if='item.type == 4'>
+                                    <div class='express' v-if='item.state == 4'>
                                         查看物流
                                     </div>
-                                    <div class='comment' v-if='item.type == 3'>
+                                    <div class='comment' v-if='item.state == 3'>
                                         评价
                                     </div>
-                                    <div class='tips'  v-if='item.type == 2'>
+                                    <div class='tips'  v-if='item.state == 2'>
                                         提醒发货
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div v-else>
+                            暂无内容
                         </div>
                     </scroll>  
                 </swiper-slide>
                 <swiper-slide>
-                    <scroll :data='watingExpress' class='scroll'>
-                        <div>
-                            <div class='order-item' v-for='(item,index) in watingExpress' :key="index">
+                    <scroll :data='watingExpress' ref='scroll4' class='scroll'>
+                        <div v-if='watingExpress && watingExpress.length > 0'>
+                            <div class='order-item' v-for='(item,index) in watingExpress' :key="index" @click='getDetail(item)'>
                                 <div class='header'> 
                                     <div class='icon-wrap'>  
                                         <svg class="icon fenlei" aria-hidden="true">
@@ -248,73 +264,78 @@
                                         </svg>
                                     </div> 
                                     <div class='seller-name'>
-                                        {{item.sellername}}
+                                        {{item.orderGoods[0].shopName}}
                                     </div>
                                     <div class='type'>
-                                        <span v-if='item.type == 1'>等待买家付款</span>
-                                        <span v-if='item.type == 2'>待发货</span>
-                                        <span v-if='item.type == 3'>待评价</span>
-                                        <span v-if='item.type == 4'>待收货</span>
+                                        <span v-if='item.state == 1'>等待买家付款</span>
+                                        <span v-if='item.state == 2'>待发货</span>
+                                        <span v-if='item.state == 3'>待收货</span>
+                                        <span v-if='item.state == 4'>待评价</span>
                                     </div>
                                 </div>
-                                <div class="content">
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <div class='gooddisc'>
-                                        <div class="t">
-                                            {{item.good.title}}
-                                        </div>
-                                        <div class="m">
-                                            {{item.good.color}}
-                                        </div>
-                                        <div class="b">
-                                            <span>￥{{item.good.price}}</span>
-                                            <span>X{{item.good.count}}</span>
+                                <div class="content-wrap" v-for='(items,i) in item.orderGoods' :key="i">
+                                    <div class="content">
+                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <div class='gooddisc'>
+                                            <div class="t">
+                                                {{items.goodsName}}
+                                            </div>
+                                            <div class="m">
+                                                {{items.showSpecName.join(',')}}
+                                            </div>
+                                            <div class="b">
+                                                <span>￥{{items.goodsPrice}}</span>
+                                                <span>X{{items.goodsNum}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='t-price'>
                                     <div  class='t'>
                                         <span>商品总价</span>
-                                        <span>￥{{item.good.price * item.good.count}}</span>
+                                        <span>￥{{item.payPrice}}</span>
                                     </div>
                                     <div  class='m'>
                                         <span>运费</span>
-                                        <span>￥{{item.good.expressFee}}</span>
+                                        <span>￥{{item.freight}}</span>
                                     </div>
                                     <div  class='b'>
                                         <span>订单总价</span>
-                                        <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                        <span>￥{{item.goodsPriceSum}}</span>
                                     </div>
                                 </div>
                                 <div class='b-price'>
                                     <span>实付款</span>
-                                    <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                    <span>￥{{item.payPrice}}</span>
                                 </div>
                                 <div class='control'>
-                                    <div class='cancel' v-if='item.type == 1'>
+                                    <div class='cancel' v-if='item.state == 1'>
                                         取消订单
                                     </div>
-                                    <div class='pay' v-if='item.type == 1'>
+                                    <div class='pay' v-if='item.state == 1'>
                                         付款
                                     </div>
-                                    <div class='express' v-if='item.type == 4'>
+                                    <div class='express' v-if='item.state == 4'>
                                         查看物流
                                     </div>
-                                    <div class='comment' v-if='item.type == 3'>
+                                    <div class='comment' v-if='item.state == 3'>
                                         评价
                                     </div>
-                                    <div class='tips'  v-if='item.type == 2'>
+                                    <div class='tips'  v-if='item.state == 2'>
                                         提醒发货
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div v-else>
+                            暂无内容
+                        </div>
                     </scroll>
                 </swiper-slide>
                 <swiper-slide>
-                    <scroll :data='watingComment' class='scroll'>
-                        <div>
-                            <div class='order-item' v-for='(item,index) in watingComment' :key="index">
+                    <scroll :data='watingComment' ref='scroll5' class='scroll'>
+                        <div v-if='watingComment && watingComment.length > 0'>
+                            <div class='order-item' v-for='(item,index) in watingComment' :key="index" @click='getDetail(item)'>
                                 <div class='header'> 
                                     <div class='icon-wrap'>  
                                         <svg class="icon fenlei" aria-hidden="true">
@@ -322,66 +343,71 @@
                                         </svg>
                                     </div> 
                                     <div class='seller-name'>
-                                        {{item.sellername}}
+                                        {{item.orderGoods[0].shopName}}
                                     </div>
                                     <div class='type'>
-                                        <span v-if='item.type == 1'>等待买家付款</span>
-                                        <span v-if='item.type == 2'>待发货</span>
-                                        <span v-if='item.type == 3'>待评价</span>
-                                        <span v-if='item.type == 4'>待收货</span>
+                                        <span v-if='item.state == 1'>等待买家付款</span>
+                                        <span v-if='item.state == 2'>待发货</span>
+                                        <span v-if='item.state == 3'>待收货</span>
+                                        <span v-if='item.state == 4'>待评价</span>
                                     </div>
                                 </div>
-                                <div class="content">
-                                    <img src="../.././assets/img/good-item.png" alt="">
-                                    <div class='gooddisc'>
-                                        <div class="t">
-                                            {{item.good.title}}
-                                        </div>
-                                        <div class="m">
-                                            {{item.good.color}}
-                                        </div>
-                                        <div class="b">
-                                            <span>￥{{item.good.price}}</span>
-                                            <span>X{{item.good.count}}</span>
+                                <div class="content-wrap" v-for='(items,i) in item.orderGoods' :key="i">
+                                    <div class="content">
+                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <div class='gooddisc'>
+                                            <div class="t">
+                                                {{items.goodsName}}
+                                            </div>
+                                            <div class="m">
+                                                {{items.showSpecName.join(',')}}
+                                            </div>
+                                            <div class="b">
+                                                <span>￥{{items.goodsPrice}}</span>
+                                                <span>X{{items.goodsNum}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class='t-price'>
                                     <div  class='t'>
                                         <span>商品总价</span>
-                                        <span>￥{{item.good.price * item.good.count}}</span>
+                                        <span>￥{{item.payPrice}}</span>
                                     </div>
                                     <div  class='m'>
                                         <span>运费</span>
-                                        <span>￥{{item.good.expressFee}}</span>
+                                        <span>￥{{item.freight}}</span>
                                     </div>
                                     <div  class='b'>
                                         <span>订单总价</span>
-                                        <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                        <span>￥{{item.goodsPriceSum}}</span>
                                     </div>
                                 </div>
                                 <div class='b-price'>
                                     <span>实付款</span>
-                                    <span>￥{{item.good.price * item.good.count + item.good.expressFee}}</span>
+                                    <span>￥{{item.payPrice}}</span>
                                 </div>
                                 <div class='control'>
-                                    <div class='cancel' v-if='item.type == 1'>
+                                    <div class='cancel' v-if='item.state == 1'>
                                         取消订单
                                     </div>
-                                    <div class='pay' v-if='item.type == 1'>
+                                    <div class='pay' v-if='item.state == 1'>
                                         付款
                                     </div>
-                                    <div class='express' v-if='item.type == 4'>
+                                    <div class='express' v-if='item.state == 4'>
                                         查看物流
                                     </div>
-                                    <div class='comment' v-if='item.type == 3'>
+                                    <div class='comment' v-if='item.state == 3'>
                                         评价
                                     </div>
-                                    <div class='tips'  v-if='item.type == 2'>
+                                    <div class='tips'  v-if='item.state == 2'>
                                         提醒发货
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div v-else>
+                            暂无内容
                         </div>
                     </scroll>
                 </swiper-slide>
@@ -394,14 +420,21 @@
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import scroll from 'common/scroll'
 import { orderList } from 'common/util'
-
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
     created(){
-        this.orderList = orderList;
-        this.currentOrder = JSON.parse(JSON.stringify(this.orderList));
+        let params = new URLSearchParams();
+            params.append('memberCode',userInfo.userid);
+        this.axios.post('/api/order/getOrderList',params).then(res => {
+            if(res.data.code !== 'success') throw new Error('error');
+           this.orderList = res.data.obj.filter(v => {
+                return v.orderGoods;
+            })
+            this.currentOrder = JSON.parse(JSON.stringify(this.orderList));
+        });
     },
     activated(){
-        console.log(this.$route.params.index);
+        console.log(1)
         let index = 0;
         if(!this.$route.params.index){
             index = 0
@@ -409,7 +442,7 @@ export default {
             index = this.$route.params.index;
         };
         this.currentIndex = index;  
-        this.$refs.swiper.swiper.slideTo(index)
+        this.$refs.swiper.swiper.slideTo(index);
     },
     methods:{
         back(){
@@ -424,6 +457,13 @@ export default {
             this.$router.push({
                 path:`/order/${item.id}`,   
             })
+        },
+        _scrollRefresh(){
+            let arr = Object.values(this.$refs);
+            arr.splice(-1,1);
+            for(let i of arr){
+                i.refresh();
+            }
         }
     },
     components:{
@@ -432,28 +472,28 @@ export default {
         scroll
     },
     computed:{
-        pendingPayList(){
+        watingPayList(){
             let _arr = JSON.parse(JSON.stringify(this.orderList));
             return _arr.filter(v => {
-               return  v.type == 1;
+               return  v.state === '1';
             });
         },
         watingShipment(){
             let _arr = JSON.parse(JSON.stringify(this.orderList));
             return _arr.filter(v => {
-                return v.type == 2
+                return v.state === '2'
             });
         },
         watingExpress(){
             let _arr = JSON.parse(JSON.stringify(this.orderList));
             return _arr.filter(v => {
-                return v.type == 4
+                return v.state === '3'
             });
         },
         watingComment(){
             let _arr = JSON.parse(JSON.stringify(this.orderList));
             return _arr.filter(v => {
-                return v.type == 3
+                return v.state === '4'
             });
         }
 
@@ -464,11 +504,14 @@ export default {
             currentIndex:0,
             swiperOption:{
                 paginationClickable: true,
-                onSlideChangeEnd:s => {
+                onSlideChangeEnd: s => {
                     this.currentIndex = s.activeIndex;
+                    this._scrollRefresh();
                 }
             },
-            notNextTick:true
+            notNextTick:true,
+            currentOrder:[],
+            navList:['全部','待付款','待发货','待收货','待评价']
         }
     }
 };
@@ -599,4 +642,9 @@ export default {
                             &.pay,&.tips,&.comment
                                 color #fff
                                 background #fc7ba6
+
+.content-wrap
+    margin-bottom 0.0667rem
+    &:last-child
+        margin-bottom 0
 </style>

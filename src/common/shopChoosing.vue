@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-21 16:55:21 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-14 14:33:37
+ * @Last Modified time: 2017-12-15 11:57:57
  */
 
 <template>
@@ -186,12 +186,16 @@ export default {
             if(this.amount <= 1){
                 Toast('最少购买一件');
                 return;
-            }
-            this.amount -- ;
+            };
+            this.amount --;
             this.$emit('less')
         },
         add(){
-            this.amount ++;
+            if(this.amount >= this.goodStock ){
+                Toast('已超出最大购买限制');
+                return ;
+            };
+            this.amount++;
             this.$emit('add');
         },
         choose(item,index){
@@ -212,8 +216,9 @@ export default {
             };
             let str = ''
             for(let i in this.choosed){
-                str +=`${i}:${this.choosed[i].cn},`
+                str +=`${i}:${this.choosed[i].cn},`;
             };
+            console.log(str)
             let data = {
                 price : this.totalPrice,
                 stock : this.goodStock,

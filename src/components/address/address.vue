@@ -14,10 +14,10 @@
                             <div class='t'>
                                 <div class='header'>
                                     <div>
-                                        {{item.name}}
+                                        {{item.consignee}}
                                     </div>
                                     <div>
-                                        {{item.phone}}
+                                        {{item.phoneNum}}
                                     </div>
                                 </div>
                                 <div class='body'>
@@ -26,7 +26,7 @@
                             </div>
                             <div class='b'>
                                 <div class='radio' @click='defaultToggle(item)'>
-                                    <img v-if='item.default' src='../.././assets/img/radio.png'>
+                                    <img v-if='item.state == "0"' src='../.././assets/img/radio.png'>
                                     <img v-else src='../.././assets/img/hradio.png'>
                                     默认地址
                                 </div>
@@ -37,7 +37,7 @@
                                         </svg>
                                         编辑
                                     </div>
-                                    <div class='btndelete' @click='deleteAddress(index)'>
+                                    <div class='btndelete' @click='deleteAddress(item)'>
                                         <svg class="icon fenlei" aria-hidden="true">
                                             <use xlink:href="#icon-lajitong"></use>
                                         </svg>
@@ -48,7 +48,9 @@
                         </div>
                     </div>
                     <transition name='address'>
-                        <e-address v-if='editing' :addressInfo='currentAddress'
+                        <e-address v-if='editing' 
+                        :addressInfo='currentAddress'
+                        :isNew='isnew'
                         @confirm='confirm'
                         @close='close'></e-address>
                     </transition>
@@ -69,7 +71,10 @@ import { userdata } from 'common/mock'
 import scroll from 'common/scroll'
 import { addressList } from 'common/util'
 import eAddress from './editAddress'
+import { Toast } from 'mint-ui'
+import { MessageBox } from 'mint-ui'
 
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 export default {
     data(){
         return {
@@ -79,7 +84,7 @@ export default {
             editing:false,
             currentAddress:{},
             currentIndex:0,
-            new : true
+            isnew : true
         }
     },
     components:{
@@ -87,50 +92,88 @@ export default {
         eAddress
     },
     created(){
-        this.addressList = addressList
+        this._getAddressList();
     },
     methods:{
         back(){
             this.$router.back();
         },
         editAddress(item,i){
-            this.new = false;
+            this.isnew = false;
             this.currentAddress = item;
             this.currentIndex = i;
             this.editing = true;
         },
-        deleteAddress(index){
-            this.addressList.splice(index,1);
-        },
-        save(){
-            this.$emit('revise',this.nickname)
+        deleteAddress(item){
+            MessageBox.confirm('确定执行此操作?', '提示').then(() => {
+                let data = new URLSearchParams();
+                    data.append('addressId',item.id);
+                    this.axios.post('/api/wsc/user/deleteAddress',data).then(res => {
+                        if(res.data.code === 'success'){
+                            Toast('删除成功');
+                            setTimeout(() => {
+                                location.reload();
+                            },1000)
+                        }
+            })
+            });
+
+            
         },
         defaultToggle(item){
-            this.addressList.forEach(v => {
-                v.default = false;
-            });
-            item.default = true;
+            console.log(userInfo.userid);
+            let data = new URLSearchParams();
+            data.append('userId',userInfo.userid);
+            data.append('addressId',item.id);
+            this.axios.post('/api/wsc/user/updateAddressState',data).then(res => {
+                if(res.data.code == 'success'){
+                    Toast('修改默认地址成功');
+                    this._getAddressList();
+                } else {
+                    Toast('修改失败！');
+                    return false;
+                }
+            })
         },
         confirm(data){
-            if(data.default){
-                for(let i of this.addressList){
-                    i.default = false
-                }
-            };
-            if(this.new){
-                this.new = false;
-                this.addressList.push(data)
-            } else {
-                this.addressList.splice(this.currentIndex,1,data);
-            }
+            // if(data.default){
+            //     for(let i of this.addressList){
+            //         i.default = false
+            //     }
+            // };
+            // if(this.new){
+            //     this.new = false;
+            //     this.addressList.push(data)
+            // } else {
+            //     this.addressList.splice(this.currentIndex,1,data);
+            // }
             this.editing = false;
         },
         addNewAddress(){
-            this.new = true;
+            this.currentAddress = {};
+            this.isNew = true;
             this.editing = true;
         },
         close(){
             this.editing = false
+        },
+        _getAddressList(){
+            let data = new URLSearchParams();
+            data.append('userId',userInfo.userid)
+            this.axios.post('/api/wsc/user/userAddress',data).then(res => {
+                res.data.obj.sort((a,b) => {
+                    return Date.parse(new Date(a.createDate)) - Date.parse(new Date(b.createDate));
+                });
+                res.data.obj.forEach(v => {
+                    if(v.state === '0') {
+                        this.$set(v,'isDefault',true)
+                    } else {
+                        this.$set(v,'isDefault',false)
+                    }
+                });
+                this.addressList = res.data.obj;
+                console.log(this.addressList)
+            })
         }
     },
     filters:{

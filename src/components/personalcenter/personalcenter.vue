@@ -187,14 +187,12 @@ export default {
               userid : res.data.obj.id,
               openid : res.data.obj.openid,
               nickName : res.data.obj.nikeName,
-              avatar : res.data.obj.img
+              avatar : res.data.obj.img,
+              sex : res.data.obj.sex === '1' ? '男' : '女'
           };
             sessionStorage.setItem('userInfo',JSON.stringify(obj));
             this.userInfo = obj;
         });
-        setTimeout(() => {
-            console.log(WeixinJSBridge)
-        },20)
     },
     data(){
         return {

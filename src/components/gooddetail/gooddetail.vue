@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-14 15:23:40
+ * @Last Modified time: 2017-12-15 11:56:17
  */
 
 <template>
@@ -39,16 +39,18 @@
                     {{sourcegood.name}}
                 </div>
                 <div class='module-price'>
-                <div class='price'>
-                    ￥<span>{{minPrice}}</span>~￥<span>{{maxPrice}}</span>
-
+                <div class='price' v-if='minPrice !== maxPrice'>
+                    ￥<span>{{minPrice}}</span>元~￥<span>{{maxPrice}}</span>元
+                </div>
+                <div class="price" v-else>
+                    ￥<span>{{minPrice}}</span>元
                 </div>
                 <div class='oldprice'>价格：
                     <span>￥{{sourcegood.marketPrice}}</span>
                 </div>
                 <div class='disc'>
                     <div class='yunfei'>
-                        运费：{{sourcegood.freight}}
+                        运费：{{sourcegood.freight === '' ? 0 : sourcegood.freight}}元
                     </div>
                     <div class='count'>
                         月销 {{sourcegood.xiaoshou_num}}件
@@ -124,10 +126,8 @@
             </scroll>
             </swiper-slide>
             <swiper-slide>
-               
                 <scroll class='scroll scroll-m' ref='scrollM' :data='sourcegood.goodsPrices'>
                  <div v-html="sourcegood.details" id='details' class="details">
-
                 </div>
                 <good-list :goodList='tests' @nowTrue='nowIsTrue'></good-list>
                 </scroll>
@@ -234,22 +234,17 @@ import shopChoosing from "common/shopChoosing";
 import confirm from "common/confirm";
 import good from "common/mock";
 import wx from "weixin-js-sdk";
+import { Toast } from 'mint-ui'
 const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 
 export default {
   async created() {
-    var a = 0;
-    for (let i = 0; i < 10; i++) {
-      if (i === 5)
-        top: {
-          break top;
-        }
-      a++;
-    }
-    a += 10;
-    console.log(a);
     await this._getGoodInfo();
     this._getCoupon();
+  },
+  async activated(){
+      await this._getGoodInfo();
+        this._getCoupon();
   },
   mounted() {
     this.$nextTick(() => {
@@ -259,7 +254,8 @@ export default {
         let elList = [...el.getElementsByTagName("*")];
         for (let i of elList) {
           i.style.height = "auto";
-          i.style.lineHeight = "auto";
+          i.style.width = 'auto';
+          i.style.lineHeight = ".5rem";
         }
         console.log(elList);
       }, 203);
@@ -308,7 +304,7 @@ export default {
       this.index = 0;
       this.refresh();
     },
-    // 商品信息更新
+    // 商品信息更新（以弃用)
     refresh() {
       this.sourcegood = this.get_current_good;
       this.size = this.sourcegood.size[0];
@@ -366,7 +362,7 @@ export default {
       this.choosing = false;
     },
     add() {
-      this.sourcegood.amount++;
+    //   this.sourcegood.amount++;
     },
     less() {
       if (this.sourcegood == 1) return;
@@ -388,6 +384,8 @@ export default {
       this.axios.post("/api/redpacket/redEnvelope", data).then(res => {
         if (res.data.code === "success") {
             Toast("领取成功");
+        } else if(res.data.message === '已经领取该红包'){
+            Toast("已经领取该红包");
         }
       });
     },
@@ -414,6 +412,9 @@ export default {
         if (res.data.code !== "success") throw new Error("接口获取失败");
         this.couponList = res.data.obj;
       });
+    },
+    _scrollRefresh(){
+        console.log(this.$refs)
     },
     ...mapMutations({
       back: "SET_GOODDETAIL_SHOW",
@@ -459,13 +460,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.details {
-    font-size: 0.35rem !important;
-
-    img {
-        width: 100vw;
-    }
-}
 
 .scroll {
     height: 100%;

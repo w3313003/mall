@@ -1,6 +1,6 @@
 <template>
     <div class='coupon-wrap'>
-        <scroll :data='couponList' class='scroll'>
+        <scroll :data='couponList' ref='scroll' class='scroll'>
             <div class='seller-wrap'>
                 <div class='seller' v-for='(item,index) in couponList' :key="index">
                     <div class='img-wrap'>
@@ -78,7 +78,9 @@ export default {
         console.log(res.data);
     });
   },
-  mounted() {},
+  activated(){
+        this.$refs.scroll.refresh()
+    },
   data() {
     return {
       dasharray: Math.PI * 100,

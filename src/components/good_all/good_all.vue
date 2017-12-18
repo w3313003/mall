@@ -53,6 +53,9 @@ export default {
             this.goodList = moocgoodList;
         })
     },
+    activated(){
+        this.$refs.scroll.refresh()
+    },
     data(){
         return {
             ischoose:false,

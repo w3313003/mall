@@ -43,31 +43,29 @@
                     </div>
                 </swiper-slide>
                 <swiper-slide>
-                     <div class='item'>
-                        <div class='radio' v-if='editing'>
-                            <img v-if='true' src='../.././assets/img/radio.png'>
-                            <img v-else src='../.././assets/img/hradio.png'>                 
-                        </div>
-                        <img src="../.././assets/img/good-item.png" alt="">
-                        <div class='text'>
-                            <p class='titles'>
-                                31233333333333333333333333333333333333333333333
-                            </p>
-                            <div class='info'>
-                                <div>
-                                    ￥
-                                    <span>300.00</span>
+                    <scroll :data='sellerList' ref='scrollL'>
+                        <div>
+                            <div class='item' v-for='(item,index) in sellerList' :key="index">
+                                <div class='radio' v-if='editing' @click="editings(item)">
+                                    <img v-if='item.isediting' src='../.././assets/img/radio.png'>
+                                    <img v-else src='../.././assets/img/hradio.png'>                 
                                 </div>
-                                <div>
-                                    已售500
-                                </div>
+                                <img src="../.././assets/img/good-item.png" alt="">
+                                <div class='text seller'>
+                                    <p class='titles '>
+                                        {{item.shopName}}
+                                    </p>
+                                    <p>
+                                        {{item.num}}人收藏
+                                    </p>
                             </div>
                         </div>
                     </div>
+                    </scroll>
                 </swiper-slide>
             </swiper>
         </div>   
-        <div class='bottom'>
+        <div class='bottom' v-if="editing">
             <div class='l'>
                 <div class='img-wrap'>
                     <img v-if='true' src='../.././assets/img/radio.png'>
@@ -77,7 +75,7 @@
                     全选
                 </div>
             </div>
-            <div class='cancle'>
+            <div class='cancle' @click="editing = false">
                 取消
             </div>
             <div class='delete'>
@@ -88,12 +86,25 @@
 </template>
 
 <script>
+import scroll from 'common/scroll'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 export default {
     components:{
         swiper, 
-        swiperSlide
+        swiperSlide,
+        scroll
+    },
+    created(){
+        let data = new URLSearchParams();
+        data.append('userId',userInfo.userid)
+        this.axios.get('/api/wsc/user/getGoosCollection',data).then(res => {
+            console.log(res.data)
+        })
+        this._getSellerList();
+    },
+    activated(){
+        this._getSellerList();
     },
     data(){
         return {
@@ -105,7 +116,8 @@ export default {
                 onSlideChangeEnd:s => {
                     this.currentIndex = s.activeIndex;
                 }
-            }
+            },
+            sellerList:[]
         }
     },
     methods:{
@@ -114,8 +126,24 @@ export default {
             this.currentIndex = index;
             this.$refs.mySwiper.swiper.slideTo(index)
         },
+        editings(item){
+            item.isediting = !item.isediting;
+        },
         back(){
             this.$router.back();
+        },
+        _getSellerList(){
+            let data = new URLSearchParams();
+            data.append('userId',userInfo.userid);
+            this.axios.post('/api/wsc/user/getShopCollection',data).then(res => {
+            res.data.obj.forEach(v => {
+                if(!v.isediting){
+                    this.$set(v,'isediting',true)
+                }
+            });
+            this.sellerList = res.data.obj;
+            console.log(this.sellerList)
+            })
         }
     }
 }
@@ -244,5 +272,6 @@ export default {
                         &:last-child
                             display flex
                             align-items flex-end
-
+                &.seller
+                    padding .3rem 0.2rem
 </style>

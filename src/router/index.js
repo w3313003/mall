@@ -164,6 +164,24 @@ const test = resolve => {
     })
 }
 
+const tkl = resolve => {
+    import ('@/components/index/tkl').then(module => {
+        resolve(module)
+    })
+}
+
+const tkldetail = resolve => {
+    import ('@/components/index/tkldetail').then(module => {
+        resolve(module)
+    })
+}
+
+const movie = resolve => {
+    import ('@/components/index/movie').then(module => {
+        resolve(module)
+    })
+}
+
 import oauth from '@/components/oauth'
 
 Vue.use(Router)
@@ -179,9 +197,6 @@ export const router = new Router({
         {
             path: '/test/oauth',
             component: oauth,
-            beforeEnter(to, from, next) {
-                next()
-            }
         }, {
             path: '/index',
             name: 'index',
@@ -294,8 +309,16 @@ export const router = new Router({
             component: hyh
         },
         {
-            path : '/test',
-            component : test
+            path : '/tkl',
+            component : tkl
+        },
+        {
+            path:'/tkl/:id',
+            component : tkldetail
+        },
+        {
+            path : '/movie',
+            component : movie
         }
     ]
 });

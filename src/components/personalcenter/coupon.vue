@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-28 14:35:40 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-14 15:31:28
+ * @Last Modified time: 2017-12-15 10:21:46
  */
 <template>
     <div class="coupon-wrap">
@@ -12,7 +12,7 @@
                     <use xlink:href="#icon-jiantou"></use>
                 </svg>
         </div> 
-        <scroll class='scroll'>
+        <scroll class='scroll' ref="scroll" :data='couponList'>
             <ul>
                 <li class='item' v-for='(item,index) in couponList' :key="index"> 
                     <div class='l'>
@@ -71,6 +71,9 @@ export default {
             })
             this.couponList = res.data.obj;
         });
+    },
+    activated(){
+        this.$refs.scroll.refresh()
     },
     methods:{
         back(){

@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-09 9:10:21 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-12 16:36:30
+ * @Last Modified time: 2017-12-15 09:03:47
  */
 import Vue from 'vue'
 import App from './App'
@@ -37,17 +37,4 @@ new Vue({
     template: '<App/>',
     components: { App },
     store,
-    beforeCreate(){
-        const href = window.location.href;
-        console.log(href);
-        let reg = /\?(?=#)/;
-        if(!reg.exec(href)){
-            var split = href.split('#');
-            console.log(split)
-            let  url = '';
-            for(let i of split){
-                url += i
-            }
-        }
-    }
 })

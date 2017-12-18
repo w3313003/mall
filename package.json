@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.17.0",
     "better-scroll": "^1.5.0",
+    "clipboard": "^1.7.1",
     "compression-webpack-plugin": "^1.0.1",
     "mint-ui": "^2.2.10",
     "stylus": "^0.54.5",

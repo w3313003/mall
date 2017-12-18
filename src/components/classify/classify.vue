@@ -59,7 +59,7 @@
                         </div>
                     </div>  
                 </transition>
-        <scroll class='scroll' ref='scroll'>
+        <scroll class='scroll' ref='scroll' :data='maleList'>
             <div>
                 <div class='content'>
                     <div class='male'>
@@ -67,13 +67,17 @@
                             男装分类
                         </div>
                         <div class='disc'>
-                            <div class="item" v-for='i in 6' :key="i">
+                            <div class="item" v-for='(item,index) in maleList' :key="index" @click="goDetail(item)">
                                 <div class='img-wrap'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
+                                    <img v-lazy="item.imgMain" alt="">
                                 </div>
                                 <div class='text'>
-                                    <p>男装上衣</p>
-                                    <div>夏季新品买一送一</div>
+                                    <p>
+                                        {{item.className}}
+                                    </p>
+                                    <div>
+                                        {{item.name}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -83,13 +87,17 @@
                             女装分类
                         </div>
                         <div class="disc">
-                            <div class="item" v-for='i in 6' :key="i">
+                             <div class="item" v-for='(item,index) in fmaleList' :key="index" @click="goDetail(item)">
                                 <div class='img-wrap'>
-                                    <img src="../.././assets/img/good-item.png" alt="">
+                                    <img v-lazy="item.imgMain" alt="">
                                 </div>
                                 <div class='text'>
-                                    <p>男装上衣</p>
-                                    <div>夏季新品买一送一</div>
+                                    <p>
+                                        {{item.className}}
+                                    </p>
+                                    <div>
+                                         {{item.name}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -104,18 +112,21 @@
 import scroll from "common/scroll";
 export default {
     created(){
-        this.axios.get('/api/waresClass/getWaresClassList?sexType=0').then(res => {
-            console.log(res.data.obj)
+        this.axios.get('/api/wsc/goods/getGoodsList').then(res => {
+            res.data.obj.forEach((v,i) => {
+                v.sexType === '0' ? this.maleList.push(v) : this.fmaleList.push(v);
+            });
         })
-        this.axios.get('/api/waresClass/getWaresClassList?sexType=1').then(res => {
-            console.log(res.data.obj)
-        })
+
     },
     activated(){
+        
         this.$refs.scroll.refresh()
     },
     data() {
         return {
+            maleList : [],
+            fmaleList : [],
             isSearching:false
         };
     },
@@ -125,6 +136,11 @@ export default {
     methods:{
         open(){
             this.searing = true;
+        },
+        goDetail(item){
+            this.$router.push({
+                path : `/good/${item.id}`
+            })
         }
     }
 };
@@ -222,10 +238,14 @@ export default {
             flex-wrap wrap
             box-sizing border-box
             padding 0.2667rem
-            justify-content space-between
+            justify-content flex-start
+            padding-bottom 0
             .item
                 width 2.9333rem
                 margin-bottom 0.1333rem
+                margin-right 0.3333rem
+                &:nth-child(3n)
+                    margin-right 0
                 .img-wrap
                     width 100%
                     height 2.9333rem
@@ -238,9 +258,18 @@ export default {
                     text-align center
                     p
                         font-size 0.4rem
-                        margin 0.0667rem
+                        margin 0.0667rem 0
+                        overflow hidden
+                        width 100%
+                        text-overflow ellipsis
+                        white-space nowrap
                     div
                         font-size 0.3333rem
+                        overflow hidden
+                        width 100%
+                        text-overflow ellipsis
+                        white-space nowrap
+                        margin 0.0667rem 0
 
 .msg
     height 0.8rem
