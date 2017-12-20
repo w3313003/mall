@@ -174,6 +174,7 @@
 <script>
 import scroll from 'common/scroll'
 import wx from 'weixin-js-sdk'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
     created(){

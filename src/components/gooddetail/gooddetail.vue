@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-15 11:56:17
+ * @Last Modified time: 2017-12-20 10:15:26
  */
 
 <template>
@@ -391,8 +391,8 @@ export default {
     },
     _getGoodInfo() {
       let id = this.$route.params.id,
-        data = new URLSearchParams();
-      data.append("goodsId", id);
+          data = new URLSearchParams();
+          data.append("goodsId", id);
       this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
         let price = res.data.obj.goodsPrices.map(v => {
           return Number(v.price);

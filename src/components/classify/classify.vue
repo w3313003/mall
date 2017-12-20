@@ -69,14 +69,14 @@
                         <div class='disc'>
                             <div class="item" v-for='(item,index) in maleList' :key="index" @click="goDetail(item)">
                                 <div class='img-wrap'>
-                                    <img v-lazy="item.imgMain" alt="">
+                                    <img v-lazy="item.img" alt="">
                                 </div>
                                 <div class='text'>
                                     <p>
-                                        {{item.className}}
+                                        {{item.classname}}
                                     </p>
                                     <div>
-                                        {{item.name}}
+                                        {{item.introduce}}
                                     </div>
                                 </div>
                             </div>
@@ -89,14 +89,14 @@
                         <div class="disc">
                              <div class="item" v-for='(item,index) in fmaleList' :key="index" @click="goDetail(item)">
                                 <div class='img-wrap'>
-                                    <img v-lazy="item.imgMain" alt="">
+                                    <img v-lazy="item.img" alt="">
                                 </div>
                                 <div class='text'>
                                     <p>
-                                        {{item.className}}
+                                        {{item.classname}}
                                     </p>
                                     <div>
-                                         {{item.name}}
+                                         {{item.introduce}}
                                     </div>
                                 </div>
                             </div>
@@ -112,15 +112,21 @@
 import scroll from "common/scroll";
 export default {
     created(){
-        this.axios.get('/api/wsc/goods/getGoodsList').then(res => {
+        this.axios.get('http://10.0.0.25:8181/ykds-wsc/f//waresClass/getWaresClassList').then(res => {
             res.data.obj.forEach((v,i) => {
                 v.sexType === '0' ? this.maleList.push(v) : this.fmaleList.push(v);
             });
-        })
+        });
+        // let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+        // let data = new URLSearchParams();
+        // data.append('userId',userInfo.userid);
+        // data.append('goodsId','086178380cc24aa3aa56eb46bc342bf6');
+        // this.axios.post('/api/activity/bargain',data).then(res => {
+        //     console.log(res.data)
+        // })
 
     },
     activated(){
-        
         this.$refs.scroll.refresh()
     },
     data() {
@@ -139,7 +145,7 @@ export default {
         },
         goDetail(item){
             this.$router.push({
-                path : `/good/${item.id}`
+                path : `/good_all/${item.id}`
             })
         }
     }

@@ -108,7 +108,7 @@ export default {
         if (!reg.test(value)) {
           Toast("请输入正确的手机号码");
         }
-      });
+      },() => {});
     },
     back() {
       this.$router.back();

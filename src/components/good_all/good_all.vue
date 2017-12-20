@@ -1,7 +1,10 @@
 <template>
     <div class='goods-wrap'>
         <div class='nav'>
-                    <div @click='ischoose = !ischoose'>价格
+                    <div 
+                        @click='ischoosePrice = !ischoosePrice'
+                        >
+                        价格
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-arrLeft-fill"></use>
                         </svg>
@@ -23,17 +26,13 @@
                     </div>
                 </div>
                 <transition name='navmove'>
-                    <div class='navchoose' v-if='ischoose'>
-                        <div :class='{"active":ispricetop}' @click='ispricetop = true'>价格由高到低
-                            <span>
-                                
-                            </span>
-                        </div>
-                        <div :class='{"active":!ispricetop}' @click='ispricetop = false'>价格由低到高</div>
+                    <div class='navchoose' v-if='ischoosePrice'>
+                        <div :class='{"active":ispricetop}'  data-type='1' @click='sortPrice'>价格由高到低</div>
+                        <div :class='{"active":!ispricetop}' data-type='2' @click='sortPrice'>价格由低到高</div>
                     </div>
-            </transition>  
+                </transition>  
                 <scroll class='scroll' ref='scroll' :data='goodList'>
-                   <goodList :goodList='goodList' @getTodetail='getTodetail'></goodList>
+                   <goodList :goodList='goodList'></goodList>
                 </scroll>
     </div>
 </template>
@@ -49,32 +48,87 @@ export default {
         goodList
     },
     created(){
-        this.$nextTick(() => {
-            this.goodList = moocgoodList;
-        })
+        
     },
     activated(){
-        this.$refs.scroll.refresh()
+        this.typeid = this.$route.params.id;
+        this.$refs.scroll.refresh();
+        this._getGoodsInfo();
     },
     data(){
         return {
-            ischoose:false,
+            ischoosePrice:false,
             ispricetop:true,
+            ischooseSalecount:false,
+            isSaletop:true,
+            ChooseType:{
+                
+            },
             goodList:[]
         }
     },
     watch:{
+        /**
+         * @augments 
+         * true 升序
+         * false 降序
+         */
         ispricetop(val){
             if(val) {
-                console.log(1)
+                this.goodList = this.PriceAscending;
             } else {
-                console.log(2)
+                this.goodList = this.PriceDescending;
             }
         }
     },
+    computed: {
+        // 价格
+        PriceAscending(){
+            return this.goodList.sort((a,b) => {
+                return b.sellingPrice - a.sellingPrice;
+            })
+        },
+        PriceDescending(){
+            return this.PriceAscending.reverse();
+        },
+        // 销量
+        SaleAscending(){
+            return this.goodList.sort((a,b) => {
+                return b.xiaoshou_num - a.xiaoshou_num
+            })
+        },
+        SaleDescending(){
+            return this.SaleAscending.reverse();
+        },
+        // 时间
+        TimeAscending(){
+            return this.goodList.sort((a,b) => {
+                return Date.parse(new Date(b.updateDate)) - Date.parse(new Date(a.updateDate))
+            })
+        },
+        TimeDescending(){
+            return this.TimeAscending.reverse();
+        }
+    },
     methods:{
-        getTodetail(item){
-            console.log(item.id)
+        sortPrice(e){
+            const type = e.currentTarget.dataset.type;
+            if(type === '1'){
+                this.ispricetop = true;
+                this.ischoosePrice = false;
+            } else {
+                this.ispricetop = false;
+                this.ischoosePrice = false;
+            }
+        },
+        _getGoodsInfo(){
+            let params = new URLSearchParams();
+            params.append('type',this.typeid);
+            this.axios.post('/api/waresClass/getClassList',params).then(res => {
+                if(res.data.code !== 'success') throw new Error('错误');
+                this.goodList = res.data.obj;
+                this.AllGoodsList = JSON.parse(JSON.stringify(res.data.obj));
+            });
         }
     }
 }

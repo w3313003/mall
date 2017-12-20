@@ -6,7 +6,7 @@
                 </div>
                 <div class='content'>
                     <div class='title'>
-                        {{item.keyword}}
+                        {{item.name}}
                     </div>
                     <div class='price-detail'>
                         <div class='price'>
@@ -73,8 +73,6 @@
 </style>
 
 <script>
-import { mapMutations } from 'vuex'
-import { mapGetters } from 'vuex'
 
 export default {
     props:{
@@ -87,11 +85,6 @@ export default {
     },
     mounted(){
         console.log(this.goodList)
-    },
-    computed:{
-        ...mapGetters([
-            'get_good_detailshow'
-        ])
     },
     methods:{
         getTodetail(item){

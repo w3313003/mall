@@ -138,32 +138,32 @@ export default {
   },
   methods: {
     async _getMsg() {
-    this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-    console.log(this.userInfo)
-    this.id = this.$route.params.id;
-    /**
-    * 获取详情信息
-    */
-      let data = new URLSearchParams();
-      data.append("tataId", this.id);
-      this.axios.post(`/api/tata/tataDetail`, data).then(res => {
-                this.info = res.data.obj;
-      });
-    /**
-    * 点赞列表
-    */
-      await this.axios.post("/api/tata/getZanName", data).then(res => {
-            this.zanList = res.data.obj;
-      });
-    /**
-    * 评论列表
-    */
-      this.axios.post("/api/tata/commentList", data).then(res => {
-        if (res.data.obj) {
-          this.commentList = res.data.obj;
-            console.log(this.commentList)
-        }
-      });
+        this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+        console.log(this.userInfo)
+        this.id = this.$route.params.id;
+        /**
+        * 获取详情信息
+        */
+          let data = new URLSearchParams();
+          data.append("tataId", this.id);
+          this.axios.post(`/api/tata/tataDetail`, data).then(res => {
+                    this.info = res.data.obj;
+          });
+        /**
+        * 点赞列表
+        */
+          await this.axios.post("/api/tata/getZanName", data).then(res => {
+                this.zanList = res.data.obj;
+          });
+        /**
+        * 评论列表
+        */
+          this.axios.post("/api/tata/commentList", data).then(res => {
+            if (res.data.obj) {
+              this.commentList = res.data.obj;
+                console.log(this.commentList)
+            }
+          });
     },
     back() {
       this.$router.back();
@@ -171,7 +171,7 @@ export default {
     dianzan() {
       let data = new URLSearchParams();
       const tataid = this.$route.params.id,
-        userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+            userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
       data.append("tataId", tataid);
       data.append("userId", userInfo.userid);
       this.axios.post("/api/tata/getZanName", data).then(res => {

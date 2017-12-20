@@ -22,7 +22,6 @@
                 <use xlink:href="#icon-pengyouquan"></use>
             </svg>
             <div>他她圈</div>
-
           </router-link>
           <router-link  to='/shopcart' tag="div">
             <svg class="icon gouwuche" aria-hidden="true">
@@ -42,42 +41,49 @@
 </template>
 
 <script>
-import goodDetail from '@/components/gooddetail/gooddetail'
-
 export default {
-  name: 'app',
-  components:{
-    goodDetail
-  }
-}
+    name : 'app'
+
+};
 </script>
 
 <style lang='stylus'>
-footer
-  position fixed
-  bottom 0
-  width 100vw
-  height 10vh
-  background-color #f6f6f6
-  .nav-wrap
-    height 100%
-    display flex
-    text-align center
-    align-items center
-    color #a9a9a9
-    & > div
-      height 100%
-      width:20%
-      display flex
-      flex-direction column
-      box-sizing border-box
-      padding 0.2rem 0
-      justify-content space-around
-      align-items center
-      &.router-link-exact-active
-        color #ef5285
-      svg 
-        font-size 0.5333rem
-      div
-        font-size 0.3rem
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    height: 10vh;
+    background-color: #f6f6f6;
+
+    .nav-wrap {
+        height: 100%;
+        display: flex;
+        text-align: center;
+        align-items: center;
+        color: #a9a9a9;
+
+        & > div {
+            height: 100%;
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 0.2rem 0;
+            justify-content: space-around;
+            align-items: center;
+
+            &.router-link-exact-active {
+                color: #ef5285;
+            }
+
+            svg {
+                font-size: 0.5333rem;
+            }
+
+            div {
+                font-size: 0.3rem;
+            }
+        }
+    }
+}
 </style>

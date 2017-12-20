@@ -205,31 +205,31 @@
                             </div>
                         </transition>
                         <transition name='indexBox' mode='out-in'>
-                        <div class='c-d-wrap' v-if='!ismale'> 
-                            <div class='c-d-wrap'>
-                                <div class='act-item' v-for='(v,i) in fmaleitem' :key="i">
-                                    <div class='c-d-banner'>
-                                        <img v-lazy="v.img" alt="">
-                                    </div>
-                                    <swiper :options='hOptions' class='h-show'>
-                                        <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index">
-                                            <img v-lazy="item.imgMain">
-                                            <span>￥{{item.sellingPrice}}</span>
-                                        </swiper-slide>
-                                        <swiper-slide class='showitem last'>
-                                            <router-link to='/' tag='div' class='box'>
-                                            <div class='red'>
-                                                查看全部
-                                            </div>
-                                            <div class='gray'>
-                                                See more
-                                            </div>
-                                            </router-link> 
+                            <div class='c-d-wrap' v-if='!ismale'> 
+                                <div class='c-d-wrap'>
+                                    <div class='act-item' v-for='(v,i) in fmaleitem' :key="i">
+                                        <div class='c-d-banner'>
+                                            <img v-lazy="v.img" alt="">
+                                        </div>
+                                        <swiper :options='hOptions' class='h-show'>
+                                            <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index">
+                                                <img v-lazy="item.imgMain">
+                                                <span>￥{{item.sellingPrice}}</span>
                                             </swiper-slide>
-                                    </swiper>
-                                </div> 
+                                            <swiper-slide class='showitem last'>
+                                                <router-link to='/' tag='div' class='box'>
+                                                <div class='red'>
+                                                    查看全部
+                                                </div>
+                                                <div class='gray'>
+                                                    See more
+                                                </div>
+                                                </router-link> 
+                                                </swiper-slide>
+                                        </swiper>
+                                    </div> 
+                                </div>
                             </div>
-                        </div>
                         </transition>
                     </div>
                 </div>                
@@ -257,19 +257,19 @@ export default {
     created(){
         this.axios.get('/api/index/getBaannerList?type=1').then(res => {
             this.banner = res.data.obj;
-        })
+        });
         this.axios.get('/api/index/getProGoodsList?type=0').then(res => {
             if(res.data.code !== 'success') return false;
             this.maleitem = res.data.obj.filter(v => {
                 return v.goodsList && v.goodsList.length > 0    
             });
-        })
+        });
         this.axios.get('/api/index/getProGoodsList?type=1').then(res => {
             if(res.data.code !== 'success') return false;
             this.fmaleitem = res.data.obj.filter(v => {
                 return v.goodsList && v.goodsList.length > 0
             })
-        })
+        });
     },
     methods:{
         _formatProGoodsList(arr){
@@ -293,7 +293,6 @@ export default {
                     }
                 }
             });
-         ;
         },
         goToGoodsDetail(item){
             this.$router.push({

@@ -98,10 +98,15 @@ export default {
     created(){
         let data = new URLSearchParams();
         data.append('userId',userInfo.userid)
-        this.axios.get('/api/wsc/user/getGoosCollection',data).then(res => {
+        this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/getGoosCollection',data).then(res => {
             console.log(res.data)
         })
         this._getSellerList();
+        const id1 = '3c514d461c05486d8a667dd4e6507198',
+              id2 = '6f611d55eb7e435f8fca360e6dd7110e';
+        let params = new URLSearchParams();
+            params.append('ids','3,4');
+        this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/deleteCollectionList',params);
     },
     activated(){
         this._getSellerList();
@@ -135,7 +140,7 @@ export default {
         _getSellerList(){
             let data = new URLSearchParams();
             data.append('userId',userInfo.userid);
-            this.axios.post('/api/wsc/user/getShopCollection',data).then(res => {
+            this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/getShopCollection',data).then(res => {
             res.data.obj.forEach(v => {
                 if(!v.isediting){
                     this.$set(v,'isediting',true)

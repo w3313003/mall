@@ -25,7 +25,7 @@
 
 <script>
 import scroll from 'common/scroll'
-import Copy from 'clipboard'
+// import Copy from 'clipboard'
 import { Toast } from 'mint-ui'
 
 export default {

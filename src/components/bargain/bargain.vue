@@ -2,7 +2,7 @@
     <div class="bargin-wrap">
         <scroll class='scroll' :data='goodList'>
             <div class='good-wrap'>
-                <div class='good' v-for='(item,index) in goodList' :key="index">
+                <div class='good' v-for='(item,index) in goodList' :key="index" @click="toShare(item)">
                     <div class='img-wrap'>
                         <img v-lazy='item.imgMain'>
                     </div>
@@ -40,12 +40,17 @@ export default {
     },
     created(){
         this.axios.get('/api/activity/getActivityList?type=1').then(res => {
-            res.data.obj.forEach(v => {
-                v.imgMain = `http://10.0.0.22:8181${v.imgMain}`
-            });
+         
             this.goodList = res.data.obj;
             console.log(this.goodList)
         })
+    },
+    methods:{
+        toShare(item){
+            this.$router.push({
+                path : `/invite/${item.id}`
+            })
+        }
     },
     data(){
         return {

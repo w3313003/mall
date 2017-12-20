@@ -44,7 +44,7 @@
                                                 {{items.goodsName}}
                                             </div>
                                             <div class="m">
-                                                {{items.showSpecName.join(',')}}
+                                                {{items.showSpecName}}
                                             </div>
                                             <div class="b">
                                                 <span>￥{{items.goodsPrice}}</span>
@@ -434,7 +434,6 @@ export default {
         });
     },
     activated(){
-        console.log(1)
         let index = 0;
         if(!this.$route.params.index){
             index = 0

@@ -182,6 +182,18 @@ const movie = resolve => {
     })
 }
 
+const share = resolve => {
+    import ('@/components/bargain/share').then(module => {
+        resolve(module)
+    })
+}
+
+const invite = resolve => {
+    import ('@/components/bargain/invite').then(module => {
+        resolve(module)
+    })
+}
+
 import oauth from '@/components/oauth'
 
 Vue.use(Router)
@@ -192,7 +204,7 @@ export const router = new Router({
     routes: [
         {
             path : '/',
-            redirect : '/test/oauth',
+            redirect : 'index',
         },
         {
             path: '/test/oauth',
@@ -269,7 +281,7 @@ export const router = new Router({
             path: '/good/:id',
             component: gooddetail
         }, {
-            path: '/good_all',
+            path: '/good_all/:id',
             name: 'good_all',
             component: good_all,
         }, {
@@ -297,7 +309,7 @@ export const router = new Router({
             component: returnGoods
         },
         {
-            path: '/seller',
+            path: '/seller/:id',
             component: seller
         },
         {
@@ -319,12 +331,19 @@ export const router = new Router({
         {
             path : '/movie',
             component : movie
+        },
+        {
+            path : '/share/:id',
+            component : share
+        },
+        {
+            path : '/invite/:id',
+            component: invite
         }
     ]
 });
 router.beforeEach((a,b,c) => {
     let url = location.href.split('#');
-    console.log(url[0])
     if(!/\?$/.test(url[0])){
         url[0] = url[0]+'?#';
         let urls = ''
@@ -332,6 +351,16 @@ router.beforeEach((a,b,c) => {
             urls += i
         }
         location.href = urls;
-    }
+        return false;
+    };
+    // 分享页判断
+    if(b.path.match(/\/.*/g)[0].length <= 1 && a.path.match(/share/)) {
+        sessionStorage.setItem('isShare',true);
+        sessionStorage.setItem('path',location.href);
+        alert('分享')
+    };
+    // if(!JSON.parse(sessionStorage.getItem('isLogin'))){
+    //     location.href = `${location.origin}/static/auth.html`
+    // }
     c();
 })

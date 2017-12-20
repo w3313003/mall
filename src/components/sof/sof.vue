@@ -6,19 +6,21 @@
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>
-        <scroll class="scroll">
+        <scroll class="scroll" ref="scroll"   :data='list'>
             <div class='content'>
                 <div class='banner'>
                     <img src="../.././assets/img/banner.png" alt="">
                 </div>
                 <div class='item' @click='gotoDetail(item)' v-for='(item,index) in list' :key="index">
                     <div class='header'>
-                        <img src="../.././assets/img/avatar.png" alt="">
-                        <div class='nickname'>壳斗马蒂</div>
-                        <div class='time'>20分钟前</div>
+                        <img :src="item.userImg" alt="">
+                        <div class='nickname'>
+                            {{item.nickName}}
+                        </div>
+                        <div class='time'>{{item.updateDate}}</div>
                     </div>
                     <div class='banner'>
-                        <img src="../.././assets/img/f_banner.png" alt="">
+                        <img :src="item.img" alt="">
                     </div>
                     <div class='heading'>{{item.title}}</div>
                     <div class='control'>
@@ -50,6 +52,9 @@ export default {
       this.list = res.data.obj;
       console.log(res.data.obj);
     });
+  },
+  activated(){
+      this.$refs.scroll.refresh();
   },
   data() {
     return {
