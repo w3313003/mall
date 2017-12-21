@@ -255,6 +255,7 @@ export default {
         this.$refs.scroll.refresh()
     },
     created(){
+        
         this.axios.get('/api/index/getBaannerList?type=1').then(res => {
             this.banner = res.data.obj;
         });

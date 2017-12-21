@@ -28,6 +28,7 @@
     }
 
   </style>
+    <script src='https://res.wx.qq.com/mmbizwap/zh_CN/htmledition/js/vconsole/3.0.0/vconsole.min.js'></script>
 </head>
 
 <body>
@@ -38,7 +39,7 @@
   </div>
   <script>
     const sign = JSON.parse(sessionStorage.getItem('isShare')),
-          path = JSON.parse(sessionStorage.getItem('path'));
+          path = sessionStorage.getItem('path');
     let wxConfig = {
         appid: "wx8a2df9136c4a762a",
         redirect_uri: location.href,
@@ -48,18 +49,24 @@
     let urlSearch = new URLSearchParams(location.search);
     // if (!JSON.parse(sessionStorage.getItem('isLogin'))) {
     if (!urlSearch.has("code")) {
-      const state = Date.parse(new Date()),
+        alert(4534)
+        var state = Date.parse(new Date()),
         url =
             `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConfig.appid}&redirect_uri=${encodeURIComponent(
-                `${wxConfig.redirect_url}`
+                `${wxConfig.redirect_uri}`
               )}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-      location.href = url;
+        location.href = url;
+              
     } else {
+        alert('重定向成功')
       const code = urlSearch.get("code"),
-        time = new Date(urlSearch.get("state")).toLocaleString();
-      axios.get(`http://10.0.0.19:8080/ykds-wsc/f/wsc/user/getUserByCode?code=${code}`)
+            time = new Date(urlSearch.get("state")).toLocaleString();
+            alert(code)
+            const data = new URLSearchParams();
+            data.append('code',code)
+      axios.post(`http://10.0.0.19:8080/ykds-wsc/f/wsc/user/getUserByCode`,data)
         .then(res => {
-          this.msg = res.data;
+            alert('成功')
           let obj = {
             userid: res.data.obj.id,
             openid: res.data.obj.openid,
@@ -68,7 +75,10 @@
           };
           sessionStorage.setItem("userInfo", JSON.stringify(obj));
           sessionStorage.setItem("isLogin", true);
-          window.href = sign ? wxConfig.shareUrl :  wxConfig.spaUrl;
+          console.log(obj)
+          location.href = sign ? wxConfig.shareUrl  :  wxConfig.spaUrl;
+        }).catch(res => {
+            alert('失败')
         });
     }
     // } else {

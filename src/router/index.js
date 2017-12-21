@@ -333,7 +333,7 @@ export const router = new Router({
             component : movie
         },
         {
-            path : '/share/:id',
+            path : '/share',
             component : share
         },
         {
@@ -357,10 +357,11 @@ router.beforeEach((a,b,c) => {
     if(b.path.match(/\/.*/g)[0].length <= 1 && a.path.match(/share/)) {
         sessionStorage.setItem('isShare',true);
         sessionStorage.setItem('path',location.href);
-        alert('分享')
+        alert('分享用户进入')
     };
-    // if(!JSON.parse(sessionStorage.getItem('isLogin'))){
-    //     location.href = `${location.origin}/static/auth.html`
-    // }
-    c();
+    if(JSON.parse(sessionStorage.getItem('isLogin'))){
+        c();
+    } else {
+        location.href = `${location.origin}/static/auth.html`;
+    };
 })

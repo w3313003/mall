@@ -9,7 +9,9 @@
                             <use xlink:href="#icon-arrLeft-fill"></use>
                         </svg>
                     </div>
-                    <div>销量
+                    <div
+                        @click='ischooseSalecount = !ischooseSalecount'
+                        >销量
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-arrLeft-fill"></use>
                         </svg>
@@ -29,6 +31,10 @@
                     <div class='navchoose' v-if='ischoosePrice'>
                         <div :class='{"active":ispricetop}'  data-type='1' @click='sortPrice'>价格由高到低</div>
                         <div :class='{"active":!ispricetop}' data-type='2' @click='sortPrice'>价格由低到高</div>
+                    </div>
+                    <div class='navchoose' v-if='ischooseSalecount'>
+                        <div :class='{"active":isSaletop}'  data-type='1' @click='sortPrice'>销量由高到低</div>
+                        <div :class='{"active":!isSaletop}' data-type='2' @click='sortPrice'>销量由低到高</div>
                     </div>
                 </transition>  
                 <scroll class='scroll' ref='scroll' :data='goodList'>
@@ -61,9 +67,6 @@ export default {
             ispricetop:true,
             ischooseSalecount:false,
             isSaletop:true,
-            ChooseType:{
-                
-            },
             goodList:[]
         }
     },

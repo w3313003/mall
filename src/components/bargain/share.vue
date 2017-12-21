@@ -64,7 +64,21 @@ export default {
     components:{
         scroll
     },
-
+    created(){
+        if(location.search.length < 1) {
+            alert('参数错误');
+            return false;
+        };
+        let searchObj = new URLSearchParams(location.search),
+            activeId = searchObj.get('activeid'),
+            userId = searchObj.get('userId');
+        let data = new URLSearchParams();
+            data.append('id',activeId);
+            data.append('userId',userId);
+        this.axios.post('http://10.0.0.19:8080/ykds-wsc/f/activity/joinKj',data).then(res => {
+            console.log(res.data)
+        })
+    }
 
 }
 </script>

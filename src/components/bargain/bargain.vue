@@ -34,22 +34,42 @@
 <script>
 import scroll from "common/scroll";
 
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+
 export default {
     components:{
         scroll
     },
+    data(){
+        return {
+            userId : '',
+            activeId : ''
+        }
+    },
     created(){
         this.axios.get('/api/activity/getActivityList?type=1').then(res => {
-         
             this.goodList = res.data.obj;
-            console.log(this.goodList)
         })
     },
     methods:{
         toShare(item){
-            this.$router.push({
-                path : `/invite/${item.id}`
-            })
+            let data = new URLSearchParams();
+                data.append('userId',userInfo.userid);
+                data.append('goodsId',item.id)
+            this.axios.post('/api/activity/bargain',data).then(res => {
+                this.activeId = res.data.obj.id;
+                this.userId = res.data.obj.userId;
+                this.$router.push({
+                    path : `/invite/${item.id}`,
+                    params:{
+                        activeId : this.activeId,
+                        userId : this.userId
+                    }
+                });
+            });
+
+
+            
         }
     },
     data(){

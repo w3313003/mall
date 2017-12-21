@@ -56,7 +56,6 @@ export default {
 
     // let data = new URLSearchParams(),
     //   url = location.href.split("?#")[0];
-    // data.append("url", url);
     // this.axios
     //   .post("http://10.0.0.17:8080/ykds-wsc/f/weixin/getJsAPIConfig", data)
     //   .then(res => {
@@ -98,11 +97,11 @@ export default {
     const appid = "wx8a2df9136c4a762a";
     let urlSearch = new URLSearchParams(location.search);
     if (!JSON.parse(sessionStorage.getItem('isLogin'))) {
-        alert(23)
       if (!urlSearch.has("code")) {
         const state = Date.parse(new Date()),
           url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${encodeURIComponent(
-            "http://vs2raa.natappfree.cc/?#/test/oauth"
+    // data.append("url", url);
+            "http://captain.natapp1.cc/?#/test/oauth"
           )}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
         location.href = url;
       } else {

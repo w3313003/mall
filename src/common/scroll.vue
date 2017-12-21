@@ -1,7 +1,7 @@
 <template>
-  <div ref="wrapper">
-    <slot></slot>
-  </div>
+    <div ref="wrapper">
+        <slot></slot>
+    </div>
 </template>
 
 <script type="text/ecmascript-6">
