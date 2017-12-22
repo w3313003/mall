@@ -345,7 +345,7 @@ export const router = new Router({
 router.beforeEach((a,b,c) => {
     let url = location.href.split('#');
     if(!/\?$/.test(url[0])){
-        url[0] = url[0]+'?#';
+        url[0] += '?#';
         let urls = ''
         for(let i of url){
             urls += i

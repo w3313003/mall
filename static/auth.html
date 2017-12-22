@@ -49,7 +49,6 @@
     let urlSearch = new URLSearchParams(location.search);
     // if (!JSON.parse(sessionStorage.getItem('isLogin'))) {
     if (!urlSearch.has("code")) {
-        alert(4534)
         var state = Date.parse(new Date()),
         url =
             `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConfig.appid}&redirect_uri=${encodeURIComponent(
@@ -62,7 +61,7 @@
       const code = urlSearch.get("code"),
             time = new Date(urlSearch.get("state")).toLocaleString();
             alert(code)
-            const data = new URLSearchParams();
+            let data = new URLSearchParams();
             data.append('code',code)
       axios.post(`http://10.0.0.19:8080/ykds-wsc/f/wsc/user/getUserByCode`,data)
         .then(res => {
