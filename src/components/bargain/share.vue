@@ -21,7 +21,7 @@
                     <div class="count">
                         <span>3</span>人帮砍
                     </div>
-                    <div class="btn">
+                    <div class="btn" @click="HelpBargin">
                         帮砍一刀
                     </div>
                 </div>
@@ -59,25 +59,31 @@
 
 <script>
 import scroll from 'common/scroll'
+let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
     components:{
         scroll
     },
     created(){
-        if(location.search.length < 1) {
-            alert('参数错误');
-            return false;
-        };
-        let searchObj = new URLSearchParams(location.search),
-            activeId = searchObj.get('activeid'),
-            userId = searchObj.get('userId');
-        let data = new URLSearchParams();
-            data.append('id',activeId);
-            data.append('userId',userId);
-        this.axios.post('http://10.0.0.19:8080/ykds-wsc/f/activity/joinKj',data).then(res => {
-            console.log(res.data)
-        })
+        
+    },
+    methods:{
+        HelpBargin(){
+            if(location.search.length < 1) {
+                alert('参数错误');
+                return false;
+            };
+            let searchObj = new URLSearchParams(location.search),
+                activeId = searchObj.get('activeid'),
+                userId = userInfo.userid;
+            let data = new URLSearchParams();
+                data.append('id',activeId);
+                data.append('userId',userId);
+            this.axios.post('/api/activity/joinKj',data).then(res => {
+                console.log(res.data)
+            })
+        }
     }
 
 }

@@ -13,7 +13,7 @@
                         <div class='disc'>
                             <div class='l'>
                                 <div>￥
-                                    <span>{{item.sellingPrice}}</span>
+                                    <span>{{item.sellingPrice - item.discount}}</span>
                                 </div>
                             </div>
                             <div class='r'>
@@ -47,7 +47,10 @@ export default {
         }
     },
     created(){
-        this.axios.get('/api/activity/getActivityList?type=1').then(res => {
+        let params = new URLSearchParams();
+            params.append('userId',userInfo.userid);
+            params.append('type','1')
+        this.axios.post('/api/activity/getActivityList',params).then(res => {
             this.goodList = res.data.obj;
         })
     },
@@ -59,13 +62,13 @@ export default {
             this.axios.post('/api/activity/bargain',data).then(res => {
                 this.activeId = res.data.obj.id;
                 this.userId = res.data.obj.userId;
-                this.$router.push({
-                    path : `/invite/${item.id}`,
-                    params:{
-                        activeId : this.activeId,
-                        userId : this.userId
-                    }
+                sessionStorage.setItem('activeId',res.data.obj.id);
+                setTimeout(() => {
+                    this.$router.push({
+                    path : `/invite/${item.id}`
                 });
+                },500)
+                
             });
 
 

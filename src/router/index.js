@@ -353,15 +353,16 @@ router.beforeEach((a,b,c) => {
         location.href = urls;
         return false;
     };
+    c();
     // 分享页判断
-    if(b.path.match(/\/.*/g)[0].length <= 1 && a.path.match(/share/)) {
-        sessionStorage.setItem('isShare',true);
-        sessionStorage.setItem('path',location.href);
-        alert('分享用户进入')
-    };
-    if(JSON.parse(sessionStorage.getItem('isLogin'))){
-        c();
-    } else {
-        location.href = `${location.origin}/static/auth.html`;
-    };
+    // if(b.path.match(/\/.*/g)[0].length <= 1 && a.path.match(/share/)) {
+    //     sessionStorage.setItem('isShare',true);
+    //     sessionStorage.setItem('path',location.href);
+    //     alert('分享用户进入')
+    // };
+    // if(JSON.parse(sessionStorage.getItem('isLogin'))){
+    //     c();
+    // } else {
+    //     location.href = `${location.origin}/static/auth.html`;
+    // };
 })

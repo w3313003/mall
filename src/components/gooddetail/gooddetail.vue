@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-21 17:21:27
+ * @Last Modified time: 2017-12-23 10:09:23
  */
 
 <template>
@@ -46,7 +46,7 @@
                     ￥<span>{{minPrice}}</span>元
                 </div>
                 <div class='oldprice'>价格：
-                    <span>￥{{sourcegood.marketPrice}}</span>
+                    <span>￥{{sourcegood.marketPrice}}元</span>
                 </div>
                 <div class='disc'>
                     <div class='yunfei'>
@@ -211,7 +211,10 @@
                 立即购买    
             </div> 
         </div>       
-        <confirm v-if='false'></confirm> 
+        <confirm v-if='false'>
+            
+            
+        </confirm> 
         <shopChoosing 
         ref='shopcart' :goodInfo='sourcegood'
         @appendTo='appendTo' 
@@ -240,11 +243,20 @@ const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 export default {
   async created() {
     await this._getGoodInfo();
-    this._getCoupon();
+    await this._getCoupon();
+    let data = new URLSearchParams();
+    data.append('goodsIds',this.$route.params.id);
+    data.append('userId',userInfo.userid);
+    data.append('money',100)
+    setTimeout(() => {
+        this.axios.post('/api/redpacket/getOrderRedpackets',data).then(res => {
+            console.log(res.data)
+        })
+    },1000)
   },
   async activated(){
-      await this._getGoodInfo();
-        this._getCoupon();
+        await this._getGoodInfo();
+        await this._getCoupon();
   },
   mounted() {
     this.$nextTick(() => {
@@ -393,24 +405,24 @@ export default {
       let id = this.$route.params.id,
           data = new URLSearchParams();
           data.append("goodsId", id);
-      this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
-        let price = res.data.obj.goodsPrices.map(v => {
-          return Number(v.price);
+        return this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
+            let price = res.data.obj.goodsPrices.map(v => {
+              return Number(v.price);
+            });
+            this.sourcegood = res.data.obj;
+            this.maxPrice = Math.max(...price);
+            this.minPrice = Math.min(...price);
+            this.imgs = res.data.obj.imgShow.split("|");
         });
-        this.sourcegood = res.data.obj;
-        this.maxPrice = Math.max(...price);
-        this.minPrice = Math.min(...price);
-        this.imgs = res.data.obj.imgShow.split("|");
-      });
     },
     _getCoupon() {
-      let id = this.sourcegood.shopId,
+        let id = this.sourcegood.shopId,
             data = new URLSearchParams();
-      data.append('userId',userInfo.userid);
-      data.append("shopId", id);
-      this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
-        if (res.data.code !== "success") throw new Error("接口获取失败");
-        this.couponList = res.data.obj;
+        data.append('userId',userInfo.userid);
+        data.append("shopId", id);
+      return this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
+            if (res.data.code !== "success") throw new Error("接口获取失败");
+            this.couponList = res.data.obj;
       });
     },
     _scrollRefresh(){

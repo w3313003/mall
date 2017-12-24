@@ -181,16 +181,16 @@ export default {
         // let userInfo = JSON.parse(localStorage.getItem('userInfo'));
         // this.userInfo = userInfo;
         let data = new URLSearchParams();
-        data.append('userId','2013267482f84b3fb098f05e003cb263');
+        data.append('userId','91e3acaa614f4c97a779426d61d1de9e');
         this.axios.post("/api/wsc/user/userDeatil",data).then(res => {
             console.log(res.data.obj);
             let obj = {
-              userid : res.data.obj.id,
-              openid : res.data.obj.openid,
-              nickName : res.data.obj.nikeName,
-              avatar : res.data.obj.img,
-              sex : res.data.obj.sex === '1' ? '男' : '女'
-          };
+                userid : res.data.obj.id,
+                openid : res.data.obj.openid,
+                nickName : res.data.obj.nikeName,
+                avatar : res.data.obj.img,
+                sex : res.data.obj.sex === '1' ? '男' : '女'
+            };
             sessionStorage.setItem('userInfo',JSON.stringify(obj));
             this.userInfo = obj;
         });

@@ -70,10 +70,12 @@ export default {
         return {
             activeId : '',
             userId : '',
-            shareConfig:{}
+            shareConfig:{},
+            activeId: ''
         }
     },
     created(){
+        this.activeId = sessionStorage.getItem('activeId');
         let url = location.href.split('#')[0],
             userid = userInfo.userid;
         let params = new URLSearchParams();
@@ -89,13 +91,14 @@ export default {
                 jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','onMenuShareQZone'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
                 success(){
                     alert('confsig:ok')
-                    
                 },
                 error(){
                     alert('config:error')
                 }
             });
-           
+           wx.ready(() => {
+               console.log("i'm ready")
+           })
         });  
     },
     activated(){
@@ -104,27 +107,26 @@ export default {
     methods:{
         invite(){
             this.shareConfig = {
-                shareUrl : `${location.origin}/?activeid=${this.$route.params.activeId}&userId=${this.$route.params.userId}#/share`,
+                shareUrl : `${location.origin}/?activeid=${this.activeId}&userId=${userInfo.userid}#/share`,
                 title : '分享测试',
                 imgUrl : '',
                 desc : '分享测试分享测试分享测试'
             };
             wx.onMenuShareTimeline({
-                title: shareConfig.title, // 分享标题
-                link: shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                imgUrl: shareConfig.imgUrl, // 分享图标
+                title: this.shareConfig.title, // 分享标题
+                link: this.shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: this.shareConfig.imgUrl, // 分享图标
                 success() {
                     alert('分享成功')
                 },
                 cancel(){
-                    
                 }
             });
             wx.onMenuShareAppMessage({
-                title: shareConfig.title, // 分享标题
-                desc: shareConfig.desc, // 分享描述
-                link: shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                imgUrl: shareConfig.imgUrl, // 分享图标
+                title: this.shareConfig.title, // 分享标题
+                desc: this.shareConfig.desc, // 分享描述
+                link: this.shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: this.shareConfig.imgUrl, // 分享图标
                 type: '', // 分享类型,music、video或link，不填默认为link
                 dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
                 success() {
@@ -135,10 +137,10 @@ export default {
                 }
             });
             wx.onMenuShareQQ({
-                title: shareConfig.title, // 分享标题
-                desc: shareConfig.desc, // 分享描述
-                link: shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                imgUrl: shareConfig.imgUrl, // 分享图标
+                title: this.shareConfig.title, // 分享标题
+                desc: this.shareConfig.desc, // 分享描述
+                link: this.shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: this.shareConfig.imgUrl, // 分享图标
                 success () {
                     alert('分享成功')
                 },
@@ -147,10 +149,10 @@ export default {
                 }
             });
             wx.onMenuShareWeibo({
-                title: shareConfig.title, // 分享标题
-                desc: shareConfig.desc, // 分享描述
-                link: shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                imgUrl: shareConfig.imgUrl, // 分享图标
+                title: this.shareConfig.title, // 分享标题
+                desc: this.shareConfig.desc, // 分享描述
+                link: this.shareConfig.shareUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: this.shareConfig.imgUrl, // 分享图标
                 success () {
                 // 用户确认分享后执行的回调函数
                 },

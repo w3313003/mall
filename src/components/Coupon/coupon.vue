@@ -52,6 +52,7 @@
 <script>
 import scroll from "common/scroll";
 import { Toast } from "mint-ui";
+const userid = '91e3acaa614f4c97a779426d61d1de9e';
 
 export default {
   components: {
@@ -65,7 +66,8 @@ export default {
   created() {
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
     let params = new URLSearchParams();
-    params.append("userId", userInfo.userid);
+    // params.append("userId", userInfo.userid);
+    params.append('userId',userid)
     this.axios.post("/api/redpacket/getRedpacketList", params).then(res => {
       res.data.obj.forEach(v => {
         if (!v.shopName && v.type == 1) {
