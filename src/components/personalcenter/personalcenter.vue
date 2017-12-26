@@ -214,7 +214,8 @@ export default {
             this.$router.push({
                 name:'order',
                 params:{
-                    index
+                    index,
+                    Singer
                 }
             })
         }

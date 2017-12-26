@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-23 10:09:23
+ * @Last Modified time: 2017-12-26 14:25:39
  */
 
 <template>
@@ -66,12 +66,15 @@
                     </div>
                 </div>
                 <div class='box'></div>
-                <div class='choose' @click='shopcartShow'>
+                <div class='choose' @click='setCurrentType'>
                 <div>
                     选择颜色/尺码
                 </div>
                 <div class='s'>
-                    <img src="../.././assets/img/....png" alt="">
+                    <img v-if='!choosedType.specId' src="../.././assets/img/....png" alt="">
+                    <span v-else>
+                        {{choosedType.specName}}
+                    </span>
                 </div>
                 </div>
                 <div class='coupon'>
@@ -207,13 +210,13 @@
             <div class='m' @click='shopcartShow'>
                 加入购物车
             </div>
-            <div class='r'>
+            <div class='r' @click="toConfirm">
                 立即购买    
             </div> 
         </div>       
-        <confirm v-if='false'>
-            
-            
+        <confirm v-if='confirm'
+        @back='closeConfirm'
+        :orderList='orderList'>
         </confirm> 
         <shopChoosing 
         ref='shopcart' :goodInfo='sourcegood'
@@ -239,39 +242,19 @@ import good from "common/mock";
 import wx from "weixin-js-sdk";
 import { Toast } from 'mint-ui'
 const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+const USER_ID = '91e3acaa614f4c97a779426d61d1de9e';
 
 export default {
   async created() {
-    await this._getGoodInfo();
-    await this._getCoupon();
-    let data = new URLSearchParams();
-    data.append('goodsIds',this.$route.params.id);
-    data.append('userId',userInfo.userid);
-    data.append('money',100)
-    setTimeout(() => {
-        this.axios.post('/api/redpacket/getOrderRedpackets',data).then(res => {
-            console.log(res.data)
-        })
-    },1000)
-  },
-  async activated(){
+        await this._getWxConfig();
         await this._getGoodInfo();
         await this._getCoupon();
   },
-  mounted() {
-    this.$nextTick(() => {
-      setTimeout(() => {
-        let el = document.getElementById("details").childNodes[0];
-        el.style.fontSize = ".3rem";
-        let elList = [...el.getElementsByTagName("*")];
-        for (let i of elList) {
-          i.style.height = "auto";
-          i.style.width = 'auto';
-          i.style.lineHeight = ".5rem";
-        }
-        console.log(elList);
-      }, 203);
-    });
+  async activated(){
+      this.confirm = false;
+        await this._getWxConfig();
+        await this._getGoodInfo();
+        await this._getCoupon();
   },
   computed: {
     ratingNum() {
@@ -364,11 +347,18 @@ export default {
     stop(e) {
       e.stopPropagation();
     },
+    setCurrentType(){
+        this.choosing = true;
+        setTimeout(() => {
+          this.$refs.shopcart.choosing = true;
+        }, 20);
+    },
     shopcartShow() {
       this.choosing = true;
       setTimeout(() => {
         this.$refs.shopcart.choosing = true;
       }, 20);
+      this.appendToShopCart = true;
     },
     shopclose() {
       this.choosing = false;
@@ -384,11 +374,64 @@ export default {
       this.choosing = false;
       this.back(false);
     },
-    appendTo() {},
+    appendTo(data) {
+        console.log(data);
+        let obj = {
+            shopId : this.sourcegood.shopId,
+            totalPrice : data.totalPrice,
+            freight : Number(this.sourcegood.freight) || 0,
+            goodsName : this.sourcegood.name,
+            goodsNum : data.amount,
+            goodsPrice : data.price, 
+            goodsId : this.sourcegood.id,
+            specId : data.specId,
+            specName : data.choosedType,
+            goodsImg : data.img
+        };
+        this.choosedType = obj
+        if(this.appendToShopCart){
+            const params = new URLSearchParams(),
+                  { shopId, specId, specName, goodsId, goodsPrice, goodsNum } = obj;
+            params.append('shoppingCart',JSON.stringify({ userId:userInfo.userid, shopId, specId, specName, goodsId, goodsPrice, goodsNum }))
+            this.axios.post('/api/wsc/wscShoppingCart/saveShoppingCart',params);
+        }
+    },
+    toConfirm() {
+        this.appendToShopCart = false;
+        if(!this.choosedType.specId){
+            this.shopcartShow();
+            return;
+        } else {
+            const { goodsId, goodsName, goodsNum, goodsPrice, specId, goodsImg, specName } = this.choosedType;
+            const goodsInfo = {
+                        shopId : this.choosedType.shopId,
+                        freight : this.choosedType.freight,
+                        payPrice : this.choosedType.totalPrice + this.choosedType.freight,
+                        orderGoods : [
+                            {
+                                goodsId,
+                                goodsName,
+                                goodsNum,
+                                goodsPrice,
+                                specId,
+                                specName,
+                                goodsImg
+                            }
+                        ]
+                  };
+            this.orderList.push(goodsInfo);
+            this.confirm = true;
+        }
+        
+    },
+    closeConfirm() {
+        this.confirm = false;
+    },
     getComment() {
       this.currentIndex = 2;
       this.$refs.mySwiper.swiper.slideTo(2);
     },
+    // 领取红包
     receiveCoupon(item) {
       let data = new URLSearchParams();
       data.append("userId", userInfo.userid);
@@ -407,7 +450,7 @@ export default {
           data.append("goodsId", id);
         return this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
             let price = res.data.obj.goodsPrices.map(v => {
-              return Number(v.price);
+                return Number(v.price);
             });
             this.sourcegood = res.data.obj;
             this.maxPrice = Math.max(...price);
@@ -420,10 +463,36 @@ export default {
             data = new URLSearchParams();
         data.append('userId',userInfo.userid);
         data.append("shopId", id);
-      return this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
-            if (res.data.code !== "success") throw new Error("接口获取失败");
-            this.couponList = res.data.obj;
-      });
+        return this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
+              if (res.data.code !== 200) throw new Error("接口获取失败");
+              this.couponList = res.data.obj;
+        });
+    },
+    _getWxConfig() {
+        let configUrl = location.href.split('#'),
+            userId = userInfo.userId;
+        let params = new URLSearchParams();
+            params.append('url',configUrl);
+            params.append('userId',userId);
+        return -this.axios.post(`/api/wsc/user/getJsSdk`,params).then(res => {
+            wx.config({
+                debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: 'wx8a2df9136c4a762a', // 必填，公众号的唯一标识
+                timestamp: res.data.obj.timestamp , // 必填，生成签名的时间戳
+                nonceStr: res.data.obj.nonce, // 必填，生成签名的随机串
+                signature: res.data.obj.signature,// 必填，签名，见附录1
+                jsApiList: ['chooseWXPay'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+                success(){
+                    alert('confsig:ok')
+                },
+                error(){
+                    alert('config:error')
+                }
+            });
+           wx.ready(() => {
+               console.log("i'm ready")
+           });
+        });
     },
     _scrollRefresh(){
         console.log(this.$refs)
@@ -465,7 +534,11 @@ export default {
         paginationClickable: true
       },
       imgs: [],
-      couponList: []
+      couponList: [],
+      confirm:false,
+      choosedType : {},
+      orderList : [] ,
+      appendToShopCart : false
     };
   }
 };
@@ -631,7 +704,6 @@ export default {
             font-size: 0.4rem;
 
             .s {
-                width: 0.6667rem;
 
                 img {
                     width: 100%;

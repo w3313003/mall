@@ -123,7 +123,7 @@
                                                 {{items.goodsName}}
                                             </div>
                                             <div class="m">
-                                                {{items.showSpecName.join(',')}}
+                                                {{items.showSpecName}}
                                             </div>
                                             <div class="b">
                                                 <span>￥{{items.goodsPrice}}</span>
@@ -202,7 +202,7 @@
                                                 {{items.goodsName}}
                                             </div>
                                             <div class="m">
-                                                {{items.showSpecName.join(',')}}
+                                                {{items.showSpecName}}
                                             </div>
                                             <div class="b">
                                                 <span>￥{{items.goodsPrice}}</span>
@@ -281,7 +281,7 @@
                                                 {{items.goodsName}}
                                             </div>
                                             <div class="m">
-                                                {{items.showSpecName.join(',')}}
+                                                {{items.showSpecName}}
                                             </div>
                                             <div class="b">
                                                 <span>￥{{items.goodsPrice}}</span>
@@ -360,7 +360,7 @@
                                                 {{items.goodsName}}
                                             </div>
                                             <div class="m">
-                                                {{items.showSpecName.join(',')}}
+                                                {{items.showSpecName}}
                                             </div>
                                             <div class="b">
                                                 <span>￥{{items.goodsPrice}}</span>
@@ -427,10 +427,10 @@ export default {
             params.append('memberCode',userInfo.userid);
         this.axios.post('/api/order/getOrderList',params).then(res => {
             if(res.data.code !== 'success') throw new Error('error');
-           this.orderList = res.data.obj.filter(v => {
-                return v.orderGoods;
-            })
-            this.currentOrder = JSON.parse(JSON.stringify(this.orderList));
+            this.orderList = res.data.obj.filter(v => {
+                    return v.orderGoods;
+            });
+            this.currentOrder = this.orderList
         });
     },
     activated(){

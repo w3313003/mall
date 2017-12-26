@@ -2,7 +2,7 @@
     <div class='confirm-wrap'>
         <div class='title'>
             确认订单
-            <svg class="icon fenlei" aria-hidden="true">
+            <svg class="icon fenlei" aria-hidden="true" @click="back">
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>
@@ -15,11 +15,11 @@
                 </div>
                 <div class="m">
                     <div>
-                        <span>收货人：去去去</span>
-                        <span>15687782523</span>    
+                        <span>收货人：{{currentAddress.consignee}}</span>
+                        <span>{{currentAddress.phoneNum}}</span>    
                     </div>
                     <div>
-                        收货地址:合肥合肥黄飞飞飞飞飞飞而发分
+                        收货地址:{{currentAddress.address}}
                     </div>
                 </div>
                 <div class='r'>
@@ -30,29 +30,31 @@
             </div>
             <div class='detail'>
                 <div class='header'>
-                    <div class='sellername'>
-                        <div>
-                            <svg class="icon fenlei" aria-hidden="true">
-                                <use xlink:href="#icon-shangjia"></use>
-                            </svg>
-                            <span>墨刀旗舰店</span>   
-                            </div>
-                        <div class='type'>
-                            等待买家付款
-                        </div> 
-                    </div>
-                    <div class='goodinfo'>
-                        <img src=".././assets/img/goodimg.png" alt="" />
-                        <div class='text'>
-                            <div class='g-title'>
-                                单身快乐大胜靠德受打击as肯德基a阿达大厦的
-                            </div>
-                            <div class='g-type'>
-                                颜色颜色颜色颜色颜色
-                            </div>
-                            <div class='g-price'>
-                                <div>￥66.00</div>
-                                <div>X1</div>
+                    <div class="seller-item" v-for='(item,index) in orderList' :key="index">
+                        <div class='sellername'>
+                            <div>
+                                <svg class="icon fenlei" aria-hidden="true">
+                                    <use xlink:href="#icon-shangjia"></use>
+                                </svg>
+                                <span>墨刀旗舰店</span>   
+                                </div>
+                            <div class='type'>
+                                等待买家付款
+                            </div> 
+                        </div>
+                        <div class='goodinfo' v-for='(v,i) in item.orderGoods' :key="i">
+                            <img :src="v.goodsImg" alt="" />
+                            <div class='text'>
+                                <div class='g-title'>
+                                    {{v.goodsName}}
+                                </div>
+                                <div class='g-type'>
+                                    {{v.specName}}
+                                </div>
+                                <div class='g-price'>
+                                    <div>￥{{v.goodsPrice}}</div>
+                                    <div>X{{v.goodsNum}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -63,8 +65,8 @@
                         <div>订单总价</div>
                     </div>
                     <div class="r">
-                        <div class='f'>￥0.00</div>
-                        <div>￥66.66</div>
+                        <div class='f' style="text-align:right">￥{{ _totalFreight.toFixed(2) }}</div>
+                        <div>￥{{_totalPrice.toFixed(2)}}</div>
                     </div>
                 </div>
                 <div class="item">
@@ -82,7 +84,7 @@
                         实付款
                     </div>
                     <div class='price'>
-                        ￥66.00
+                        ￥{{_totalPrice.toFixed(2)}}
                     </div>
                 </div>
                 <div class="item">
@@ -90,7 +92,7 @@
                         买家留言
                     </div>
                     <div class='input-wrap'>
-                        <input type="text" placeholder="选填">
+                        <input type="text" v-model.trim="msg" placeholder="选填">
                     </div>
                 </div>
             </div>
@@ -98,9 +100,9 @@
         <div class='bottom'>
             <div class='l'>
                 合计:
-                <span>￥66.00元</span>
+                <span>￥{{_totalPrice.toFixed(2)}}元</span>
             </div>
-            <div class='r'>
+            <div class='r' @click="sendOrder">
                 提交订单
             </div>
         </div>
@@ -108,8 +110,114 @@
 </template>
 
 <script>
+import wx from "weixin-js-sdk";
+
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+
 export default {
-  
+    props:{
+        orderList:{
+            type : Array,
+            default : () => []
+        }
+    },
+    data() {
+        return {
+            addressList : [],
+            currentAddress : {},
+            msg:'' ,
+            redpacketMoney:0,
+        }
+    },
+    async created(){
+        console.log(this.orderList);
+        await this._getAddressList();
+        await this._calculateTotalMoney();
+    },
+    computed: {
+        _totalFreight() {
+            let freight = 0;
+            this.orderList.forEach(v => {
+                freight += Number(v.freight)
+            });
+            return freight;
+        },
+        _totalPrice() {
+            let price = 0;
+            this.orderList.forEach(v => {
+                price += v.payPrice
+            });
+            return price;
+        }
+    },
+    filter:{
+        formatMoney(val) {
+            return Number(val).toFixed(2)
+        }
+    },
+    methods : {
+        back() {
+            this.$emit('back');
+        },
+        sendOrder(){
+            let obj = {
+                money: this._totalPrice,
+                addressId : this.currentAddress.id,
+                userId : userInfo.userid,
+                orderList : this.orderList,
+                memberMessage:this.msg
+            };
+            let params = new URLSearchParams();
+                params.append('orderInfo',JSON.stringify(obj));
+            this.axios.post('/api/order/saveOrder',params).then(res => {
+                if(!res.data.success) throw new Error('请求失败'); 
+                this.orderIds = res.data.obj;
+            }).then(res => {
+                let data = new URLSearchParams();
+                    data.append('userId', userInfo.userid);
+                    data.append('orderIds', this.orderIds);
+                    data.append('money', obj.money);
+                    data.append('url',location.href)
+                this.axios.post('/api/order/payOrder',data).then(res => {
+                    alert('开始支付');
+                    wx.chooseWXPay({
+                        timestamp:res.data.obj.timestamp,
+                        nonceStr:res.data.obj.nonce,
+                        package : res.data.obj.packageName,
+                        signType:res.data.obj.signType,
+                        paySign : res.data.obj.signature,
+                        success() {
+                            alert('payok')
+                        },
+                        cancel() {
+                            
+                        }
+                    })
+                })
+            })
+            console.log(obj)
+        },
+        _calculateTotalMoney(){
+            let money = 0;
+            this.orderList.forEach(v => {
+                money += v.payPrice
+            });
+        },
+        _getAddressList() {
+            let data = new URLSearchParams();
+            data.append('userId',userInfo.userid);
+            return this.axios.post('/api/wsc/user/userAddress',data).then(res => {
+                if(res.data.code !== 'success') throw new Error('地址获取失败');
+                this.addressList = res.data.obj;
+                for(let i of this.addressList) {
+                    if(i.state === '0') {
+                        this.currentAddress = i;
+                        break;
+                    }
+                }
+            })
+        }
+    }
 }
 </script>
 

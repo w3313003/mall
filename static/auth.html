@@ -63,7 +63,7 @@
             alert(code)
             let data = new URLSearchParams();
             data.append('code',code)
-      axios.post(`http://10.0.0.19:8080/ykds-wsc/f/wsc/user/getUserByCode`,data)
+      axios.post(`/api/wsc/user/getUserByCode`,data)
         .then(res => {
             alert('成功')
           let obj = {

@@ -131,6 +131,7 @@ import scroll from 'common/scroll'
 import shopChoosing from 'common/shopChoosing'
 import goodLists from 'common/goodList'
 import { moocgoodList } from 'common/util'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
     data(){
@@ -148,7 +149,8 @@ export default {
       goodLists
     },
     created(){
-        this.recommend = moocgoodList
+        this.recommend = moocgoodList;
+        this.axios.post('/api/wsc/wscShoppingCart/getShoppingCartList')
         this.goodList = this._initshopList();
     },
     activated(){

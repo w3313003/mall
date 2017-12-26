@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-09 9:10:21 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-20 16:00:07
+ * @Last Modified time: 2017-12-26 11:13:13
  */
 import Vue from 'vue'
 import App from './App'
@@ -28,7 +28,7 @@ Vue.use(VueLazyload, {
 new vConsole();
 
 Vue.prototype.axios = axios.create({
-    timeout: 1000,
+    timeout: 5000,
 })
 
 Vue.config.productionTip = false
@@ -40,4 +40,5 @@ new Vue({
     template: '<App/>',
     components: { App },
     store,
-})
+});
+

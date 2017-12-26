@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-21 16:55:21 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-15 11:57:57
+ * @Last Modified time: 2017-12-25 17:55:21
  */
 
 <template>
@@ -13,7 +13,7 @@
                 <div class='header'>
                     <div class='img-wrap'>
                         <!-- <img :src='img' alt=""> -->
-                        <img v-lazy='img' alt="">
+                        <img v-lazy='goodInfo.imgMain' alt="">
                     </div>
                     <div class='disc'>
                         <div class='price'>
@@ -59,7 +59,7 @@
                             </svg>
                         </div>
                         <div>
-                            <input type="text" v-model='amount' maxlength='3'>
+                            <input type="text" disabled v-model='amount' maxlength='3'>
                         </div>
                         <div @click='add'>
                             <svg class="icon indexicon" aria-hidden="true">
@@ -112,10 +112,7 @@ export default {
     },
     computed:{
         totalPrice(){
-            return this.goodPrice * this.amount;
-        },
-        img(){
-            return this.goodInfo.imgMain
+            return this.goodsPrice * this.amount;
         }
     },
     watch:{
@@ -134,12 +131,13 @@ export default {
                     Object.values(this.choosed).forEach(v => {
                         arr.push(v.id)
                     });
-                    const queryStr = arr.join(''),
-                          reverseQueryStr = arr.reverse().join('');
+                    const queryStr = arr.join(','),
+                          reverseQueryStr = arr.reverse().join(',');
                     this.goodInfo.goodsPrices.forEach(v => {
-                        if(v.specChileId == queryStr || v.specChileId == reverseQueryStr){
-                            this.goodPrice = v.price;
+                        if(v.specChileId === queryStr || v.specChileId === reverseQueryStr){
+                            this.goodsPrice = v.price;
                             this.goodStock= v.stock;
+                            this.specChileId = v.specChileId
                         };
                     })
                 }
@@ -152,10 +150,11 @@ export default {
             choosing:false,
             typeMap : {},
             amount : 1,
-            choosed:{} ,
+            choosed: {} ,
             otherType:'',
-            goodPrice:0,
-            goodStock:0
+            goodsPrice:0,
+            goodStock:0 ,
+            specChileId: 0
         }
     },
     created(){
@@ -218,11 +217,14 @@ export default {
             for(let i in this.choosed){
                 str +=`${i}:${this.choosed[i].cn},`;
             };
-            console.log(str)
             let data = {
-                price : this.totalPrice,
+                totalPrice : this.totalPrice,
                 stock : this.goodStock,
-                choosedType: str.slice(0,-1)
+                price : this.goodsPrice,
+                amount : this.amount,
+                choosedType: str.slice(0,-1),
+                specId:this.specChileId,
+                img : this.goodInfo.imgMain
             };            
             this.$emit('appendTo',data);
             this.close();

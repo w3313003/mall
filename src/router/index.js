@@ -99,11 +99,13 @@ const good_all = resolve => {
         resolve(module)
     })
 }
-const gooddetail = resolve => {
-    import ('@/components/gooddetail/gooddetail').then(module => {
-        resolve(module)
-    })
-}
+// const gooddetail = resolve => {
+//     import ('@/components/gooddetail/gooddetail').then(module => {
+//         resolve(module)
+//     })
+// }
+// 非懒加载
+import gooddetail from '@/components/gooddetail/gooddetail'
 
 const address = resolve => {
         import ('@/components/address/address').then(module => {

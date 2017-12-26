@@ -112,7 +112,7 @@
 import scroll from "common/scroll";
 export default {
     created(){
-        this.axios.get('http://10.0.0.25:8181/ykds-wsc/f//waresClass/getWaresClassList').then(res => {
+        this.axios.get('/api/waresClass/getWaresClassList').then(res => {
             res.data.obj.forEach((v,i) => {
                 v.sexType === '0' ? this.maleList.push(v) : this.fmaleList.push(v);
             });
