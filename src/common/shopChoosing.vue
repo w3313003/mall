@@ -1,21 +1,34 @@
+/*
+ * @Author: ZhaoJie 
+ * @Date: 2017-11-21 16:55:21 
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2018-01-04 17:11:01
+ */
+
 <template>
     <transition name='mask'>
-        <div class='mask' v-show='choosing' @click='close'>
+        <div class='mask'  @click='close'>
         <transition name='choosing'>
-            <div class='choosetype' v-show='choosing' @click.stop='cancelBubble'>
+            <div class='choosetype'  @click.stop='cancelBubble'>
                 <div class='header'>
                     <div class='img-wrap'>
-                        <img src=".././assets/img/goodimg.png" alt="">
+                        <img v-lazy='goodInfo.imgMain' alt="">
                     </div>
                     <div class='disc'>
                         <div class='price'>
                             ￥<span>{{totalPrice}}</span>
                         </div>
                         <div class='Allcount'>
-                            库存{{goodInfo.totalcount}}
+                            库存 : {{ goodStock }}
                         </div>
                         <div class='currenttype'>
-                            已选: {{currentType}}
+                            已选: 
+                            <span v-if='otherType.length <= 1'>
+                                <i v-for='(value,key,index) in choosed' :key="index"  >
+                                    {{key}}:{{value.cn}}
+                                </i>
+                            </span>
+                            <span v-else>请选择{{otherType}}</span> 
                         </div>
                         <div class='cancel' @click='close'>
                             <svg class="icon" aria-hidden="true">
@@ -24,20 +37,15 @@
                         </div>
                     </div>
                 </div>
-                <div class='block choose_block1'>
-                    <div class='title'>颜色:</div>
+                <div class='block choose_block1' v-for='(value,key,index) in typeMap' :key="index">
+                    <div class='title'>{{key}}:</div>
                     <div class='detail-type'>
-                        <div class='item' :class='{"active" : item == color}' @click='chooseColor(item)' v-for='(item,index) in goodInfo.color' :key="index">
-                            {{item}}    
+                        <div class='item' :class='{"active": choosed[items.type] && choosed[items.type]["index"] === indexs }' 
+                                            @click.stop='choose(items,indexs)' v-for='(items,indexs) in value' :key="indexs">
+                           <span>
+                               {{items.name}}    
+                            </span> 
                         </div>  
-                    </div>
-                </div>
-                <div class='block choose_block2'>
-                    <div class='title'>尺码:</div> 
-                    <div class='detail-type'>
-                        <div class='item' :class='{"active" : item == size}' @click='chooseSize(item)' v-for='(item,index) in goodInfo.size' :key="index">
-                            {{item}}    
-                        </div> 
                     </div>
                 </div>
                 <div class='count'>
@@ -51,7 +59,7 @@
                             </svg>
                         </div>
                         <div>
-                            <input type="text" v-model='goodInfo.amount' maxlength='3'>
+                            <input type="text" disabled v-model='amount' maxlength='3'>
                         </div>
                         <div @click='add'>
                             <svg class="icon indexicon" aria-hidden="true">
@@ -70,59 +78,165 @@
 </template>
 
 <script>
+/**
+  * 取数组差集
+  * @arguments Array 
+  */
+function diffSet() {
+    let arr = [];
+    [...arguments].reduce((q, c) => {
+        if (!q instanceof Array) {
+            throw new Error('参数必须是数组');
+            return;
+        };
+        let _arr = [...new Set(q)],
+            _nextarr = [...new Set(c)];
+        _arr.forEach(v => {
+            _nextarr.includes(v) ? '' : arr.push(v)
+        });
+        _nextarr.forEach(v => {
+            _arr.includes(v) ? '' : arr.push(v)
+        });
+    });
+    return [...new Set(arr)];
+}
+import { Toast } from 'mint-ui'
 export default {
     props:{
         goodInfo:{
             type:Object,
-            default(){
-                return {};
-            }
+            default: () => {}
+        },
+        goodsNum:{
+            type: Number,
+            default: 0
         }
-    },
-    created(){
-        this.size = this.goodInfo.size[0];
-        this.color = this.goodInfo.color[0]
     },
     computed:{
         totalPrice(){
-            return this.goodInfo.price * this.goodInfo.amount 
-        },
-        currentType(){
-            if(!this.color || !this.szie) '';
-            return `颜色:${this.color},尺码:${this.size}`
+            return this.goodsPrice * this.amount;
         }
+    },
+    watch:{
+        // 动态价格计算
+        choosed:{
+            handler(){
+                let typeArr = Object.keys(this.typeMap),
+                    choosedArr = Object.keys(this.choosed),
+                    typeLength =typeArr.length,
+                    choosedLength = choosedArr.length;
+                if(typeLength > choosedLength){
+                    this.otherType = diffSet(typeArr,choosedArr)[0];
+                } else if (typeLength  == choosedLength) {
+                    this.otherType = '';
+                    let arr = [];
+                    Object.values(this.choosed).forEach(v => {
+                        arr.push(v.id)
+                    });
+                    const queryStr = arr.join(','),
+                          reverseQueryStr = arr.reverse().join(',');
+                    this.goodInfo.goodsPrices.forEach(v => {
+                        if(v.specChileId === queryStr || v.specChileId === reverseQueryStr){
+                            this.goodsPrice = v.price - this.goodInfo.discount;
+                            this.goodStock= Number(v.stock);
+                            this.specChileId = v.specChileId
+                        };
+                    })
+                }
+            },
+            deep:true
+        },
     },
     data(){
         return {
-            size:'',
-            color:'',
-            choosing:false
+            choosing:false,
+            typeMap : {},
+            amount : 1,
+            choosed: {} ,
+            otherType:'',
+            goodsPrice:0,
+            goodStock:0 ,
+            specChileId: 0
         }
     },
+    created(){
+        console.log('areated');
+        if(!this.goodInfo.discount) {
+            this.$set(this.goodInfo,'discount',0)
+        }
+        this.currentType = this.goodInfo.goodsPrices[0].specChileId.split(',');
+        this._formatGoodsTypeList(this.goodInfo);
+    },
+    activated(){
+        console.log('active')
+    },
     methods:{
+        _formatGoodsTypeList(arr){
+            arr.specs.forEach(v => {
+                v.specChiles.forEach(item => {
+                    const key = v.name;
+                    if(!this.typeMap[key]){
+                        this.typeMap[key] = [];
+                    }
+                    this.typeMap[key].push({
+                        id : item.id,
+                        name: item.name,
+                        type:key
+                    });
+                });
+            });
+        },
         close(){
-           this.choosing = false
+            this.$emit('close');
         },
         less(){
-            this.$emit('less')
+            if(this.amount <= 1){
+                Toast('最少购买一件');
+                return;
+            };
+            this.amount --;
         },
         add(){
-            this.$emit('add')
+            if(this.amount >= this.goodStock ){
+                Toast('已超出最大购买限制');
+                return ;
+            };
+            this.amount++;
         },
-        chooseColor(item){
-            this.color = item;
-            this.$emit('chooseColor',item)
+        choose(item,index){
+            const key = item.type;
+            this.$set(this.choosed,`${key}`,{
+                cn : item.name,
+                id : item.id,
+                index : index
+            });
+            console.log(this.choosed)
         },
-        chooseSize(item) {
-            this.size = item;
-            this.$emit('chooseSize',item)
+        appendToShopCart(){
+            let choosedTypeCount = Object.keys(this.choosed).length,
+                originTypeCount = this.goodInfo.specs.length;
+            if(choosedTypeCount < originTypeCount){
+                Toast('规格选择错误，请重试');
+                return;
+            };
+            let str = ''
+            for(let i in this.choosed){
+                str +=`${i}:${this.choosed[i].cn},`;
+            };
+            let data = {
+                totalPrice : this.totalPrice,
+                stock : this.goodStock,
+                price : this.goodsPrice,
+                amount : this.amount,
+                choosedType: str.slice(0,-1),
+                specId:this.specChileId,
+                img : this.goodInfo.imgMain
+            };            
+            this.$emit('appendTo',data);
+            this.close();
         },
         cancelBubble(e){
             e.stopPropagation();
-        },
-        appendToShopCart(){
-            this.$emit('appendTo')
-            this.close();
         }
     }
 }

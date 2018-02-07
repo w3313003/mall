@@ -1,10 +1,10 @@
 <template>
   <div class='sales-wrap'>
-            <scroll class='scroll' :data='goodList'>
+        <div class='scroll'>
             <div class='good-wrap'>
-                <div class='good' v-for='(item,index) in goodList' :key="index">
+                <div class='good' @click='goToDetail(item)' v-for='(item,index) in goodList' :key="index">
                     <div class='img-wrap'>
-                        <img src='../.././assets/img/goodimg.png'>
+                        <img v-lazy='item.imgMain'>
                     </div>
                     <div class='content'>
                         <div class='title'>
@@ -13,25 +13,25 @@
                         <div class='disc'>
                             <div class='l'>
                                 <div>￥
-                                    <span>{{item.price}}</span>
+                                    <span>{{item.sellingPrice}}</span>
                                 </div>
                             </div>
                             <div class='r'>
-                                ￥{{item.oldprice}}件
+                                ￥{{item.marketPrice}}
                             </div>
                         </div>
                         <div class='acount'>
                             <div>
-                                限量<span>20</span>件
+                                限量<span>{{item.stockNum}}</span>件
                             </div>
                             <div>
-                                月销{{item.totalcount}}件
+                                月销{{item.xiaoshou_num}}件
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </scroll>
+        </div>
   </div>
 </template>
 
@@ -41,59 +41,22 @@ export default {
     components:{
         scroll
     },
+    activated(){
+        this.axios.get('/api/activity/getActivityList?type=3').then(res => {
+            this.goodList = res.data.obj;
+            console.log(this.goodList)
+        })
+    },
+    methods: {
+        goToDetail(item) {
+            this.$router.push({
+                path:`/good/${item.id}`
+            })
+        }
+    },
     data(){
         return {
-            goodList:[
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                },
-                {
-                    name:'2017夏季新款贝壳头板鞋',
-                    price:300,
-                    count:30,
-                    totalcount:2000,
-                    oldprice:100
-                }
-            ]
+            goodList:[]
 
         }
     }
@@ -103,14 +66,17 @@ export default {
 <style lang="stylus" scoped>
 .sales-wrap
     position fixed
-    height 100vh
+    height 100%
     width  100%
     overflow hidden
     z-index 999
     background #e7e7e7
     .scroll
         height 100%
-        overflow hidden
+        overflow-x hidden;
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
+
         .good-wrap
             box-sizing border-box
             padding 0.2rem

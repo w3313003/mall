@@ -1,4 +1,7 @@
 // https://github.com/michael-ciniawsky/postcss-load-config
+function add (a){
+    console.log(a)
+}
 
 module.exports = {
   "plugins": {

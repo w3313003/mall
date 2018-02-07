@@ -1,7 +1,7 @@
 <template>
-  <div ref="wrapper">
-    <slot></slot>
-  </div>
+    <div ref="wrapper">
+        <slot></slot>
+    </div>
 </template>
 
 <script type="text/ecmascript-6">
@@ -79,7 +79,7 @@ export default {
       this.scroll && this.scroll.enable()
     },
     refresh() {
-      this.scroll && this.scroll.refresh()
+      this.scroll && this.scroll.refresh();    
     },
     scrollTo() {
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)

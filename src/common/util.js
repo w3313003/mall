@@ -1,3 +1,6 @@
+export const APPID = 'wx8a2df9136c4a762a'
+
+
 export const moocgoodList = [{
         sellername: '墨刀旗舰店',
         id: 1,
@@ -571,6 +574,62 @@ export const shopList = [{
 
 ]
 
+export const orderList = [{
+    sellername: '墨刀旗舰店',
+    type: 1,
+    id: 1,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 2,
+    id: 2,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 3,
+    id: 3,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 4,
+    id: 4,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}, {
+    sellername: '墨刀旗舰店',
+    type: 1,
+    id: 5,
+    good: {
+        title: '2017新款orderorder之类的什么假订单',
+        color: '颜色：紫色，自由组合',
+        price: 66,
+        count: 4,
+        expressFee: 0
+    },
+}]
 
 let elementStyle = document.createElement('div').style
 
@@ -603,29 +662,6 @@ export function prefixStyle(style) {
 
     return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }
-
-export const addressList = [{
-    name: '李康',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: true
-}, {
-    name: '厉害',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}, {
-    name: '七七八八',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}, {
-    name: '九九九九',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}];
-
 export const provinceList = [{
     text: '北京市',
     value: '110000'

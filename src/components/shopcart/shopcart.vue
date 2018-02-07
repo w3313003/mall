@@ -3,9 +3,10 @@
         <div class='Ttitle'>
             购物车
         </div>
-        <scroll class='scroll' :data='goodList'>
+        <div class='scroll' ref='scroll'>
             <div>
-                <div v-if='goodList.length > 0 ' class='gooditem' v-for='(allitem,allindex) in goodList' :key="allindex">
+            <div class='goods'>
+                <div v-if="goodList.length > 0"  class='gooditem' v-for='(allitem,allindex) in goodList' :key="allindex">
                     <div class='header'>
                         <div class='radio' @click='chooseall(allitem)'>
                             <img v-if='allitem.allclick' src='../.././assets/img/radio.png'>
@@ -31,19 +32,19 @@
                                 </div>
                                 <div class='item-detail'>
                                     <div class='img-wrap'>
-                                        <img src="../.././assets/img/good-item.png" alt="">
+                                        <img v-lazy="item.goodsImg" alt="">
                                     </div>
                                     <div class='item-content' v-if='!item.editing'>
                                         <div class='title'>
-                                            2017夏季新款贝壳头板鞋2017夏季新款贝壳头板鞋2017夏季新款贝壳头板鞋
+                                            {{item.goodsName}}
                                         </div>
                                         <div class='type'>
-                                            {{item.currenttype}}
+                                            {{item.specName}}
                                         </div>
                                         <div class='price'>
-                                            <div>￥<span>{{item.price * item.amount}}</span>
+                                            <div>￥<span>{{item.goodsPrice}}</span>
                                             </div>
-                                            <div>x{{item.amount}}</div>
+                                            <div>x{{item.goodsNum}}</div>
                                         </div>
                                     </div>
                                     <div class='item-content edit' v-else>
@@ -55,7 +56,8 @@
                                                     </svg>
                                                 </div>
                                                 <div class='input-wrap'>
-                                                    <input type="text" v-model='item.amount' maxlength='3'>
+                                                    <p  v-html="item.goodsNum"></p>
+                                                    <!-- <input type="number" v-model='item.goodsNum' maxlength='3'> -->
                                                 </div>
                                                 <div class='btn' @click='add(item)'>
                                                     <svg class="icon indexicon" aria-hidden="true">
@@ -66,7 +68,7 @@
                                             <div class='choosesing' @click='reChoose(item)'>
                                                 <div class='currenttype'>
                                                     <div>
-                                                        {{item.currenttype}}
+                                                        {{item.specName}}
                                                     </div>
                                                 </div>
                                                 <div class='control-icon'>
@@ -85,17 +87,31 @@
                         </div>
                     </transition>
                 </div>
+                <div class="empty" v-if='goodList.length < 1'>
+                    <div class='empty-content'>
+                        <img src='../../assets/img/empty.gif'/> 
+                        <p class='desc'> 
+                            你的购物车空空如也
+                        </p>
+                        <div class='btn' @click='goIndex'>
+                            去逛逛
+                        </div> 
+                    </div> 
+                </div>
+            </div>                
                 <div class='recommend'>
                     <div class='title'>
                         猜你喜欢
                     </div> 
                     <div class='content'>
-                        <goodLists :goodList='recommend'
-                         @getTodetail='getTodetail'   ></goodLists>
+                        <goodLists 
+                        :goodList='recommend'
+                         @getTodetail='getTodetail'></goodLists>
                     </div>
                 </div>
             </div>
-        </scroll>
+            
+        </div>
         <div class='bottom-block'>
             <div class='allbtn' @click='chooseAll'>
                 <div class='radio'>
@@ -108,29 +124,37 @@
                 合计:<span>￥{{ AllTotalPrice }}</span>
             </div>
             <div class='resultbtn' @click='submit'>
-                结算 ({{choosingGoods.length}})
+                结算({{choosingGoods.length}})
             </div> 
         </div>
-        <shopChoosing 
-        ref='shopcart' 
-        :goodInfo='currentgood' 
-        v-if='ischoosing'
-        @add='Shopadd'
-        @less='Shopless'
-        @chooseColor='chooseColor'
-        @chooseSize='chooseSize'
-        @appendTo='editFinish'
-        ></shopChoosing>
+        <shopChoosing
+            ref='shopcart' 
+            :goodInfo='currentgood.wscGoos' 
+            :goodsNum='currentgood.goodsNum'
+            v-if='ischoosing'
+            @chooseColor='chooseColor'
+            @chooseSize='chooseSize'
+            @appendTo='editFinish'
+            @close='close'>
+        </shopChoosing>
+        <confirm
+            v-if='confirm'
+            @back='closeConfirm'
+            :orderList='orderList'
+            :isShopCart='true'
+        />
     </div>
 </template>
 
 
 <script>
-import { shopList } from 'common/util'
 import scroll from 'common/scroll'
 import shopChoosing from 'common/shopChoosing'
 import goodLists from 'common/goodList'
+import confirm from "common/confirm";
 import { moocgoodList } from 'common/util'
+import { Toast } from 'mint-ui'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
     data(){
@@ -139,46 +163,72 @@ export default {
             currentgood:{},
             ischoosing:false,
             currentColor:'',
-            currentSize:''
+            currentSize:'',
+            choosedGoods:[],
+            orderList:[],
+            confirm:false,
+            recommend: []
         }
     },
     components:{
-      scroll,
-      shopChoosing,
-      goodLists
+        scroll,
+        shopChoosing,
+        goodLists,
+        confirm
     },
-    created(){
-        this.recommend = moocgoodList
-        this.goodList = this._initshopList();
+    activated(){
+        this.confirm = false;
+        let data = new URLSearchParams();
+            data.append('userId',userInfo.userid);
+        this.axios.post('/api/wsc/wscShoppingCart/getShoppingCartList',data).then(res => {
+            if(res.data.obj) {
+                this.goodList = res.data.obj;
+                this.goodList = this._initshopList(this.goodList)
+            };
+        });
+        this.axios.get('/api/wsc/goods/youLike').then(res => {
+            this.recommend = res.data.obj
+        })
     },
     methods:{
-        _initshopList(){
-            let map = {},
-                arr = [];
-            shopList.forEach(v => {
+        close(){
+            this.ischoosing = false;
+        },
+        _initshopList(arr){
+            let map = {};
+            arr.forEach(v => {
                 this.$set(v,'isclick',true);
                 this.$set(v,'editing',false)
-                const key = v.sellername;
+                const key = v.shopName;
                 if(!map[key]) {
                     map[key] = {
-                        title:v.sellername,
+                        title:v.shopName,
                         items:[],
                         allclick : true,
                         editing:false
                     }
                 };
             });
-            Object.values(map).forEach(v => {
-                arr.push(v);
+            let _arr = Object.values(map).map(v => {
+                return v;
             });
-            arr.forEach(v => {
-                for(let i of shopList){
-                    if(i.sellername === v.title) {
-                        v.items.push(i)
+            _arr.forEach(v => {
+                for(let i of arr){
+                    if(i.shopName === v.title) {
+                        v.items.push(i);
                     }
                 }
             });
-            return arr;
+            _arr.forEach(v => {
+                v.items.forEach(_ => {
+                    Object.defineProperty(_,'freight',{
+                        value: _.wscGoos.freight || 0,
+                        writable: true,
+                        enumerable: true 
+                    })
+                })
+            });
+            return _arr;
         },
         choosegood(a,b){
             b.isclick = !b.isclick;
@@ -199,13 +249,19 @@ export default {
                 v.editing = true
             })
         },
-        Shopadd(){
-            this.currentgood.amount++
+        goIndex() {
+            this.$router.push({
+                path: '/index'
+            })
         },
-        Shopless(){
-            if(this.currentgood == 1) return;
-            this.currentgood--
-        },
+        // Shopadd(){
+        //     console.log(this.currentgood)
+        //     this.currentgood.goodsNum++
+        // },
+        // Shopless(){
+        //     if(this.currentgood.amount == 1) return;
+        //     this.currentgood.goodsNum--
+        // },
         chooseColor(item){
             this.currentColor = item;
         },
@@ -213,35 +269,125 @@ export default {
             this.currentSize = item
         },
         less(item){
-            if(item.amount == 1) return;
-            item.amount--
+            if(item.goodsNum <= 1) return;
+            item.goodsNum--;
         },
         add(item){
-            item.amount++
+            if(item.goodsNum >= item.stock) {
+                Toast('超出最大购买限制');
+                return;
+            }
+            item.goodsNum++
         },
         reChoose(item){
             this.ischoosing = true;
             this.currentgood = item;
-            setTimeout(() => {
-                this.$refs.shopcart.choosing = true;
-            },20)
         },
-        editFinish(){
+        // 接收规格组件回调
+        editFinish(data){
+            this.currentgood.goodsPrice = +data.price;
+            this.currentgood.stock = data.stock;
+            this.currentgood.specName = data.choosedType;
+            this.currentgood.goodsNum = data.amount;
+            this.currentgood.specId = data.specId;
             this.ischoosing = false;
-            let str = `颜色:${this.currentColor},尺码:${this.currentSize}`
-            this.currentgood.currenttype = str;
         },
         editend(item){
+            let arr = item.items.filter(v => {
+                return v.isclick
+            });
+            let objs = {
+                userId : userInfo.userid,
+                shoppingCartList:[]
+            };
+            arr.forEach(v => {
+                let obj = {
+                    id: v.id,
+                    goodsNum: v.goodsNum,
+                    specId: v.specId,
+                    specName: v.specName,
+                    goodsPrice: v.goodsPrice
+                };
+                objs.shoppingCartList.push(obj)
+            });
+            let params = new URLSearchParams();
+                params.append('cartList',JSON.stringify(objs));
+            this.axios.post('/api/wsc/wscShoppingCart/updateCartGoods',params).then(res => {
+                this.goodList = this._initshopList(res.data);
+            })
             item.editing = false;
             item.items.forEach(v => {
                 v.editing = false
             });
         },
         deleteitem(a,b,i,ai){
-            a.items.splice(i,1)
+            let params = new URLSearchParams();
+                params.append('userId',userInfo.userid);
+                params.append('cartId',b.id);
+            this.axios.post('/api/wsc/wscShoppingCart/deleteCartGoods',params).then(res => {
+                if(!res.data.obj) {
+                    this.goodList = [];
+                    return;
+                };
+                this.goodList = this._initshopList(res.data.obj);
+                Toast('删除成功');
+            })
         },
         submit(){
-            console.log(this.choosingGoods)
+            if(this.choosingGoods.length < 1) {
+                Toast('至少选择一件商品')
+                return false;
+            };
+            let _arr = [],
+                _map = {};
+            // 抽取商家集合
+            this.choosingGoods.forEach(v => {
+                const key = v.shopId;
+                if(!_map[key]) {
+                    _map[key] = {
+                        shopId: key,
+                        shopName:v.shopName,
+                        payPrice: '',
+                        freight: '',
+                        orderGoods: []
+                    }
+                }
+            });
+            let arr = Object.values(_map);
+            arr.forEach(v => {
+                for(let i of this.choosingGoods) {
+                    if(i.shopId === v.shopId) {
+                        let obj = {
+                            id: i.id,
+                            goodsId: i.goodsId,
+                            goodsName: i.goodsName,
+                            goodsNum: i.goodsNum,
+                            goodsPrice: i.goodsPrice,
+                            specId: i.specId,
+                            specName: i.specName,
+                            goodsImg: i.goodsImg,
+                            freight:i.freight
+                        }
+                        v.orderGoods.push(obj)
+                    }
+                }
+            });
+            arr.forEach(v => {
+                let price = 0,
+                    freight = 0;
+                for(let i of v.orderGoods){
+                    price += i.goodsPrice * i.goodsNum;
+                    freight += Number(i.freight);
+                };
+                v.goodsPrice  = price;
+                v.payPrice = price + freight;
+                v.freight = freight;
+            });
+            this.orderList = arr;
+            this.confirm = true;
+        },
+        closeConfirm(){
+            this.confirm = false;
         },
         getTodetail(item){
             this.$router.push({
@@ -268,16 +414,19 @@ export default {
         }
     },
     watch:{
-        goodList:{
-            handler(){
-                this.goodList.forEach((v,i) => {
-                    if(v.items.length < 1){
-                        this.goodList.splice(i,1)
-                    };
-                })
-            },
-            deep:true
-        }
+        // goodList:{
+        //     handler(){
+        //         setTimeout(() => {
+        //             this.goodList.forEach((v,i) => {
+        //                 if(v.items.length < 1){
+        //                     this.goodList.splice(i,1)
+        //                 };
+        //             })
+        //         },20)
+                
+        //     },
+        //     deep:true
+        // }
     },
     computed:{
         AllTotalPrice(){
@@ -287,11 +436,11 @@ export default {
                     if(i.isclick === false){
                         continue;
                     } else {
-                        money += i.price * i.amount + i.freight;
+                        money += i.goodsPrice * i.goodsNum
                     }
                 }
             });
-            return money
+            return money.toFixed(2);
         },
         totalFreight(){
             let money = 0;
@@ -314,9 +463,9 @@ export default {
         choosingGoods(){
             let arr = [];
             this.goodList.forEach(v => {
-                    for(let i of v.items){
+                for(let i of v.items){
                     i.isclick == true ? arr.push(i) : ''
-                    }
+                }
             });
             return arr;
         },
@@ -327,7 +476,8 @@ export default {
 
 <style lang="stylus" scoped>
 .shopcart-wrap
-    height 90vh
+    position absolute
+    height 90%
     width 100%
     overflow hidden
     background #e7e7e7
@@ -341,10 +491,14 @@ export default {
         background #fc7aa5
         text-align center
         font-size 0.4rem
+        position absolute
+        top 0
     .scroll
-        flex 1
         height 100%
-        overflow hidden
+        overflow-x hidden
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
+        margin 1.1333rem 0
         .gooditem
             background #ffffff
             margin-bottom 0.1333rem
@@ -434,7 +588,7 @@ export default {
                                 display flex
                                 justify-content space-around
                                 .btn
-                                    width 0.8rem
+                                    flex 0 0 0.8rem
                                     height 0.8rem
                                     border 0.0133rem solid #e7e7e7
                                     line-height 0.8rem
@@ -443,6 +597,13 @@ export default {
                                     flex 1
                                     box-sizing border-box
                                     padding 0 0.1333rem
+                                    overflow hidden
+                                    display flex
+                                    font-size .4rem
+                                    border 1px solid #E7E7E7
+                                    margin 0 .1rem
+                                    align-items center
+                                    justify-content center
                                     input 
                                         border 1px solid #E7E7E7
                                         display block
@@ -479,10 +640,12 @@ export default {
     display flex
     background-color #ffffff
     height 1.1333rem
+    width 100%
     box-sizing border-box
     font-size 0.35rem
     border-top 0.0267rem solid #e7e7e7
-    align-items center
+    position absolute
+    bottom 0
     .allbtn
         width 2.1333rem
         height 100%
@@ -504,6 +667,7 @@ export default {
         box-sizing border-box
         padding 0 0.2rem
         font-size: 0.35rem
+        align-items center
         span 
             color #fc7aa5
     .resultbtn
@@ -523,6 +687,7 @@ export default {
     opacity 1
 
 .recommend
+    margin-bottom 3vh
     .title
         height 1.2rem
         background #fff
@@ -541,4 +706,33 @@ export default {
             background #fc7aa5
     .content
         padding 0.1rem
+
+.empty
+    width 100%
+    height 8rem
+    background #e7e7e7
+    position relative
+    .empty-content
+        position absolute
+        width 3.8rem
+        left 50%
+        top 50%
+        text-align center
+        transform translate(-50%,-50%)
+        img
+            width 100%
+            height 2.5rem
+        .desc
+            color #989898
+            font-size .35rem
+            margin .2rem 0
+        .btn
+            width 75%
+            font-size .35rem
+            text-align center
+            display inline-block
+            padding .15rem 0
+            background #fc7aa5
+            color #fff
+            border-radius 0.625rem
 </style>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="./axios.min.js"></script>
+  <link rel='stylesheet' href='./reset.css'></link>
+  <style>
+    .mask {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      left: 0;
+      top: 0;
+      background: #7f78a7e6
+    }
+
+    .mask img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 50px;
+      height: 50px;
+      transform: translate3d(-50%, -50%, 0);
+    }
+
+  </style>
+</head>
+
+<body>
+  <div>
+    <div class="mask">
+      <img src="./loading.gif" alt="">
+    </div>
+  </div>
+  <script>
+    const sign = JSON.parse(sessionStorage.getItem('isShare')),
+          path = sessionStorage.getItem('path');
+    let wxConfig = {
+        appid: "wx8a2df9136c4a762a",
+        redirect_uri: location.href,
+        spaUrl: `${location.origin}/weixin/index.html`,
+        shareUrl: path
+    };   
+    let urlSearch = new URLSearchParams(location.search);
+    // if (!JSON.parse(sessionStorage.getItem('isLogin'))) {
+    if (!urlSearch.has("code")) {
+        var state = Date.parse(new Date()),
+        url =
+            `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${wxConfig.appid}&redirect_uri=${encodeURIComponent(
+                `${wxConfig.redirect_uri}`
+              )}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+        location.href = url;
+    } else {
+      const code = urlSearch.get("code"),
+            time = new Date(urlSearch.get("state")).toLocaleString();
+            let data = new URLSearchParams();
+            data.append('code',code)
+      axios.post(`/api/wsc/user/getUserByCode`,data)
+        .then(res => {
+          let obj = {
+            userid: res.data.obj.id,
+            openid: res.data.obj.openid,
+            nickName: res.data.obj.nikeName,
+            avatar: res.data.obj.img,
+            sex: res.data.obj.sex === '1' ? '男' : '女'
+          };
+          sessionStorage.setItem("userInfo", JSON.stringify(obj));
+          sessionStorage.setItem("isLogin", true);
+          location.href = sign ? wxConfig.shareUrl  :  wxConfig.spaUrl;
+        }).catch(res => {
+        });
+    }
+    // } else {
+    //     window.href = wxConfig.spaUrl
+    // }
+
+  </script>
+</body>
+
+</html>

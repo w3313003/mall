@@ -12,7 +12,7 @@
                     收货人
                 </div>
                 <div class='value'>
-                    <input type="text" v-model='addressInfo.name' placeholder="请输入收货人姓名">
+                    <input type="text" v-model='addressInfo.consignee' placeholder="请输入收货人姓名">
                 </div>
             </div>
             <div class='item'>
@@ -20,7 +20,7 @@
                     联系号码
                 </div>
                 <div class='value'>
-                    <input type="number" v-model='addressInfo.phone' placeholder="请输入手机号码" maxlength="11" >
+                    <input type="number" v-model='addressInfo.phoneNum' placeholder="请输入手机号码" maxlength="11" >
                 </div>
             </div>
             <div class='item'>
@@ -42,14 +42,14 @@
                 </div>
             </div>
             <div class='item'>
-                <textarea name="" id="" placeholder="请输入详细地址" v-model='DetailAdress'>
+                <textarea name="" id="" placeholder="请输入详细地址" v-model.trim='DetailAdress'>
 
                 </textarea>
             </div>
             <div class='item'>
                 <div class='key'>设为默认地址</div>
                 <div class='value' style="transform: scale(0.9);">
-                    <mt-switch v-model='addressInfo.default'>
+                    <mt-switch v-model='addressInfo.isDefault'>
 
                     </mt-switch>
                 </div>
@@ -67,31 +67,43 @@
 import { provinceList,cityList,areaList } from 'common/util'
 import cityPicker from 'common/city-picker'
 import { Switch } from 'mint-ui'
-
+import { Toast } from 'mint-ui'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
   export default {
     name: '',
     components: {
       cityPicker,
       'mt-switch': Switch
     },
-    created(){
-        console.log(1)
-        console.log(this.addressInfo)
-    },
+    
     props: {
         addressInfo:{
             type:Object,
             default() {
                 return {}
             }
+        },
+        isADefault:false,
+        isNew:{
+            type : Boolean,
+            default : false
         }
+    },
+    computed : {
+    },
+    created() {
+        console.log(this.isADefault);
+        if(this.isADefault) {
+            this.addressInfo.isDefault = true;
+        };
     },
     data () {
       return {
           area:[provinceList, cityList, areaList],
           startIndex:[0, 0, 0],
           carea:'',
-          DetailAdress:''
+          DetailAdress:'',
+          isDefault:true
       }
     },
     computed:{
@@ -103,12 +115,9 @@ import { Switch } from 'mint-ui'
                 for (let i of this.carea){
                     str += `${i},`
                 };
-                return str;
+                return str.substring(0,str.length - 1);
             }
         }
-    },
-    created() {
-
     },
     methods: {
         showPicker(){
@@ -117,14 +126,75 @@ import { Switch } from 'mint-ui'
         handleSelect(arg){
             this.carea = [...arg[2]];
         },
-        confirm(){
-            let data = {
-                name  : this.addressInfo.name,
-                phone : this.addressInfo.phone,
-                address :`${this.currentArea}${this.DetailAdress}`.replace(/\,/g,''),
-                default : this.addressInfo.default,
+        confirm() {
+            let reg = /^1[3|4|5|7|8|9]\d{9}/;
+            if(!reg.test(this.addressInfo.phoneNum)){
+                Toast('手机号码格式错误');
+                return false;
             };
-            this.$emit('confirm',data);
+            if(!this.addressInfo.consignee || this.addressInfo.consignee.length <= 1){
+                Toast('请输入收货人姓名');
+                return false;
+            }
+            if(this.DetailAdress.length < 5){
+                Toast('详细地址最少需要5个字符');
+                return false;
+            };
+            if(!this.currentArea || this.currentArea.length < 10){
+                Toast('请选择所在地区');
+                return false;
+            };
+            
+            let data = {
+                consignee  : this.addressInfo.consignee,
+                phoneNum : this.addressInfo.phoneNum,
+                address :`${this.currentArea}${this.DetailAdress}`.replace(/\,/g,''),
+                state : this.addressInfo.isDefault ? '0' : '1',
+                Id:this.addressInfo.id
+            };
+            if(this.isNew){
+                let params = new URLSearchParams();
+                params.append('consignee',this.addressInfo.consignee);
+                params.append('phoneNum',this.addressInfo.phoneNum);
+                params.append('address',`${this.currentArea}${this.DetailAdress}`.replace(/\,/g,''));
+                params.append('state',this.addressInfo.isDefault ? '0' : '1');
+                params.append('userId',userInfo.userid);
+                this.axios.post('/api/wsc/user/editAddress',params).then(res => {
+                    if(res.data.code === 'success'){
+                        Toast('设置成功');
+                        if(this.isADefault) {
+                            this.$emit('success',data)
+                        } else {
+                            setTimeout(() => {
+                                location.reload();
+                            },1000)
+                        }
+                    }
+                })
+            } else {
+                let params = new URLSearchParams();
+                params.append('consignee',this.addressInfo.consignee);
+                params.append('phoneNum',this.addressInfo.phoneNum);
+                params.append('address',`${this.currentArea}${this.DetailAdress}`.replace(/\,/g,''));
+                params.append('state',this.addressInfo.isDefault ? '0' : '1');
+                params.append('Id',this.addressInfo.id);
+                params.append('userId',userInfo.userid);
+                this.axios.post('/api/wsc/user/editAddress',params).then(res => {
+                    if(res.data.code === 'success'){
+                        Toast('修改成功');
+                        if(this.isADefault) {
+                            this.$emit('success',data)
+                        } else {
+                            setTimeout(() => {
+                                location.reload();
+                            },1000)
+                        }
+                        
+                    }
+                });
+            }
+            console.log(data)
+            // this.$emit('confirm',data);
         },
         close(){
             this.$emit('close')

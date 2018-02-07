@@ -1,6 +1,6 @@
 <template>
     <div class='pc-wrap'>
-        <scroll class='scroll'>
+    <div class='scroll' ref="scroll">
         <div>
         <div class='header'>
             <div class='title'>
@@ -9,20 +9,20 @@
             <div class='h-content'>
                 <div class='l'>
                     <div class='img-wrap'>
-                        <img src='../.././assets/img/avatar.png'>
+                        <img :src='userInfo.avatar'>
                     </div>
                     <div class='nickname'>
-                        {{userInfo.nickname}}
+                        {{userInfo.nickName}}
                     </div>
                 </div>
                 <div class='r'>
                     <div class='t'>
-                        <svg class="icon fenlei" aria-hidden="true">
+                        <!-- <svg class="icon fenlei" aria-hidden="true">
                             <use xlink:href="#icon-iconcopy"></use>
                         </svg>
                         <svg class="icon fenlei" aria-hidden="true">
                             <use xlink:href="#icon-duihuakuang"></use>
-                        </svg>  
+                        </svg>   -->
                     </div>
                     <div class='b' @click='infoDetail'>
                         个人信息
@@ -35,15 +35,15 @@
                 <div class='l'>
                     我的订单
                 </div>
-                <div class="r">
+                <router-link to='/order' class="r" tag='div'>
                     查看全部订单
                     <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-jiantou"></use>
                     </svg>    
-                </div> 
+                </router-link> 
             </div>
             <div class='content'>
-                <div class='item'>
+                <div class='item' data-id='0' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -51,7 +51,7 @@
                         待付款
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='1' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon2.png" alt="">
                     </div>
@@ -59,7 +59,7 @@
                         待发货
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='2' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -67,7 +67,7 @@
                         待收货
                     </div>
                 </div>
-                <div class='item'>
+                <div class='item' data-id='3' @click='goOrderCenter'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
@@ -75,19 +75,19 @@
                         待评价
                     </div>
                 </div>
-                <div class='item'>
+                <router-link to='/returnGoods' class='item' tag="div">
                     <div class='img-wrap'>
                         <img src="../.././assets/img/o_icon1.png" alt="">
                     </div>
                     <div>
                         退换货
                     </div>
-                </div>
+                </router-link>
             </div>
         </div>
         <div class='ul-content'>
             <ul>
-                <li>
+                <router-link to='/personalcenter/activities' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_08.png" alt="">
                     </div>
@@ -97,8 +97,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/collection' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_09.png" alt="">
                     </div>
@@ -108,8 +108,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/coupon' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_10.png" alt="">
                     </div>
@@ -119,8 +119,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/my_comment' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_11.png" alt="">
                     </div>
@@ -130,8 +130,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/myTopic' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_12.png" alt="">
                     </div>
@@ -141,8 +141,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/help' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_13.png" alt="">
                     </div>
@@ -152,8 +152,8 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
-                <li>
+                </router-link>
+                <router-link to='/personalcenter/feedback' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_14.png" alt="">
                     </div>
@@ -163,24 +163,36 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
+                </router-link>
             </ul>
         </div>
         </div>
-        </scroll>
+    </div>
     </div>
 </template>
 
 <script>
-import { userdata } from 'common/mock'
-import scroll from 'common/scroll'
-
+import scroll from 'common/scroll';
+import wx from 'weixin-js-sdk';
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
-    created(){
-        this.axios.get("http://g.cn").then(res => {
-            this.userInfo = res.data;
-        })
+    created() {
+        this.userInfo = userInfo;
+        // let data = new URLSearchParams();
+        // data.append('userId','91e3acaa614f4c97a779426d61d1de9e');
+        // this.axios.post("/api/wsc/user/userDeatil",data).then(res => {
+        //     console.log(res.data.obj);
+        //     let obj = {
+        //         userid : res.data.obj.id,
+        //         openid : res.data.obj.openid,
+        //         nickName : res.data.obj.nikeName,
+        //         avatar : res.data.obj.img,
+        //         sex : res.data.obj.sex === '1' ? '男' : '女'
+        //     };
+        //     sessionStorage.setItem('userInfo',JSON.stringify(obj));
+        //     this.userInfo = obj;
+        // });
     },
     data(){
         return {
@@ -195,6 +207,15 @@ export default {
             this.$router.push({
                 path:'/personalcenter/personalinfo'
             })
+        },
+        goOrderCenter(e){
+            const index =  +e.currentTarget.dataset.id + 1;
+            this.$router.push({
+                name:'order',
+                params:{
+                    index,
+                }
+            })
         }
     }
 }
@@ -203,15 +224,19 @@ export default {
 <style lang="stylus" scoped>
 .pc-wrap
     background-color #e7e7e7
-    height 90vh
     overflow hidden
+    position absolute
+    width 100%
+    height 90%
     .scroll
         height 100%
-        overflow hidden
+        overflow-x hidden
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
 
 .header
     height 4rem
-    background-color #fc7aa5
+    background: linear-gradient(0deg, #fc7aa5, #f9acc5)
     display flex
     flex-direction column
     justify-content space-between
@@ -245,6 +270,8 @@ export default {
         .r
             width 2.8rem
             height 2.4rem
+            display flex
+            align-items center
             .t
                 box-sizing border-box
                 padding 0 0.3rem
@@ -256,6 +283,7 @@ export default {
             .b
                 color #fc7aa5
                 margin 0.4rem 0
+                width 100%
                 height 0.7333rem
                 line-height 0.7333rem
                 font-size 0.3333rem
@@ -267,7 +295,7 @@ export default {
     height 3.6rem
     display flex
     flex-direction column
-    border-bottom 1px solid #666
+    border-bottom 1px solid #888
     .title
         height 1.0667rem
         line-height 1.0667rem
@@ -275,7 +303,7 @@ export default {
         padding 0 0.2rem
         display flex
         justify-content space-between
-        border-bottom 0.0133rem solid #e7e7e7
+        border-bottom 0.0133rem solid #888
         .l
             font-size 0.38rem
         .r
@@ -288,7 +316,7 @@ export default {
         display flex
         justify-content space-between
         .item
-            width 80px
+            width 1.0667rem
             box-sizing border-box
             padding 0.4rem 0
             display flex
@@ -310,7 +338,7 @@ export default {
         align-items center
         box-sizing border-box
         padding 0 0.2rem
-        border-bottom 1px solid #666
+        border-bottom 1px solid #888
         justify-content space-between
         div
             font-size 0.35rem

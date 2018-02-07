@@ -2,22 +2,22 @@
     <div class='good-wrap'>
         <div v-for='(item,index) in goodList' :key="index" class='gooditem' @click='getTodetail(item)'>
                 <div class='img-wrap'>
-                    <img src=".././assets/img/goodimg.png" alt="">
+                    <img :src="item.imgMain" alt="">
                 </div>
                 <div class='content'>
                     <div class='title'>
-                        {{item.title}}
+                        {{item.name}}
                     </div>
                     <div class='price-detail'>
                         <div class='price'>
                             ￥
-                            <span>{{item.price}}</span>
+                            <span>{{item.sellingPrice}}</span>
                         </div>
                         <div class='oldprice'>
-                            ￥{{item.oldprice}}
+                            ￥{{item.marketPrice}}
                         </div>
                         <div class='acount'>
-                            月销{{item.count}}件
+                            月销{{item.xiaoshou_num}}件
                         </div>
                     </div>
                 </div>
@@ -45,6 +45,7 @@
             border-radius 10px
             img 
                 width 100%
+                height 100%
     .content
         font-size 0.3333rem
         margin 0.1333rem 0
@@ -72,8 +73,6 @@
 </style>
 
 <script>
-import { mapMutations } from 'vuex'
-import { mapGetters } from 'vuex'
 
 export default {
     props:{
@@ -84,20 +83,12 @@ export default {
             }
         }
     },
-    computed:{
-        ...mapGetters([
-            'get_good_detailshow'
-        ])
-    },
     methods:{
         getTodetail(item){
-            this.$emit('getTodetail',item);
-            this.setgood(item);
-        },
-        ...mapMutations({
-            setgood:'SET_CURRENT_GOOD',
-            setGoodDetailShow: 'SET_GOODDETAIL_SHOW'
-        })
+            this.$router.push({
+                path : `/good/${item.id}`
+            });
+        }
     }
 }
 </script>
