@@ -1,18 +1,17 @@
 /*
  * @Author: ZhaoJie 
  * @Date: 2017-11-21 16:55:21 
- * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-25 17:55:21
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2018-01-04 17:11:01
  */
 
 <template>
     <transition name='mask'>
-        <div class='mask' v-show='choosing' @click='close'>
+        <div class='mask'  @click='close'>
         <transition name='choosing'>
-            <div class='choosetype' v-show='choosing' @click.stop='cancelBubble'>
+            <div class='choosetype'  @click.stop='cancelBubble'>
                 <div class='header'>
                     <div class='img-wrap'>
-                        <!-- <img :src='img' alt=""> -->
                         <img v-lazy='goodInfo.imgMain' alt="">
                     </div>
                     <div class='disc'>
@@ -20,7 +19,7 @@
                             ￥<span>{{totalPrice}}</span>
                         </div>
                         <div class='Allcount'>
-                            库存 : {{goodStock}}
+                            库存 : {{ goodStock }}
                         </div>
                         <div class='currenttype'>
                             已选: 
@@ -41,7 +40,8 @@
                 <div class='block choose_block1' v-for='(value,key,index) in typeMap' :key="index">
                     <div class='title'>{{key}}:</div>
                     <div class='detail-type'>
-                        <div class='item' :class='{"active": choosed[items.type] && choosed[items.type]["index"] == indexs }' @click.stop='choose(items,indexs)' v-for='(items,indexs) in value' :key="indexs">
+                        <div class='item' :class='{"active": choosed[items.type] && choosed[items.type]["index"] === indexs }' 
+                                            @click.stop='choose(items,indexs)' v-for='(items,indexs) in value' :key="indexs">
                            <span>
                                {{items.name}}    
                             </span> 
@@ -105,9 +105,11 @@ export default {
     props:{
         goodInfo:{
             type:Object,
-            default(){
-                return {};
-            }
+            default: () => {}
+        },
+        goodsNum:{
+            type: Number,
+            default: 0
         }
     },
     computed:{
@@ -135,15 +137,15 @@ export default {
                           reverseQueryStr = arr.reverse().join(',');
                     this.goodInfo.goodsPrices.forEach(v => {
                         if(v.specChileId === queryStr || v.specChileId === reverseQueryStr){
-                            this.goodsPrice = v.price;
-                            this.goodStock= v.stock;
+                            this.goodsPrice = v.price - this.goodInfo.discount;
+                            this.goodStock= Number(v.stock);
                             this.specChileId = v.specChileId
                         };
                     })
                 }
             },
             deep:true
-        }
+        },
     },
     data(){
         return {
@@ -158,9 +160,15 @@ export default {
         }
     },
     created(){
-        console.log(this.goodInfo)
+        console.log('areated');
+        if(!this.goodInfo.discount) {
+            this.$set(this.goodInfo,'discount',0)
+        }
         this.currentType = this.goodInfo.goodsPrices[0].specChileId.split(',');
         this._formatGoodsTypeList(this.goodInfo);
+    },
+    activated(){
+        console.log('active')
     },
     methods:{
         _formatGoodsTypeList(arr){
@@ -179,7 +187,7 @@ export default {
             });
         },
         close(){
-           this.choosing = false
+            this.$emit('close');
         },
         less(){
             if(this.amount <= 1){
@@ -187,7 +195,6 @@ export default {
                 return;
             };
             this.amount --;
-            this.$emit('less')
         },
         add(){
             if(this.amount >= this.goodStock ){
@@ -195,7 +202,6 @@ export default {
                 return ;
             };
             this.amount++;
-            this.$emit('add');
         },
         choose(item,index){
             const key = item.type;

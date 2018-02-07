@@ -7,58 +7,78 @@
             </svg>
         </div>
         <div class="gooddetail">
-            <img src="../.././assets/img/good-item.png" alt="">
+            <img :src="orderInfo.goodsImg" alt="">
             <div class='info'>
-                <div class="t">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
-                <div class="m">颜色颜色颜色颜色颜色</div>
+                <div class="ts">{{orderInfo.goodsName}}</div>
+                <div class="m">
+                    {{orderInfo.specName}}
+                </div>
                 <div class="b">
-                    <span>￥66.66</span>
-                    <span>X2</span>
+                    <span>￥
+                        {{orderInfo.goodsPrice}}
+                    </span>
+                    <span>X
+                        {{orderInfo.goodsNum}}
+                    </span>
                 </div>
             </div>
         </div>
-        <div class="returnblock">
-            <div class='item'>
-                <div>选择颜色/尺码:</div>
-                <div>尺码170/M</div>
-            </div>
+        <div class="returnblock" v-if='orderInfo.state == 1'>
             <div class="item">
                 <div>换货原因:</div>
-                <div>尺码不合适</div>
+                <div>{{orderInfo.remarks}}</div>
             </div>
         </div>
-        <div class="returnblock">
+        <div class="returnblock" v-else>
             <div class="item">
                 <div>退款原因:</div>
-                <div>尺码不合适</div>
+                <div>
+                    {{orderInfo.remarks}}
+                </div>
             </div>
-            <div class='imgblock'>
+            <div class='imgblock' v-if="imgs && imgs.length >= 1">
                 <div>上传凭证</div>
                 <div class='img'>
-                    <img src="../.././assets/img/banner.png" alt="">
-                                        <img src="../.././assets/img/banner.png" alt="">
-                    <img src="../.././assets/img/banner.png" alt="">
-
+                    <img :src="v" alt="" v-for="(v,i) in imgs" :key="i">
                 </div>
             </div>
         </div>
         <div class='seller-address'>
-            <div class="item">商家地址:合肥合肥分恢复和恢复和合肥合肥</div>
-            <div class="item">收货人:男枪</div>
-            <div class="item">电话:156654233</div>
+            <div class="item">商家地址:{{orderInfo.address}}</div>
+            <div class="item">收货人:{{orderInfo.consignee}}</div>
+            <div class="item">电话:
+                {{orderInfo.tel}}
+            </div>
         </div>
         <div class='t'>
-            <div class='wx'>商家微信:21312312</div>
-            <div class="qq">商家qq:4545445</div>
+            <div class='wx' v-if="orderInfo.wx">商家微信:{{orderInfo.wx}}</div>
+            <div class="qq">商家qq:{{orderInfo.qq}}</div>
         </div>
     </div>
 </template>
 
 <script>
 export default {
+    data() {
+        return {
+            orderInfo: {},
+            imgs: []
+        }
+    },
+    activated() {
+        let id = this.$route.params.id;
+        this.axios.get(`/api/wsc/user/getBackGoodsDetail?id=${id}`).then(res => {
+            this.orderInfo = res.data.obj;
+            if(this.orderInfo.proof1) {
+                for(let i in this.orderInfo){
+                    /proof/.exec(i) ? this.imgs.push(this.orderInfo[i]) : ''; 
+                }
+            };
+        })
+    },  
     methods:{
         back(){
-
+            this.$router.back();
         }
     }
 }

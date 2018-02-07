@@ -14,13 +14,13 @@
         </div>
         <div class='msg'>
             <div class='order-info'>
-                <p>收件人:sad啥事大时代撒打算</p>
-                <p>地址:撒开了的骄傲时空的吉安市侃大山</p>
-                <p>实付款:￥66.00</p>
+                <p>收件人:{{consignee}}</p>
+                <p>地址:{{address}}</p>
+                <p>实付款:￥{{totalMoney}}</p>
             </div>
-            <div class='btn'>查看订单</div>
+            <div class='btn' @click="toOrder">查看订单</div>
             <div class='tips'>
-                下单后下单后下单后下单后下单后下单后下单后下单后下单后下单后下单后下单后
+                {{tips}}
             </div>
         </div>
     </div>
@@ -28,9 +28,35 @@
 
 <script>
 export default {
+    props:{
+        consignee: {
+            type: String,
+            default :''
+        },
+        address: {
+            type: String,
+            default: ''
+        },
+        totalMoney: ''
+    },
+    created() {
+        console.log(this.consignee)
+    },
+    data() {
+        return {
+            tips: '1233',
+        }
+    },
     methods:{
         back(){
-            this.$emit('back')
+            this.$router.push({
+                path: '/index'
+            })
+        },
+        toOrder() {
+            this.$router.push({
+                path:'/order'
+            })
         }
     }
 }
@@ -41,7 +67,7 @@ export default {
     width 100%
     height 100vh
     overflow hidden
-    z-index 9999
+    z-index 99999
     position fixed
     left 0 
     top 0

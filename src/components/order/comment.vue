@@ -61,9 +61,9 @@
             <div class='l'>
                 <img src="../.././assets/img/radio.png" v-if='anonymous' alt="">
                 <img src="../.././assets/img/hradio.png" v-else alt="">
-                <div  @click='anonymous=!anonymous'>匿名评价</div>
+                <div @click='anonymous=!anonymous'>匿名评价</div>
             </div>
-            <div class='r' @click='close'>
+            <div class='r' @click='send'>
                 发表评价    
             </div>
         </div>
@@ -71,7 +71,20 @@
 </template>
 
 <script>
+import { Toast, Indicator } from 'mint-ui';
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 export default{
+    props:{
+        goodsInfo:{},
+        orderId:{
+            type: String,
+            default: ''
+        }
+    },
+    created(){
+        console.log(this.goodsInfo);
+        console.log(this.orderId)
+    },
     data(){
         return {
             content:'',
@@ -97,16 +110,40 @@ export default{
         express(index){
             this.expressPonit = index;
         },
+        send(){
+            Indicator.open({
+              text: '加载中...',
+              spinnerType: 'double-bounce'
+            });
+            let obj = {
+                userId: userInfo.userid,
+                orderId: this.orderId,
+                comments:[{
+                    isNewRecord:true,
+                    gooodsId:this.goodsInfo.goodsId,
+                    shopId: this.goodsInfo.shopId,
+                    content: this.content,
+                    describ: this.discPoint + 1,
+                    attitude: this.serversPonit + 1,
+                    logistics: this.expressPonit + 1,
+                    img1: this.imgs[0],
+                    img2: this.imgs[1],
+                    img3: this.imgs[2],
+                }]
+            };
+            console.log(obj)
+            let data = new URLSearchParams();
+                data.append('commentInfo',JSON.stringify(obj));
+            this.axios.post('/api/goodsComment/addGoosComment',data).then(res => {
+                    Indicator.close();
+                    Toast('评论成功');
+                    setTimeout(() => {
+                        this.close();
+                    },1000)
+            })          
+        },
         close(){
-            let data = {
-                imgs:this.imgs,
-                content : this.content,
-                discPoint : this.discPoint,
-                serversPonit : this.serversPonit,
-                expressPonit : this.expressPonit,
-                isanonymous:this.anonymous
-            }
-            this.$emit('close',data)
+            this.$emit('close')
         },
         fileclick(){
             this.$refs.files.click();
@@ -120,7 +157,7 @@ export default{
               Toast("文件类型错误");
               return;
             };
-            if(file.size > 2000000){
+            if(file.size > 1000000){
                 Toast('文件尺寸过大');
                 return ;
             }
@@ -152,6 +189,7 @@ export default{
     background #e7e7e7
     display flex
     flex-direction column
+    z-index 999
     .title,.bottom
         width 100%
         flex 0 0 1.1333rem

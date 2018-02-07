@@ -6,15 +6,21 @@
     </div>
     <div class='content'>
             <swiper class='item male' v-show='male' :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
-                <swiper-slide v-for='(item,index) in maleList' :key="index">
-                    <div class='btn'>
+                <swiper-slide v-for='(item,index) in maleList' :key="index" >
+                    <div class='btn' @click='zan(item)' v-if='!item.cId'>
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-aixin"></use>
                         </svg>
                         点赞
                     </div>
+                    <div class='btn' v-else>
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-aixin1-copy"></use>
+                        </svg>
+                        已点赞
+                    </div>
                     <img v-lazy="item.imgMain" alt="">
-                    <div class='title'>
+                    <div class='title' @click='toDetail(item)'>
                         <div class='t'>{{item.name}}</div>
                         <div class='b'>
                             ￥<span>{{item.sellingPrice}}</span><span>{{item.marketPrice}}</span>
@@ -23,15 +29,21 @@
                 </swiper-slide>
             </swiper>
             <swiper class='item fmale' v-if='!male' :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
-                <swiper-slide v-for='(item,index) in fmaleList' :key="index">
-                    <div class='btn'>
+                <swiper-slide v-for='(item,index) in fmaleList' :key="index" >
+                    <div class='btn' @click='zan(item)' v-if='!item.cId'>
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-aixin"></use>
                         </svg>
                         点赞
                     </div>
+                    <div class='btn' v-else>
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-aixin"></use>
+                        </svg>
+                        已点赞
+                    </div>
                     <img v-lazy="item.imgMain" alt="">
-                    <div class='title'>
+                    <div class='title' @click='toDetail(item)'>
                         <div class='t'>{{item.name}}</div>
                         <div class='b'>
                             ￥<span>{{item.sellingPrice}}</span><span>{{item.marketPrice}}</span>
@@ -45,22 +57,17 @@
 
 <script>
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
     components:{
         swiper,
         swiperSlide,
     },
     created(){
-        this.axios.get('/api/activity/getActivityList?hyhType=1').then(res => {
-
-            this.maleList = res.data.obj;
-            console.log(this.maleList)
-        });
-        this.axios.get('/api/activity/getActivityList?hyhType=2').then(res => {
-
-            this.fmaleList = res.data.obj;
-            console.log(this.fmaleList)
+        this.axios.get(`/api/activity/getActivityList?type=4&userId=${userInfo.userid}`).then(res => {
+            res.data.obj.forEach(v => {
+                v.hyhType === '男生' ? this.maleList.push(v) : this.fmaleList.push(v);
+            })
         });
     },
     data(){
@@ -76,6 +83,22 @@ export default {
         }
     },
     methods:{
+        zan(item) {
+            let data = new URLSearchParams();
+                data.append('goodsId',item.id);
+                data.append('userId',userInfo.userid)
+            this.axios.post('/api/wsc/goods/zanGoods',data).then(res => {
+                this.$set(item,'cId','9')
+            })
+        },
+        toDetail(item) {
+            this.$router.push({
+                path:`/good/${item.id}`
+            })
+        },
+        goShopping(item) {
+            
+        }
     }
 }
 </script>

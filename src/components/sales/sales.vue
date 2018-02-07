@@ -1,8 +1,8 @@
 <template>
   <div class='sales-wrap'>
-            <scroll class='scroll' :data='goodList'>
+        <div class='scroll'>
             <div class='good-wrap'>
-                <div class='good' v-for='(item,index) in goodList' :key="index">
+                <div class='good' @click='goToDetail(item)' v-for='(item,index) in goodList' :key="index">
                     <div class='img-wrap'>
                         <img v-lazy='item.imgMain'>
                     </div>
@@ -31,7 +31,7 @@
                     </div>
                 </div>
             </div>
-        </scroll>
+        </div>
   </div>
 </template>
 
@@ -41,14 +41,18 @@ export default {
     components:{
         scroll
     },
-    created(){
+    activated(){
         this.axios.get('/api/activity/getActivityList?type=3').then(res => {
-            res.data.obj.forEach(v => {
-                v.imgMain = `http://10.0.0.22:8181/${v.imgMain}`
-            });
             this.goodList = res.data.obj;
             console.log(this.goodList)
         })
+    },
+    methods: {
+        goToDetail(item) {
+            this.$router.push({
+                path:`/good/${item.id}`
+            })
+        }
     },
     data(){
         return {
@@ -62,14 +66,17 @@ export default {
 <style lang="stylus" scoped>
 .sales-wrap
     position fixed
-    height 100vh
+    height 100%
     width  100%
     overflow hidden
     z-index 999
     background #e7e7e7
     .scroll
         height 100%
-        overflow hidden
+        overflow-x hidden;
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
+
         .good-wrap
             box-sizing border-box
             padding 0.2rem

@@ -1,6 +1,6 @@
 <template>
     <div class='pc-wrap'>
-        <scroll class='scroll'>
+    <div class='scroll' ref="scroll">
         <div>
         <div class='header'>
             <div class='title'>
@@ -17,12 +17,12 @@
                 </div>
                 <div class='r'>
                     <div class='t'>
-                        <svg class="icon fenlei" aria-hidden="true">
+                        <!-- <svg class="icon fenlei" aria-hidden="true">
                             <use xlink:href="#icon-iconcopy"></use>
                         </svg>
                         <svg class="icon fenlei" aria-hidden="true">
                             <use xlink:href="#icon-duihuakuang"></use>
-                        </svg>  
+                        </svg>   -->
                     </div>
                     <div class='b' @click='infoDetail'>
                         个人信息
@@ -131,7 +131,7 @@
                         </svg>
                     </div>
                 </router-link>
-                <li>
+                <router-link to='/personalcenter/myTopic' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_12.png" alt="">
                     </div>
@@ -141,7 +141,7 @@
                             <use xlink:href="#icon-jiantou"></use>
                         </svg>
                     </div>
-                </li>
+                </router-link>
                 <router-link to='/personalcenter/help' tag='li'>
                     <div class='img-wrap'>
                         <img src="../.././assets/img/me_icon_13.png" alt="">
@@ -167,33 +167,32 @@
             </ul>
         </div>
         </div>
-        </scroll>
+    </div>
     </div>
 </template>
 
 <script>
-import scroll from 'common/scroll'
-import wx from 'weixin-js-sdk'
+import scroll from 'common/scroll';
+import wx from 'weixin-js-sdk';
 const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
-    created(){
-        // let userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        // this.userInfo = userInfo;
-        let data = new URLSearchParams();
-        data.append('userId','91e3acaa614f4c97a779426d61d1de9e');
-        this.axios.post("/api/wsc/user/userDeatil",data).then(res => {
-            console.log(res.data.obj);
-            let obj = {
-                userid : res.data.obj.id,
-                openid : res.data.obj.openid,
-                nickName : res.data.obj.nikeName,
-                avatar : res.data.obj.img,
-                sex : res.data.obj.sex === '1' ? '男' : '女'
-            };
-            sessionStorage.setItem('userInfo',JSON.stringify(obj));
-            this.userInfo = obj;
-        });
+    created() {
+        this.userInfo = userInfo;
+        // let data = new URLSearchParams();
+        // data.append('userId','91e3acaa614f4c97a779426d61d1de9e');
+        // this.axios.post("/api/wsc/user/userDeatil",data).then(res => {
+        //     console.log(res.data.obj);
+        //     let obj = {
+        //         userid : res.data.obj.id,
+        //         openid : res.data.obj.openid,
+        //         nickName : res.data.obj.nikeName,
+        //         avatar : res.data.obj.img,
+        //         sex : res.data.obj.sex === '1' ? '男' : '女'
+        //     };
+        //     sessionStorage.setItem('userInfo',JSON.stringify(obj));
+        //     this.userInfo = obj;
+        // });
     },
     data(){
         return {
@@ -215,7 +214,6 @@ export default {
                 name:'order',
                 params:{
                     index,
-                    Singer
                 }
             })
         }
@@ -226,11 +224,15 @@ export default {
 <style lang="stylus" scoped>
 .pc-wrap
     background-color #e7e7e7
-    height 90vh
     overflow hidden
+    position absolute
+    width 100%
+    height 90%
     .scroll
         height 100%
-        overflow hidden
+        overflow-x hidden
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
 
 .header
     height 4rem
@@ -268,6 +270,8 @@ export default {
         .r
             width 2.8rem
             height 2.4rem
+            display flex
+            align-items center
             .t
                 box-sizing border-box
                 padding 0 0.3rem
@@ -279,6 +283,7 @@ export default {
             .b
                 color #fc7aa5
                 margin 0.4rem 0
+                width 100%
                 height 0.7333rem
                 line-height 0.7333rem
                 font-size 0.3333rem
@@ -290,7 +295,7 @@ export default {
     height 3.6rem
     display flex
     flex-direction column
-    border-bottom 1px solid #666
+    border-bottom 1px solid #888
     .title
         height 1.0667rem
         line-height 1.0667rem
@@ -298,7 +303,7 @@ export default {
         padding 0 0.2rem
         display flex
         justify-content space-between
-        border-bottom 0.0133rem solid #e7e7e7
+        border-bottom 0.0133rem solid #888
         .l
             font-size 0.38rem
         .r
@@ -333,7 +338,7 @@ export default {
         align-items center
         box-sizing border-box
         padding 0 0.2rem
-        border-bottom 1px solid #666
+        border-bottom 1px solid #888
         justify-content space-between
         div
             font-size 0.35rem

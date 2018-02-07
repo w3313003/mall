@@ -2,11 +2,11 @@
     <div class="types">
         <div class='title'>
             商品分类    
-            <svg class="icon fenlei" aria-hidden="true">
+            <svg class="icon fenlei" aria-hidden="true" @click="back">
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>  
-        <div class='item'>
+        <div class='item' @click="toAll">
             <div>
                 全部商品
             </div>
@@ -14,38 +14,14 @@
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>
-        <div class='type'>
+        <div class='type' v-for="(v,i) of typeList" :key="i" @click='toType(v)'>
             <div class="item">
                 <div>
-                    外套
+                    {{v.commoditytype}}
                 </div>
                 <div class='btn'>
                     查看全部
                 </div>
-            </div>
-            <div class='detail'>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
-            </div>
-        </div>
-        <div class='type'>
-            <div class="item">
-                <div>
-                    裤装
-                </div>
-                <div class='btn'>
-                    查看全部
-                </div>
-            </div>
-            <div class='detail'>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
-                <div>西裤</div>
             </div>
         </div>
     </div>  
@@ -53,7 +29,35 @@
 
 <script>
 export default {
-  
+    data (){
+        return {
+            typeList: []
+        }
+    },
+    activated() {
+        this.axios.get(`/api/shop/shopCommoditytype?shopId=${this.$route.params.id}`).then(res => {
+            console.log(res.data);
+            this.typeList = res.data.obj
+        })
+    },
+    methods:{
+        back() {
+            this.$router.back();
+        },
+        toAll() {
+            this.$router.push({
+                path: `/seller/${this.$route.params.id}/all`
+            })
+        },
+        toType(item) {
+            this.$router.push({
+                path: `/seller/${item.id}/type`,
+                query:{
+                    type:item.commoditytype
+                }
+            });
+        }
+    }
 }
 </script>
 
@@ -64,7 +68,7 @@ export default {
     left 0
     width 100vw
     height 100vh
-    z-index 999
+    z-index 9999
     background #e7e7e7
     .title
         width 100%

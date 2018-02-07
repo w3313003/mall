@@ -26,6 +26,11 @@ const sofDetail = resolve => {
             resolve(module)
         })
     }
+const release = resolve => {
+        import ('@/components/sof/release').then(module => {
+            resolve(module)
+        })
+    }
     // end
 const shopcart = resolve => {
         import ('@/components/shopcart/shopcart').then(module => {
@@ -65,6 +70,21 @@ const my_coupon = resolve => {
 }
 const personalinfo = resolve => {
     import ('@/components/personalinfo/personalinfo').then(module => {
+        resolve(module)
+    })
+}
+const myTopic = resolve => {
+    import ('../components/personalcenter/myTopic').then(module => {
+        resolve(module)
+    })
+}
+const topicDetail = resolve => {
+    import ('../components/personalcenter/topicDetail').then(module => {
+        resolve(module)
+    })
+}
+const topicComment = resolve => {
+    import ('../components/personalcenter/topicComment').then(module => {
         resolve(module)
     })
 }
@@ -118,6 +138,11 @@ const dorm = resolve => {
         resolve(module)
     })
 }
+const dormTop = resolve => {
+    import ('@/components/index/dormType').then(module => {
+        resolve(module)
+    })
+}
 const fashion = resolve => {
     import ('@/components/index/fashion').then(module => {
         resolve(module)
@@ -128,6 +153,12 @@ const fDetail = resolve => {
         resolve(module)
     })
 }
+const fFeedBack = resolve => {
+    import ('@/components/index/fashionFeedBack').then(module => {
+        resolve(module)
+    })
+}
+
 const order = resolve => {
     import ('@/components/order/ordercenter').then(module => {
         resolve(module)
@@ -150,6 +181,22 @@ const seller = resolve => {
 }
 const sellerTypes = resolve => {
     import ('@/components/seller/sellerTypes').then(module => {
+        resolve(module)
+    })
+}
+const sellerType = resolve => {
+    import ('@/components/seller/type').then(module => {
+        resolve(module)
+    })
+}
+const sellerAll = resolve => {
+    import ('@/components/seller/sellerAll').then(module => {
+        resolve(module)
+    })
+}
+
+const sellerNew = resolve => {
+    import ('@/components/seller/new').then(module => {
         resolve(module)
     })
 }
@@ -196,7 +243,19 @@ const invite = resolve => {
     })
 }
 
+import success from '../common/success'
+
 import oauth from '@/components/oauth'
+
+import returnDetail from '@/components/returnGoods/returnDetail'
+
+import express from '@/components/order/express'
+
+import recruit from '@/components/index/recruit'
+
+import search from '@/components/index/search'
+
+import acDetail from '@/components/index/acDetail'
 
 Vue.use(Router)
 
@@ -207,6 +266,27 @@ export const router = new Router({
         {
             path : '/',
             redirect : 'index',
+        },
+        {
+            path: '/search',
+            component: search
+        },
+        {
+            path: '/acDetail/:id',
+            component: acDetail
+        },
+        {
+            path: '/express',
+            component: express
+        },
+        {
+            path: '/recruit',
+            component: recruit
+        },
+        {
+            path : '/success',
+            name : 'success',
+            component : success
         },
         {
             path: '/test/oauth',
@@ -233,6 +313,9 @@ export const router = new Router({
             path: '/shopcart',
             name: 'shopcart',
             component: shopcart
+        },{
+            path: '/sof/release/:id',
+            component: release
         },
         //个人中心 
         {
@@ -259,6 +342,15 @@ export const router = new Router({
             name: 'personalinfo',
             component: personalinfo
         }, {
+            path: '/personalcenter/myTopic',
+            component: myTopic
+        },{
+            path: '/topic/:id',
+            component: topicDetail
+        },{
+            path: '/topic/comment/:id',
+            component: topicComment
+        },{
             path: '/personalcenter/coupon',
             component: my_coupon
         },
@@ -281,7 +373,8 @@ export const router = new Router({
             component: sales
         }, {
             path: '/good/:id',
-            component: gooddetail
+            component: gooddetail,
+            meta : { keepAlive:false }
         }, {
             path: '/good_all/:id',
             name: 'good_all',
@@ -293,11 +386,17 @@ export const router = new Router({
             path: '/dorm',
             component: dorm
         }, {
+            path: '/dorm/top',
+            component: dormTop
+        },{
             path: '/fashion',
             component: fashion
         }, {
             path: '/fashion/:id',
             component: fDetail
+        },{
+            path: '/fashion/feedback/:id',
+            component: fFeedBack
         }, {
             path: '/order',
             name: 'order',
@@ -315,8 +414,20 @@ export const router = new Router({
             component: seller
         },
         {
-            path: '/seller/types',
+            path: '/seller/:id/types',
             component: sellerTypes
+        },
+        {
+            path: '/seller/:id/all',
+            component: sellerAll
+        },
+        {
+            path: '/seller/:id/type',
+            component:sellerType
+        },
+        {
+            path: '/seller/:id/new',
+            component: sellerNew
         },
         {
             path: '/hyh',
@@ -336,14 +447,20 @@ export const router = new Router({
         },
         {
             path : '/share',
+            name: 'share',
             component : share
         },
         {
             path : '/invite/:id',
             component: invite
+        },
+        {
+            path: '/returnDetail/:id',
+            component: returnDetail
         }
     ]
 });
+
 router.beforeEach((a,b,c) => {
     let url = location.href.split('#');
     if(!/\?$/.test(url[0])){
@@ -355,16 +472,15 @@ router.beforeEach((a,b,c) => {
         location.href = urls;
         return false;
     };
-    c();
-    // 分享页判断
-    // if(b.path.match(/\/.*/g)[0].length <= 1 && a.path.match(/share/)) {
-    //     sessionStorage.setItem('isShare',true);
-    //     sessionStorage.setItem('path',location.href);
-    //     alert('分享用户进入')
-    // };
-    // if(JSON.parse(sessionStorage.getItem('isLogin'))){
-    //     c();
-    // } else {
-    //     location.href = `${location.origin}/static/auth.html`;
-    // };
+    // c();
+    // 分享页判断;
+    if (location.href.indexOf('share') !== -1) {
+        sessionStorage.setItem('isShare',true);
+        sessionStorage.setItem('path',location.href);
+    };
+    if(JSON.parse(sessionStorage.getItem('isLogin'))){
+        c();
+    } else {
+        location.href = `${location.origin}/weixin/static/auth.html`;
+    };
 })

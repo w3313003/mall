@@ -15,11 +15,11 @@
                 </div>
                 <div class="m">
                     <div>
-                        <span>收货人:{{orderMsg.memberName}}</span>
-                        <span>{{orderMsg.memberPhone}}</span>    
+                        <span>收货人:{{orderMsg.consignee}}</span>
+                        <span>{{orderMsg.phoneNum}}</span>    
                     </div>
                     <div>
-                        收货地址:{{orderMsg.memberAddress}}
+                        收货地址:{{orderMsg.address}}
                     </div>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                                 <use xlink:href="#icon-shangjia"></use>
                             </svg>
                             <span>
-                                {{orderMsg.title}}
+                                {{orderMsg.shopName}}
                             </span>   
                             </div>
                         <div class='type'>
@@ -40,13 +40,18 @@
                     </div>
                     <div v-for='(item,index) in orderMsg.orderGoods' :key="index" class="gooditem">
                         <div class='goodinfo'>
-                            <img src="../.././assets/img/goodimg.png" alt="" />
+                            <img :src="item.goodsImg" alt="" />
                             <div class='text'>
                                 <div class='g-title'>
                                     {{item.goodsName}}
                                 </div>
                                 <div class='g-type'>
-                                    颜色颜色颜色颜色颜色
+                                    <div>
+                                        123
+                                    </div>
+                                    <div v-if='orderMsg.state == 4' class="btn" @click.stop="goToComment(item,items)"> 
+                                        去评价
+                                    </div>
                                 </div>
                                 <div class='g-price'>
                                     <div>￥{{item.goodsPrice}}</div>
@@ -62,17 +67,20 @@
                         <div>订单总价</div>
                     </div>
                     <div class="r">
-                        <div class='f'>￥0.00</div>
-                        <div>￥66.66</div>
+                        <div class='f'>￥{{orderMsg.freight}}</div>
+                        <div>￥{{orderMsg.payPrice - orderMsg.freight}}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div>
                         优惠券
                     </div>
-                    <div style="color:#fc7aa5">
+                    <div style="color:#fc7aa5" v-if="orderMsg.redpacketId">
                         -{{orderMsg.redpacketMoney}}元
                     </div>  
+                    <div v-else>
+                        未使用优惠券
+                    </div>
                 </div>
                 <div class="item">
                     <div>
@@ -87,82 +95,151 @@
                         买家留言
                     </div>
                     <div class='input-wrap'>
-                        {{orderMsg.memberMessage}}
+                        <span v-if="orderMsg.memberMessage != ''">{{orderMsg.memberMessage}}</span>
+                        <span v-else>无留言</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class='bottom'>
+        <!-- <div class='bottom'>
             <div class='control'>
-                <div class='cancel'>
+                <div class='cancel' v-if="orderMsg.state == 1">
                     取消订单
                 </div>
-                <div class='pay'>
+                <div class='pay'  v-if="orderMsg.state == 1" @click.stop="pay">
                     付款
                 </div>
-                <div class='express'>
+                <div class='express'  v-if="orderMsg.state == 3">
                     查看物流
                 </div>
-                <div class='comment' @click='goTocomment = true'>
-                    评价
-                </div>
-                <div class='tips'>
+                <div class='tips' v-if='orderMsg.state == 2'>
                     提醒
                 </div>
-                <div class='tips' @click='gotorefund = true'>
+                <div class='tips' v-if="orderMsg.payState == 2"  @click='gotorefund = true'>
                     退款
                 </div>
             </div>
-        </div>
+        </div> -->
         <returngoods v-if='gotorefund'></returngoods>
-        <comment v-if='goTocomment' @close='close'></comment>
+        <comment 
+        v-if='goTocomment' 
+        @close='goTocomment = false'>
+        </comment>
+        <success v-if='success'
+            :consignee='orderMsg.consignee'
+            :address='orderMsg.address'
+            :totalMoney='orderMsg.payPrice'>
+        </success>
     </div>
 </template>
 
 <script>
-import comment from './comment'
-import returngoods from './return'
-const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
+import comment from './comment';
+import returngoods from './return';
+import wx from 'weixin-js-sdk';
+import { APPID } from 'common/util';
+import success from 'common/success'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 
 export default {
-    created(){
+    activated() { 
+        this.success = false;
         const id = this.$route.params.id;
-        console.log(id);
         let params = new URLSearchParams();
-            params.append('memberCode',userInfo.userid);
-        this.axios.post('/api/order/getOrderList',params).then(res => {
-            if(res.data.code !== 'success') throw new Error('error');
-            this.orderMsg = res.data.obj.filter(v => {
-                return v.id === id;
-            })[0];
-            this.$set(this.orderMsg,'title',this.orderMsg.orderGoods[0].shopName)
-            console.log(this.orderMsg)
-        });
+            params.append('orderId',id);
+            this.axios.post('/api/order/getOrder',params).then(res => {
+                this.orderMsg = res.data;
+            })
     },
     methods:{
         back(){
             this.$router.back();
         },
-        close(){
-            this.goTocomment = false;
+        goToComment() {
+
+        },
+        pay() {
+            let data = new URLSearchParams();
+                data.append("userId", userInfo.userid);
+                data.append("orderIds", this.$route.params.id);
+                data.append("money", this.orderMsg.payPrice);
+                data.append("url", location.href);
+                this.axios.post("/api/order/payOrder", data).then(res => {
+                    alert("开始支付");
+                    wx.chooseWXPay({
+                      timestamp: res.data.obj.timestamp,
+                      nonceStr: res.data.obj.nonce,
+                      package: res.data.obj.packageName,
+                      signType: res.data.obj.signType,
+                      paySign: res.data.obj.signature,
+                      success: () => {
+                        var param = new URLSearchParams();
+                        param.append("payId", res.data.obj.payId);
+                        this.axios.post("/api/order/paySuccess".param).then(res => {
+                            this.success = true;
+                        });
+                      },
+                      cancel: () => {
+                        
+                      }
+                    });
+                });
+        },
+        _getWxConfig() {
+            let configUrl = location.href.split('#'),
+                userId = userInfo.userId;
+            let params = new URLSearchParams();
+                params.append('url',configUrl);
+                params.append('userId',userId);
+            return this.axios.post(`/api/wsc/user/getJsSdk`,params).then(res => {
+                wx.config({
+                    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                    appId: APPID, // 必填，公众号的唯一标识
+                    timestamp: res.data.obj.timestamp , // 必填，生成签名的时间戳
+                    nonceStr: res.data.obj.nonce, // 必填，生成签名的随机串
+                    signature: res.data.obj.signature,// 必填，签名，见附录1
+                    jsApiList: ['chooseWXPay'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+                    success(){
+                        alert('confsig:ok')
+                    },
+                    error(){
+                        alert('config:error')
+                    }
+                });
+               wx.ready(() => {
+                   console.log("i'm ready")
+               });
+            });
         }
     },
     data(){
         return {
-            goTocomment:false,
-            gotorefund:false,
-            orderMsg:{}
+            goTocomment: false,
+            gotorefund: false,
+            orderMsg: {},
+            success: false
         }
     },
     components:{
         comment,
-        returngoods
+        returngoods,
+        success
     }
 }
 </script>
 
 <style lang="stylus" scoped>
+.g-type
+    display flex
+    justify-content space-between
+    .btn
+        padding .1rem
+        background #fc7ba6
+        color #fff
+        border-radius 0.1333rem
+
+
 .confirm-wrap
     width 100%
     height 100vh
@@ -261,6 +338,7 @@ export default {
                     font-size .333rem  
                     .f
                         color #666  
+                        text-align right
                         &:last-child
                             text-align right
                 .l,.r

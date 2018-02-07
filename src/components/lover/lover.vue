@@ -2,21 +2,14 @@
     <div class='lover-wrap'>
         <div class='swipe-wrap' ref='swipe'>
             <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
-                <swiper-slide>
-                    <img src='../.././assets/img/banner.png' alt="">
+                <swiper-slide v-for='(item,i) of banner' :key="i">
+                    <img :src='item.banner' alt="">
                 </swiper-slide>
-                <swiper-slide>
-                    <img src='../.././assets/img/banner.png' alt="">
-                </swiper-slide>
-                <swiper-slide>
-                    <img src='../.././assets/img/banner.png' alt="">
-                </swiper-slide>
-                <div class="swiper-pagination"  slot="pagination"></div>
             </swiper>
         </div>
-        <scroll class='scroll' ref='scroll' :data='goodList'>
+        <div class='scroll' ref='scroll'>
             <goodList :goodList='goodList' @getTodetail='getTodetail'></goodList>
-        </scroll>  
+        </div>  
     </div>
 </template>
 
@@ -31,14 +24,15 @@ export default {
         scroll,
         goodList
     },
-    created(){
-        this.axios.get('/api/activity/getActivityList?type=2').then(res => {
-            this.goodList = res.data.obj;
-            console.log(this.goodList)
+    created() {
+        this.axios.get('/api/index/getBaannerList?type=2').then(res => {
+            this.banner = res.data.obj;
         })
     },
     activated(){
-        this.$refs.scroll.refresh()
+        this.axios.get('/api/activity/getActivityList?type=2').then(res => {
+            this.goodList = res.data.obj;
+        })
     },
     methods:{
         calcheight(){
@@ -67,7 +61,8 @@ export default {
             swiperOption:{
                 pagination: '.swiper-pagination',
                 paginationClickable: true,
-            }
+            },
+            banner: []
         }
     }
 }
@@ -76,19 +71,27 @@ export default {
 <style lang="stylus" scoped>
 .lover-wrap
     position fixed
-    height 100vh
-    width  100%
+    height 100%
+    width 100%
     overflow hidden
     z-index 999
     background-color #fff
-    display flex
-    flex-direction column
     .swipe-wrap
+        position absolute
         width 100%
+        height: 4.2rem;
         img 
             width 100%
+            height 100%
     .scroll
-        flex 1
+        margin-top 4.2rem;
         height 100%
-        overflow hidden
+        overflow-x hidden;
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
+
+
+.swiper-slide
+    height 100%
+
 </style>

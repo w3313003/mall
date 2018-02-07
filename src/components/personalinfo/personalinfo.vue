@@ -10,17 +10,17 @@
         <div class='content'>
             <div class='item first'>
                 <div class='item-title'>
-                    头像1
+                    头像
                 </div>
                 <div class='avatar-wrap'>
-                    <img v-lazy='userInfo.avatar'>
+                    <img :src='userInfo.avatar'>
                 </div>
             </div>
             <div class='item' >
                 <div class='item-title'>
                     昵称
                 </div>
-                <div class='item-value' @click='editnickname'>
+                <div class='item-value'>
                     {{ userInfo.nickName }}
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     电话
                 </div>
                 <div class='item-value' @click='changePhone'>
-                    {{ userInfo.phone || '请输入号码' }}
+                    {{ userInfo.phoneNum || '请输入号码' }}
                 </div>
             </div>
             <div class='item' @click='address'>
@@ -71,7 +71,6 @@ import nickname from "common/nickname";
 import { MessageBox } from "mint-ui";
 import { Toast , Actionsheet} from "mint-ui";
 const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-
 export default {
   components: {
     nickname,
@@ -84,15 +83,43 @@ export default {
       sexList:[
           {
              name : '男',
-             method(){
-                 console.log(65665)
+             method: () => {
+                let data = new URLSearchParams();
+                    data.append('id',userInfo.userid);
+                    data.append('sex','1');
+                this.axios.post('/api/wsc/user/updateUserInfo',data).then(res => {
+                    let obj = {
+                                userid: res.data.id,
+                                openid: res.data.openid,
+                                nickName: res.data.nikeName,
+                                avatar: res.data.img,
+                                sex: res.data.sex === '1' ? '男' : '女'
+                            };
+                        this.userInfo = obj;
+                        sessionStorage.setItem('userInfo',JSON.stringify(obj));
+                        Toast('修改成功');
+                })
              }
           },
           {
               name : '女',
-              method(){
-                  console.log(6666554545)
-              }
+              method: () => {
+                let data = new URLSearchParams();
+                    data.append('id',userInfo.userid);
+                    data.append('sex','2');
+                this.axios.post('/api/wsc/user/updateUserInfo',data).then(res => {
+                    let obj = {
+                                userid: res.data.id,
+                                openid: res.data.openid,
+                                nickName: res.data.nikeName,
+                                avatar: res.data.img,
+                                sex: res.data.sex === '1' ? '男' : '女'
+                            };
+                        this.userInfo = obj;
+                        sessionStorage.setItem('userInfo',JSON.stringify(obj));
+                        Toast('修改成功');
+                     });
+             }
           }
       ],
       sexShow:false
@@ -107,7 +134,24 @@ export default {
         let reg = /^1[3|4|5|7|8|9]\d{9}$/;
         if (!reg.test(value)) {
           Toast("请输入正确的手机号码");
-        }
+          return;
+        };
+        let data = new URLSearchParams();
+            data.append('id',userInfo.userid);
+            data.append('phoneNum',value);
+        this.axios.post('/api/wsc/user/updateUserInfo',data).then(res => {
+            let obj = {
+                userid: res.data.id,
+                openid: res.data.openid,
+                nickName: res.data.nikeName,
+                avatar: res.data.img,
+                sex: res.data.sex === '1' ? '男' : '女',
+                phoneNum: res.data.phoneNum
+            };
+            this.userInfo = obj;
+            sessionStorage.setItem('userInfo',JSON.stringify(obj));
+            Toast('修改成功');
+        })
       },() => {});
     },
     back() {
@@ -118,7 +162,16 @@ export default {
     },
     editnickname() {
       MessageBox.prompt("请输入昵称", "").then(({ value, action }) => {
-          
+        if(value.length < 2) {
+            Toast('最少两个字符');
+            return ;
+        };
+        let data = new URLSearchParams();
+            data.append('id',userInfo.userid);
+            data.append('phoneNum',value);
+            this.axios.post('/api/wsc/user/updateUserInfo',data).then(res => {
+
+            })
       });
       // this.editing = true
     },

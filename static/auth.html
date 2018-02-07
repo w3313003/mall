@@ -28,7 +28,6 @@
     }
 
   </style>
-    <script src='https://res.wx.qq.com/mmbizwap/zh_CN/htmledition/js/vconsole/3.0.0/vconsole.min.js'></script>
 </head>
 
 <body>
@@ -43,7 +42,7 @@
     let wxConfig = {
         appid: "wx8a2df9136c4a762a",
         redirect_uri: location.href,
-        spaUrl: location.origin,
+        spaUrl: `${location.origin}/weixin/index.html`,
         shareUrl: path
     };   
     let urlSearch = new URLSearchParams(location.search);
@@ -55,29 +54,24 @@
                 `${wxConfig.redirect_uri}`
               )}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
         location.href = url;
-              
     } else {
-        alert('重定向成功')
       const code = urlSearch.get("code"),
             time = new Date(urlSearch.get("state")).toLocaleString();
-            alert(code)
             let data = new URLSearchParams();
             data.append('code',code)
       axios.post(`/api/wsc/user/getUserByCode`,data)
         .then(res => {
-            alert('成功')
           let obj = {
             userid: res.data.obj.id,
             openid: res.data.obj.openid,
-            nickName: res.data.obj.nickname,
-            avatar: res.data.obj.img
+            nickName: res.data.obj.nikeName,
+            avatar: res.data.obj.img,
+            sex: res.data.obj.sex === '1' ? '男' : '女'
           };
           sessionStorage.setItem("userInfo", JSON.stringify(obj));
           sessionStorage.setItem("isLogin", true);
-          console.log(obj)
           location.href = sign ? wxConfig.shareUrl  :  wxConfig.spaUrl;
         }).catch(res => {
-            alert('失败')
         });
     }
     // } else {

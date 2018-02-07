@@ -10,47 +10,51 @@
                 我的评价
             </div>
             <div class='r'>
-                <svg class="icon" aria-hidden="true">
+                <!-- <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-bianji1"></use>
-                </svg>
+                </svg> -->
             </div>
         </div>
         <div class='content'>
-            <div class='item'>
+            <div class='item' v-for='(item,index) in commentList' :key="index">
                 <div class='header'>
                     <div class="nickname">
-                        666
+                        {{item.nickName}}
                     </div>
-                    <div class="time">217.6.3</div>   
+                    <div class="time">
+                        {{item.updateDate}}    
+                    </div>   
                 </div>
                 <div class='text'>
-                    评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj评价，p9ngj
+                    {{item.content}}
                 </div>
                 <div class='goodinfo'>
-                    <img src="../.././assets/img/goodimg.png" alt="">
+                    <img :src="item.goodsImg" alt="">
                     <div class='gooddisc'>
                         <div class='t'>
-                            是的萨达十大啥家乎季后赛的哈市大胜靠德大路口的
+                            {{ item.goodsName }}
                         </div>
                         <div class='m'>
-                            颜色自由组合  尺码打啊
+                            {{item.specName}}
                         </div>
                         <div class='b'>
                             <div class='price'>
-                                $666
+                                ￥{{item.piece}}
                             </div>
                             <div class='count'>
-                                X1
+                                X{{item.num}}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class='seller-comm'>
+                <div class='seller-comm' v-if='item.shopContent'>
                     <div class='t'>
-                        <span>[掌柜回复]</span> <span>2017.6.6</span>
+                        <span>[掌柜回复]</span> <span>
+                            {{item.replyDate}}
+                        </span>
                     </div>
                     <div class='seller-content'>
-                        回复回复回复回复回复回复回复回复
+                        {{item.shopContent}}
                     </div>
                 </div>
             </div>
@@ -59,10 +63,24 @@
 </template>
 
 <script>
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
+    created() {
+        let params = new URLSearchParams();
+            params.append('userId',userInfo.userid);
+        this.axios.post('/api/goodsComment/userCommentList',params).then(res => {
+            if(res.data.code !== '200') throw new Error('请求失败');
+            this.commentList = res.data.obj
+        })
+    },
     methods:{
         back(){
             this.$router.back();
+        }
+    },
+    data() {
+        return {
+            commentList: []
         }
     }
 }
@@ -120,7 +138,7 @@ export default {
                 display flex
                 box-sizing border-box
                 padding 0.2rem 0.3333rem
-                background #f5f5f5
+                background #e7e7e7
                 & > img 
                     width 1.9333rem
                     height 1.9333rem

@@ -9,27 +9,35 @@
             <div class='m'>
                 详情
             </div>
-            <div class='r'>
+            <div class='r' @click="toRelease">
                 发布
             </div>
         </div>
-        <scroll class='scroll' :data='commentList'>
+        <div class='scroll'>
         <div class='middle'>
             <div class="banner">
-                <img src="../.././assets/img/banner.png" alt="">
+                <img :src="info.img" alt="">
             </div>
             <div class="content">   
                 <div class='c-title'>{{info.title}}</div>
                 <div class='disc'>
                     <div class='headers'>
-                        <img src="../.././assets/img/avatar.png" alt="">
-                        <div class='nickname'>壳斗马蒂</div>
-                        <div class='time'>20分钟前</div>
+                        <img style='border-radius:50%' :src="info.headImg" alt="">
+                        <div class='nickname'>
+                            {{info.name}}
+                        </div>
+                        <div class='time'>
+                            {{info.createDate}}
+                        </div>
                     </div>
                 </div>
-                <div class='page' v-html='info.content'>
+                <div style="position: relative">
+                    <div class='pages' ref="page" v-html='info.content'>
+                        
+                    </div>
+                    <div class="mask" v-if="!allShow"></div>
                 </div>
-                <div class='hidden-btn'>
+                <div class='hidden-btn' @click="getAll" v-if="!allShow">
                     查看更多
                     <div>
                         <svg class="icon fenlei" aria-hidden="true">
@@ -50,53 +58,74 @@
                         </span>
                     </div>
                 </div>
-                <div class='page'></div>
             </div> 
-             <div class='d-rating-block'>
+                <div class='d-rating-block' v-show='allShow'>
                     <div class='d-r-title'>
                         评价({{this.commentList ? this.commentList.length : 0}})
                     </div>
-                    <block :commentList='commentList'
-                            @deepComment='deepComment'></block>
+                    <block 
+                        :commentList='commentList'
+                        @deepComment='deepComment'>
+                    </block>
                 </div>
             <div class='about-wrap'>
                 <div class='about-title'>
                     相关话题
                 </div>
-                <div class='about-item'>
+                <div v-if="AboutTopic.length > 0" class='about-item' v-for="(v,i) of AboutTopic" :key="i" @click="toDetail(v)">
                     <div class='header'>
-                        <img src="../.././assets/img/avatar.png" alt="">
-                        <div class='nickname'>壳斗马蒂</div>
-                        <div class='time'>20分钟前</div>
+                        <img :src="v.userImg" alt="">
+                        <div class='nickname'>
+                            {{v.nickName}}
+                        </div>
+                        <div class='time'>
+                            {{v.createDate}}
+                        </div>
                     </div>
                     <div class='banner'>
-                        <img src="../.././assets/img/f_banner.png" alt="">
+                        <img :src="v.img" alt="">
                     </div>
-                    <div class='heading'>这里有一个标题</div>
+                    <div class='heading'>
+                        {{v.title}}
+                    </div>
                     <div class='control'>
-                        <div>
+                        <!-- <div @click.stop='dianzans(v)'>
                             <svg class="icon fenlei" aria-hidden="true">
                                 <use xlink:href="#icon-dianzan"></use>
                             </svg>
-                            9999
-                        </div>
+                            {{v.zan}}
+                        </div> -->
                         <div>
                             <svg class="icon fenlei" aria-hidden="true">
                                 <use xlink:href="#icon-duihuakuang"></use>
                             </svg>
-                            989
+                            {{v.com}}
                         </div>
                     </div>
                 </div>
+                <div v-show='AboutTopic.length < 1' class='empty'>
+                    暂无相关话题
+                </div>
             </div>
         </div>
-        </scroll>
-        <div class="bottom">
+        </div>
+        <div class="bottom" v-if="!deepRating">
             <div class='input-wrap'>
                 <input type="text" placeholder="快来评论吧" v-model.trim='commentContent'>
             </div>
             <div class='btn' @click='sendComment'>
-                评价
+                评论
+            </div>
+        </div>
+        <div class="bottom" v-else>
+            <div class='input-wrap'>
+                <input type="text" :placeholder="commentName" v-model.trim='dcommentContent'>
+            </div>
+            <div class='btn' @click='sendComment'>
+                回复
+            </div>
+            <div class='btn toggle' @click="deepRating = false">
+                回到评论
             </div>
         </div>
     </div>
@@ -106,10 +135,12 @@
 import block from "./sofratingblock";
 import scroll from "common/scroll";
 import { Toast } from 'mint-ui'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
   created() {
-    this._getMsg();
+    this.id = this.$route.params.id;
+    this._getMsg(this.id);
   },
   mounted(){
       this.$nextTick(() => {
@@ -118,9 +149,8 @@ export default {
   },
   activated() {
     if(!this.isFirst){
-        this._getMsg();
-        console.log("active");
-    }
+        this._getMsg(this.id);
+    };
   },
   components: {
     block,
@@ -128,24 +158,30 @@ export default {
   },
   data() {
     return {
+      id:'',
       userId: "",
       zanList: [],
       info: [],
       commentList: [],
       commentContent: "",
-      isFirst:true
+      dcommentContent: '',
+      isFirst:true,
+      deepRating: false,
+      currentParentId:'',
+      AboutTopic: [],
+      newId:'',
+      commentName:'',
+      allShow: false
     };
   },
   methods: {
-    async _getMsg() {
+    async _getMsg(id) {
         this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-        console.log(this.userInfo)
-        this.id = this.$route.params.id;
         /**
         * 获取详情信息
         */
           let data = new URLSearchParams();
-          data.append("tataId", this.id);
+          data.append("tataId", id);
           this.axios.post(`/api/tata/tataDetail`, data).then(res => {
                     this.info = res.data.obj;
           });
@@ -153,17 +189,33 @@ export default {
         * 点赞列表
         */
           await this.axios.post("/api/tata/getZanName", data).then(res => {
-                this.zanList = res.data.obj;
+                if(res.data.obj) {
+                    this.zanList = res.data.obj;
+                } else {
+                    this.zanList = []
+                }
+                
           });
         /**
         * 评论列表
         */
           this.axios.post("/api/tata/commentList", data).then(res => {
             if (res.data.obj) {
-              this.commentList = res.data.obj;
-                console.log(this.commentList)
+              this.commentList = res.data.obj.sort((a,b) => {
+                  return new Date(b.createDate).getTime() - new Date(a.createDate).getTime();
+              });
             }
           });
+          /** 
+          * 相关话题
+          */
+          this.axios.get(`/api/tata/getChildTataList?tataId=${this.$route.params.id}`).then(res => {
+              if(res.data.obj) {
+                  this.AboutTopic = res.data.obj;
+              } else {
+                  this.AboutTopic = [];
+              }
+          })
     },
     back() {
       this.$router.back();
@@ -179,34 +231,110 @@ export default {
           this.zanList = res.data.obj;
           Toast('点赞成功')
         } else {
-            this.zanList = [];
             Toast('已经点赞')
         }
       });
     },
+    dianzans(v) {
+      let data = new URLSearchParams();
+        const tataid = v.id,
+              userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+        data.append("tataId", tataid);
+        data.append("userId", userInfo.userid);
+        this.axios.post("/api/tata/getZanName", data).then(res => {
+          if (res.data.code == "success") {
+            Toast('点赞成功');
+            this.axios.get(`/api/tata/getChildTataList?tataId=${this.$route.params.id}`).then(res => {
+              if(res.data.code === 'success' && res.data.obj instanceof Array) {
+                  this.AboutTopic = res.data.obj;
+              } else {
+                  this.AboutTopic = [];
+              }
+            })
+          } else {
+              Toast('已经点过赞了')
+          }
+        });
+    },
+    getAll() {
+        this.allShow = true;
+        console.log(this.$refs.page)
+        this.$refs.page.style.height = 'auto'
+    },
     sendComment() {
-        if(this.commentContent.length < 5){
-            Toast('评论内容不得少于5字');
-            this.commentContent = '';
-            return;
+        if(this.deepRating){
+            if(this.dcommentContent.length < 1){
+                Toast('评论内容不得少于1字');
+                this.commentContent = '';
+                return;
+            }
+            let data = new URLSearchParams();
+                data.append("tataId", this.id);
+                data.append("content", this.dcommentContent);
+                data.append("userId", userInfo.userid);
+                data.append('parent',this.currentParentId);
+            this.axios.post("/api/tata/addComment", data).then(res => {
+                if(res.data.code === 'success') {
+                    Toast('评论成功');
+                    this.deepRating = false;
+                    this.dcommentContent = ''
+                    setTimeout(() => {
+                        this.commentList = res.data.obj;
+                    },1000)
+                }
+            });
+
+        } else {
+            if(this.commentContent.length < 1){
+                Toast('评论内容不得少于1字');
+                this.commentContent = '';
+                return;
+            }
+            let data = new URLSearchParams();
+                data.append("tataId", this.id);
+                data.append("content", this.commentContent);
+                data.append("userId", userInfo.userid);
+            this.axios.post("/api/tata/addComment", data).then(res => {
+                if(res.data.code === 'success') {
+                    Toast('评论成功');
+                    this.deepRating = false;
+                    this.commentContent = '';
+                    setTimeout(() => {
+                        this.commentList = res.data.obj;
+                    },1000)
+                }
+            });
         }
-      let content = this.commentContent,
-        data = new URLSearchParams();
-      data.append("tataId", this.id);
-      data.append("content", content);
-      data.append("userId", this.userInfo.userid);
-      this.axios.post("/api/tata/addComment", data).then(res => {
-          console.log(res.data)
-      });
+    },
+    toRelease() {
+        this.$router.push({
+            path: `/sof/release/${this.$route.params.id}`
+        })
     },
     deepComment(item){
-        let data = new URLSearchParams(),
-            content = this.commentContent,
-            parent = item.id;
-        data.append("tataId", this.id);
-        data.append("content", this.commentContent);
-        data.append("userId", this.userInfo.id);
-    }
+        console.log(item);
+        this.dcommentContent = '';
+        this.deepRating = true;
+        this.currentParentId = item.id;
+        this.commentName = `回复${item.wscUserName}`
+    },
+    toDetail(item){
+        this.newId = item.id;
+        this.$router.push({
+            path: `/sof/detail/${item.id}`
+        });
+    },
+  },
+  watch: {
+      $route() {
+          this._getMsg(this.newId);
+          location.reload();
+      },
+      commentContent(val) {
+          if(val.indexOf(':') === -1) {
+              this.deepComment = false;
+          }
+      }
   }
 };
 </script>
@@ -236,7 +364,7 @@ export default {
 .about-wrap {
     background: #ffffff;
     margin-top: 0.1333rem;
-
+    margin-bottom: .3rem;
     .about-title {
         height: 1.2rem;
         line-height: 1.2rem;
@@ -262,13 +390,14 @@ export default {
         padding: 0.3333rem;
         background: #fff;
         margin-bottom: 0.1333rem;
-
+        border-bottom: 0.0133rem solid #e7e7e7
         .header {
             display: flex;
             height: 0.9333rem;
             font-size: 0.3333rem;
 
             img {
+                border-radius 50%
                 width: 0.9333rem;
                 height: 0.9333rem;
             }
@@ -383,17 +512,14 @@ export default {
 
 .rd-wrap {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     position: fixed;
-    z-index: 999;
+    z-index: 1000;
     top: 0;
     left: 0;
     background: #fff;
-    display: flex;
-    flex-direction: column;
-    display: flex;
-    flex-direction: column;
-
+    position absolute
+    overflow hidden
     .title {
         height: 1.2rem;
         display: flex;
@@ -403,7 +529,9 @@ export default {
         align-items: center;
         box-sizing: border-box;
         padding: 0 0.4rem;
-
+        position absolute
+        width 100%
+        z-index 2
         .icon {
             font-size: 0.5rem;
         }
@@ -420,16 +548,21 @@ export default {
     }
 
     .scroll {
-        flex: 1;
-        overflow: hidden;
+        overflow: scroll;
         background: #e7e7e7;
-
+        height 100%
+        box-sizing border-box
+        padding 1.1333rem 0
+        -webkit-overflow-scrolling: touch;
         .middle {
             .banner {
                 width: 100%;
+                height: 4.6667rem;
+                margin: 0.2rem 0;
 
                 img {
                     width: 100%;
+                    height: 100%;
                 }
             }
 
@@ -440,8 +573,8 @@ export default {
                 padding: 0.1rem 0.2rem 0rem;
 
                 .c-title {
-                    font-size: 0.3333rem;
-                    line-height: 0.45rem;
+                    font-size: 0.5rem;
+                    padding .1rem 0
                     text-align: center;
                     margin: 0.1rem 0;
                     width: 100%;
@@ -450,10 +583,13 @@ export default {
                     white-space: nowrap;
                 }
 
-                .page {
+                .pages {
                     font-size: 0.3rem;
                     line-height: 0.35rem;
                     word-break: break-all;
+                    p {
+                        color:red
+                    }
                 }
 
                 .hidden-btn {
@@ -479,7 +615,11 @@ export default {
     padding: 0.2rem 0.3333rem;
     display: flex;
     justify-content: space-between;
-
+    background #fff
+    position absolute
+    bottom 0
+    width 100%
+    z-index 2 
     .input-wrap {
         flex: 1;
         background: #f5f5f5;
@@ -498,6 +638,7 @@ export default {
     .btn {
         flex: 0 0 1.8933rem;
         background-color: #fc7aa5;
+        border 1px solid #fc7aa5
         color: #fff;
         font-size: 0.45rem;
         height: 100%;
@@ -506,6 +647,32 @@ export default {
         justify-content: center;
         margin-left: 5vw;
         border-radius: 0.2rem;
+        &.toggle{
+            font-size .25rem
+            flex 0 0 auto;
+            padding 0 .15rem
+            margin-left .15rem
+            background-color: #fff;
+            color #666
+            border 1px solid #666
+        }
     }
 }
+
+.toggle {
+    font-size: .2rem
+}
+
+.mask
+    height .3rem
+    position absolute
+    width 100%
+    background #fff
+    top 2.8rem
+    left 0
+    filter: blur(8px);
+.empty
+    text-align center
+    padding .2rem 0
+    font-size .35rem
 </style>

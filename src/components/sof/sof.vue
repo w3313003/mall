@@ -2,35 +2,49 @@
     <div class='sof-wrap'>
         <div class="title">
             他她圈    
-            <svg class="icon fenlei" aria-hidden="true">
+            <!-- <svg class="icon fenlei" aria-hidden="true">
                 <use xlink:href="#icon-jiantou"></use>
-            </svg>
+            </svg> -->
         </div>
-        <scroll class="scroll" ref="scroll"   :data='list'>
+        <div class="scroll" ref="scroll" >
             <div class='content'>
                 <div class='banner'>
-                    <img src="../.././assets/img/banner.png" alt="">
+                    <img :src="banner" alt="">
                 </div>
                 <div class='item' @click='gotoDetail(item)' v-for='(item,index) in list' :key="index">
                     <div class='header'>
-                        <img :src="item.userImg" alt="">
+                        <img style="border-radius:50%" :src="item.headImg" alt="">
                         <div class='nickname'>
-                            {{item.nickName}}
+                            {{item.name}}
                         </div>
-                        <div class='time'>{{item.updateDate}}</div>
+                        <div class='time'>{{item.createDate}}</div>
                     </div>
                     <div class='banner'>
                         <img :src="item.img" alt="">
                     </div>
                     <div class='heading'>{{item.title}}</div>
-                    <div class='control'>
-                        <div>
+                    <div class='control' v-if="item.isZan !== '1'">
+                        <div @click.stop='zan(item)' >
                             <svg class="icon fenlei" aria-hidden="true">
                                 <use xlink:href="#icon-dianzan"></use>
                             </svg>
                             {{item.zan}}
                         </div>
-                        <div @click.stop='gotoComment(item)'>
+                        <div @click.stop='false'>
+                            <svg class="icon fenlei" aria-hidden="true">
+                                <use xlink:href="#icon-duihuakuang"></use>
+                            </svg>
+                            {{item.com}}
+                        </div>
+                    </div>
+                    <div class='control' v-else>
+                        <div @click.stop='zan(item)' >
+                            <svg class="icon fenlei" aria-hidden="true">
+                                <use xlink:href="#icon-dianzan-copy"></use>
+                            </svg>
+                            {{item.zan}}
+                        </div>
+                        <div @click.stop='false'>
                             <svg class="icon fenlei" aria-hidden="true">
                                 <use xlink:href="#icon-duihuakuang"></use>
                             </svg>
@@ -39,26 +53,30 @@
                     </div>
                 </div>
             </div>
-        </scroll>
+            <div style="height:1.1333rem;width: 100%"></div>
+        </div>
     </div>
 </template>
 
 <script>
 import scroll from "common/scroll";
-
+import { Toast } from 'mint-ui';
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
-  created() {
-    this.axios.get("/api/tata/tataList").then(res => {
+    created() {
+        this.axios.get('/api/index/getBaannerList?type=3').then(res => {
+            this.banner = res.data.obj[0].banner
+        })
+    },
+  activated() {
+    this.axios.get(`/api/tata/tataList?userId=${userInfo.userid}`).then(res => {
       this.list = res.data.obj;
-      console.log(res.data.obj);
     });
-  },
-  activated(){
-      this.$refs.scroll.refresh();
   },
   data() {
     return {
-      list: []
+      list: [],
+      banner:''
     };
   },
   methods: {
@@ -71,6 +89,25 @@ export default {
       this.$router.push({
         path: `/sof/detail/${item.id}`
       });
+    },
+    zan(item) {
+        let data = new URLSearchParams();
+        const tataid = item.id,
+              userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+        data.append("tataId", tataid);
+        data.append("userId", userInfo.userid);
+        this.axios.post("/api/tata/getZanName", data).then(res => {
+          if (res.data.message == "成功") {
+            this.zanList = res.data.obj;
+            Toast('点赞成功');
+            this.$set(item, 'isZan', '888')
+            this.axios.get(`/api/tata/tataList?userId=${userInfo.userid}`).then(res => {
+                this.list = res.data.obj;
+            });
+          } else {
+              Toast('已经点赞')
+          }
+        });
     }
   },
   components: {
@@ -80,20 +117,21 @@ export default {
 </script>
 <style lang="stylus" scoped>
 .sof-wrap {
-    height: 90vh;
+    position absolute
+    height: 90%;
+    width 100%
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-
     .title {
         width: 100%;
+        top 0
         height: 1.1333rem;
         line-height: 1.1333rem;
         background: #fff;
         color: #fc7aa5;
         text-align: center;
         font-size: 0.4rem;
-        position: relative;
+        position absolute
+        z-index 2
         border-bottom: 0.0133rem solid #e7e7e7;
 
         .icon {
@@ -108,10 +146,12 @@ export default {
     }
 
     .scroll {
-        flex: 1;
-        overflow: hidden;
+        margin 1.1333rem 0
+        height 100%
+        overflow-x hidden
+        overflow-y: scroll;
         background: #e7e7e7;
-
+        -webkit-overflow-scrolling: touch;
         .content {
             & > .banner {
                 width: 100%;
@@ -193,4 +233,9 @@ export default {
         }
     }
 }
+
+.banner
+    img 
+        width 100%
+        height 100%
 </style>

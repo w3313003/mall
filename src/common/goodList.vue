@@ -2,7 +2,7 @@
     <div class='good-wrap'>
         <div v-for='(item,index) in goodList' :key="index" class='gooditem' @click='getTodetail(item)'>
                 <div class='img-wrap'>
-                    <img v-lazy="item.imgMain" alt="">
+                    <img :src="item.imgMain" alt="">
                 </div>
                 <div class='content'>
                     <div class='title'>
@@ -82,9 +82,6 @@ export default {
                 return []
             }
         }
-    },
-    mounted(){
-        console.log(this.goodList)
     },
     methods:{
         getTodetail(item){

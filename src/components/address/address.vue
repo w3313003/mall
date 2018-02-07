@@ -47,18 +47,20 @@
                             </div>
                         </div>
                     </div>
-                    <transition name='address'>
+                    
+                </scroll>
+                <div v-else>
+                    没有数据
+                </div>
+            </div>  
+
+            <transition name='address'>
                         <e-address v-if='editing' 
                         :addressInfo='currentAddress'
                         :isNew='isnew'
                         @confirm='confirm'
                         @close='close'></e-address>
                     </transition>
-                </scroll>
-                <div v-else>
-                    没有数据
-                </div>
-            </div>  
             <div class='bottom' @click='addNewAddress'>
                 添加收货地址
             </div>
@@ -118,7 +120,7 @@ export default {
             })
             });
 
-p        },
+        },
         defaultToggle(item){
             console.log(userInfo.userid);
             let data = new URLSearchParams();
@@ -152,6 +154,8 @@ p        },
             this.currentAddress = {};
             this.isNew = true;
             this.editing = true;
+            console.log(this.editing);
+
         },
         close(){
             this.editing = false

@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <div class='bottom'>
+        <div class='bottom' @click="send">
             提交
         </div>
         <input type="file" @change='upload' ref='files' hidden >
@@ -38,13 +38,18 @@
 </template>
 
 <script>
-import { Toast } from 'mint-ui'
-
+import { Toast } from 'mint-ui';
+import { Indicator } from 'mint-ui';
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
     computed:{
         contentLength(){
             return this.content.length
         }
+    },
+    activated() {
+        this.content = '';
+        this.imgs = [];
     },
     methods:{
         back(){
@@ -64,7 +69,7 @@ export default {
               Toast("文件类型错误");
               return;
             };
-            if(file.size > 2000000){
+            if(file.size > 1000000){
                 Toast('文件尺寸过大');
                 return ;
             }
@@ -79,7 +84,30 @@ export default {
             };
         },
         deleteImg(index){
-            this.imgs.splice(index,1)
+            this.imgs.splice(index,1);
+        },
+        send() {
+            if(this.content.length < 5) {
+                Toast('至少需要5个字符');
+                return;
+            };
+            Indicator.open({
+              text: '加载中...',
+              spinnerType: 'double-bounce'
+            });
+            let data = new URLSearchParams();
+                data.append('conten',this.content);
+                data.append('userId',userInfo.userid);
+                data.append('img',this.imgs.join(',!,'));
+            this.axios.post('/api/wsc/user/platformOpinion',data).then(res => {
+                if(res.data.code === 'success') {
+                    Indicator.close();
+                    Toast('反馈成功');
+                    setTimeout(() => {
+                        this.$router.push('/index');
+                    },1000)
+                }
+            })
         }
     },
     data(){

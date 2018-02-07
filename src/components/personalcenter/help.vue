@@ -9,11 +9,11 @@
             <div class='m'>
                 帮助
             </div>
-            <div class='r'>
+            <a style='color:#fff' href="tel:15669855445" class='r'>
                 <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-kefu"></use>
                 </svg>
-            </div>
+            </a>
         </div>
         <div class='content'>
             <div v-for='(item,index) in helpList' :key="index" @click='watchDetail(item)'>

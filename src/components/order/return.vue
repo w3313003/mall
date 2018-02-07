@@ -9,28 +9,30 @@
         </div>
         <div class='content'>
             <div class="gooddetail">
-                <img src="../.././assets/img/good-item.png" alt="">
+                <img :src="orderInfo.goodsImg" alt="">
                 <div class='info'>
-                    <div class="ts">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
-                    <div class="m">颜色颜色颜色颜色颜色</div>
+                    <div class="ts">{{orderInfo.goodsName}}</div>
+                    <div class="m">{{orderInfo.specName}}</div>
                     <div class="b">
-                        <span>￥66.66</span>
-                        <span>X2</span>
+                        <span>￥{{orderInfo.goodsPrice}}</span>
+                        <span>X
+                            {{orderInfo.goodsNum}}
+                        </span>
                     </div>
                 </div>
             </div>
-            <div class='item' style='margin-top:0.1333rem'>
+            <div class='item' v-if="!isExchange" style='margin-top:0.1333rem'>
                 <div>退款原因</div>
-                <input type="text" placeholder="请输入退款原因">
+                <input type="text" placeholder="请输入退款原因" v-model.trim="returnWord">
             </div>
-            <div class='img-wrap'>
+            <div class='img-wrap' v-if="!isExchange">
                 <div class='control' @click='fileclick'>
                      <svg class="icon" aria-hidden="true">
                         <use xlink:href="#icon-jiahao"></use>
                     </svg>
                 </div>
                 <div class='imgblock' v-for='(item,index) in imgs' :key="index">
-                    <img :src='item' alt="">
+                    <img :src="item" alt="">
                     <div class='close' @click='deleteImg(index)'>
                         <svg class="icon" aria-hidden="true">
                             <use xlink:href="#icon-delete"></use>
@@ -38,34 +40,40 @@
                     </div>
                 </div>
             </div>
-            <div class="returnblock">
+            <div class="returnblock" v-if="isExchange">
                 <div class='choose'>
-                    <div>
+                    <div @click="chooseType = true">
                         选择颜色/尺码
                     </div>
-                    <div class='s'>
+                    <div class='s' v-if="currentType.length < 1" >
                         <img src="../.././assets/img/....png" alt="">
+                    </div>
+                    <div v-else>
+                        {{currentType}}
                     </div>
                 </div>
                 <div class='item' style='margin-top:0.1333rem'>
                     <div>换货原因</div>
-                    <input type="text" placeholder="请输入换货原因">
+                    <input type="text" v-model="changeWord" placeholder="请输入换货原因">
                 </div>  
             </div>
             <div class='seller-address'>
-                <div class="item">商家地址:合肥合肥分恢复和恢复和合肥合肥</div>
-                <div class="item">收货人:男枪</div>
-                <div class="item">电话:156654233</div>
+                <div class="item">商家地址:{{orderInfo.address}}</div>
+                <div class="item">收货人:{{orderInfo.consignee}}</div>
+                <div class="item">电话:{{orderInfo.tel}}</div>
             </div>
             <div class='t'>
-                <div class='wx'>商家微信:21312312</div>
-                <div class="qq">商家qq:4545445</div>
+                <div class='wx' v-if="orderInfo.wx">商家微信:{{orderInfo.wx}}</div>
+                <div class="qq">商家qq:{{orderInfo.qq}}</div>
             </div>
         </div>
-        <shopChoosing v-if='false'>
-        
+        <shopChoosing v-if='chooseType'
+            :goodInfo='orderInfo.wscGoods'
+            @appendTo='appendTo' 
+            @close='chooseType = false'
+        >
         </shopChoosing>    
-        <div class='bottom'>
+        <div class='bottom' @click='send'>
             提交
         </div>
     </div>
@@ -76,9 +84,25 @@ import { Toast } from 'mint-ui'
 import shopChoosing from 'common/shopChoosing'
 
 
+const user = JSON.parse(sessionStorage.getItem('userInfo'));
+console.log(user)
 export default {
+    props: {
+        orderInfo: {
+            type: Object,
+            default:() => {}
+        },
+        orderId:'',
+        isExchange:{
+            type: Boolean,
+            default: false,
+        }
+    },
     components:{
         shopChoosing
+    },
+    created() {
+        console.log(this.orderInfo)
     },
     methods:{
         back(){
@@ -111,11 +135,94 @@ export default {
         },
         deleteImg(index){
             this.imgs.splice(index,1)
+        },
+        appendTo(data){
+            console.log(data);
+            this.changeInfo = data;
+            this.currentType = data.choosedType;
+            this.currentNums = data.amount;
+        },
+        send() {
+            const { shopName, payType, goodsName,goodsId, goodsNum, goodsPrice, goodsImg, specName, shopId, payPrice, kjPrice, redpacketMoney, redpacketType, redpacketId, freight, payDate, addressId, logisticsId, orderNum } = this.orderInfo;
+            let obj = {
+                oldOrderId: this.orderId,
+                memberCode: user.userid,
+                state:  this.isExchange ? '1' : '2',
+                shopId, 
+                payPrice, 
+                kjPrice, 
+                redpacketMoney, 
+                redpacketType, 
+                redpacketId, 
+                freight, 
+                payDate, 
+                addressId, 
+                logistics: logisticsId, 
+                orderNum,
+                proof1: this.imgs[0],
+                proof2: this.imgs[1],
+                proof3: this.imgs[2],
+                payType,
+                wscBackOrderGoods:{
+                }
+             };
+            if(this.isExchange) {
+                let data = {
+                    shopId,
+                    shopName, 
+                    goodsId, 
+                    goodsNum: this.currentNums, 
+                    goodsPrice, 
+                    goodsImg, 
+                    specName: this.currentType,
+                    goodsName
+                };
+                obj.remarks = this.changeWord;
+                obj.wscBackOrderGoods = data;
+                let params = new URLSearchParams();
+                    params.append('backOrderInfo',JSON.stringify(obj));
+                this.axios.post('/api/wsc/user/saveBackGoods',params).then(res => {
+                    if(res.data.msg === '请求成功'){
+                        Toast('提交成功');
+                        setTimeout(() => {
+                            this.back();
+                        },1000)
+                    }
+                }) ;
+            } else {
+                let data = {
+                    shopId,
+                    shopName, 
+                    goodsId, 
+                    goodsNum, 
+                    goodsPrice, 
+                    goodsImg, 
+                    specName,
+                    goodsName
+                };
+                obj.remarks = this.returnWord;
+                obj.wscBackOrderGoods = data;
+                let params = new URLSearchParams();
+                    params.append('backOrderInfo',JSON.stringify(obj));
+                this.axios.post('/api/wsc/user/saveBackGoods',params).then(res => {
+                    if(res.data.msg === '请求成功'){
+                        Toast('提交成功');
+                        setTimeout(() => {
+                            this.back();
+                        },1000)
+                    }
+                });
+            }
         }
     },
     data(){
         return {
-            imgs:[]
+            imgs:[],
+            returnWord:'',
+            changeWord:'',
+            chooseType: false,
+            currentType: '',
+            currentNums: 0
         }
     }
 }

@@ -2,11 +2,13 @@
     <div class='wrap'>
         <div class='item' v-for='(item,i) in commentList' :key="i">
             <div class='header'>
-                <img src="../.././assets/img/avatar.png" alt="">
+                <img :src="item.headImg" alt="">
                 <div class='nickname'>
                     {{item.wscUserName}}
                 </div>
-                <div class='time'>20分钟前</div>
+                <div class='time'>
+                    {{item.createDate}}
+                </div>
             </div>
             <div class='content'>
                 {{item.content}}
@@ -86,6 +88,7 @@ export default {
             img
                 width 0.9333rem
                 height 0.9333rem
+                border-radius 50%
             .nickname
                 flex 1
                 display flex

@@ -1,29 +1,35 @@
 <template>
     <div class='seller'>
-        <div class='header'>
+        <div class='header' @click="detailShow = true" v-if='!detailShow'>
             <div class='background'>
-                <img src="../.././assets/img/goodimg.png" alt="">
+                <img :src="sellerInfo.logo" alt="">
             </div>
             <div class='seller-logo'>
-                <img src="../.././assets/img/goodimg.png" alt="">
+                <img :src="sellerInfo.logo" alt="">
             </div>
             <div class='seller-name'>
                 <div class='t'>
-                    墨刀专营店
+                    {{sellerInfo.shopName}}
                 </div>
                 <div class='b'>
-                    1999人已收藏
+                    {{sellerInfo.num}}人已收藏
                 </div>
             </div>
-            <div class='seller-collection'>
-                <svg class="icon" aria-hidden="true">
+            <div class='seller-collection' v-if="!isCollect" @click.stop="collection">
+                <svg class="icon" aria-hidden="true" style="color:#fff">
                     <use xlink:href="#icon-aixin"></use>
                 </svg>
                 <span>收藏</span>
             </div>
+            <div class='seller-collection' v-else>
+                <svg class="icon" aria-hidden="true" style="color:red" >
+                    <use xlink:href="#icon-aixin"></use>
+                </svg>
+                <span>已收藏</span>
+            </div>
         </div>
         <div class="nav">
-            <div class='item'>
+            <div class='item' @click="toAll">
                 <div class='icon-wrap'>
                     <svg class="icon fenlei" aria-hidden="true">
                         <use xlink:href="#icon-baozhuanhuan"></use>
@@ -31,7 +37,7 @@
                 </div>
                 <div class='title'>全部商品</div>
             </div>
-            <div class='item'>
+            <div class='item' @click="toNew">
                 <div class='icon-wrap'>
                     <svg class="icon fenlei" aria-hidden="true">
                         <use xlink:href="#icon-liwu"></use>
@@ -39,61 +45,115 @@
                 </div>
                 <div class='title'>新品上架</div>
             </div>
-            <router-link to='/seller/types' class='item' tag='div'>
+            <div class='item' @click="toType">
                 <div class='icon-wrap'>
                     <svg class="icon fenlei" aria-hidden="true">
                         <use xlink:href="#icon-fenlei"></use>
                     </svg>
                 </div>
                 <div class='title'>分类</div>
-            </router-link>
+            </div>
         </div>
         <div class='gooditem'>
             <div class='title'>
                 商家推荐
             </div>
             <div class='item'>
-                 <goodList :goodList='goodList'></goodList>
+                 <goodList :goodList='recommendList'></goodList>
+                 <div style='height:1.2rem'></div>
             </div>
         </div>
+        <transition name='toDetail'>
+            <Deatil v-if='detailShow' @back='detailShow = false' :info='sellerInfo' :shopId='$route.params.id'></Deatil>
+        </transition>
     </div>
 </template>
 
 <script>
 import goodList from 'common/goodList'
 import { moocgoodList } from 'common/util.js'
+import Deatil from './detail'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
     components:{
-        goodList
+        goodList,
+        Deatil
     },
     created(){
         this.goodList = moocgoodList;
     },
+    data(){
+        return {
+            sellerInfo: {},
+            isCollect: false,
+            recommendList: [],
+            detailShow:false
+        }
+    },
     activated(){
-        
+        let shopId = this.$route.params.id;
+        let data = new URLSearchParams();
+            data.append('shopId',shopId);
+            data.append('userId',userInfo.userid);
+        this.axios.get(`/api/shop/shopIndex?shopId=${shopId}`).then(res => {
+            this.sellerInfo = res.data.obj
+        });
+        this.axios.post('/api/shop/shopIsCollection',data).then(res => {
+            this.isCollect = res.data.message === '未收藏' ? false : true
+        });
+        this.axios.post('/api/waresClass/getYourLike',data).then(res => {
+            this.recommendList = res.data.obj
+        })
+    },
+    methods:{
+        collection() {
+            let data = new URLSearchParams();
+                data.append('userId',userInfo.userid);
+                data.append('shopId',this.$route.params.id);
+            this.axios.post('/api/wsc/user/shopCollection',data).then(res => {
+                if(res.data.message === '收藏商品成功') {
+                    this.isCollect = true;
+                }
+            })
+        },
+        toType() {
+            this.$router.push({
+                path: `/seller/${this.$route.params.id}/types`
+            })
+        },
+        toAll() {
+            this.$router.push({
+                path: `/seller/${this.$route.params.id}/all`
+            })
+        },
+        toNew() {
+            this.$router.push({
+                path: `/seller/${this.$route.params.id}/new`
+            })
+        }
     }
 }
 </script>
 
 <style lang="stylus" scoped>
 .seller
-    display flex
     position fixed 
     z-index 999
     top 0 
     height 0
-    width 100vw
-    height 100vh
+    width 100%
+    height 100%
     flex-direction column
     background #e7e7e7
-    display flex
-    flex-direction column
+    overflow hidden
     .header
         width 100%
-        height 200px
+        height 2.6rem
         overflow hidden
-        position relative
+        position absolute
+        top 0
+        z-index 2000
         box-sizing border-box
         padding 0.3333rem
         display flex
@@ -137,9 +197,12 @@ export default {
     .nav
         height 2.2667rem
         background #fff
+        position absolute
+        top 2.6rem
         display flex
         width 100%
         justify-content space-around
+        z-index 2000
         .item
             display flex
             flex-direction column
@@ -160,10 +223,11 @@ export default {
             .title
                 font-size .35rem
     .gooditem
-        margin-top 0.1333rem
+        height 100%
+        box-sizing border-box
+        padding-top 5rem
         background #fff
-        flex 1
-        overflow scroll
+        overflow hidden
         .title
             height 1.2rem
             font-size .35rem
@@ -179,4 +243,13 @@ export default {
                 height .4rem
                 width 0.0667rem
                 background #fc7aa5
+        .item
+            height 100%
+            overflow scroll
+            -webkit-overflow-scrolling: touch;
+
+.toDetail-enter-active,.toDetail-leave-active
+    transition all .5s
+.toDetail-enter,.toDetail-leave-to
+    transform translate3d(100%,0,0)
 </style>

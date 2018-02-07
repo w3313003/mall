@@ -1,6 +1,6 @@
 <template>
     <div class="bargin-wrap">
-        <scroll class='scroll' :data='goodList'>
+        <div class='scroll'>
             <div class='good-wrap'>
                 <div class='good' v-for='(item,index) in goodList' :key="index" @click="toShare(item)">
                     <div class='img-wrap'>
@@ -27,13 +27,13 @@
                     </div>
                 </div>
             </div>
-        </scroll>
+        </div>
     </div>
 </template>
 
 <script>
 import scroll from "common/scroll";
-
+import { Toast } from 'mint-ui'
 const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
@@ -46,7 +46,7 @@ export default {
             activeId : ''
         }
     },
-    created(){
+    activated() {
         let params = new URLSearchParams();
             params.append('userId',userInfo.userid);
             params.append('type','1')
@@ -58,21 +58,31 @@ export default {
         toShare(item){
             let data = new URLSearchParams();
                 data.append('userId',userInfo.userid);
-                data.append('goodsId',item.id)
+                data.append('goodsId',item.id);
+                if(item.kjId) {
+                    sessionStorage.setItem('kjId',item.kjId);
+                } else {
+                    sessionStorage.setItem('kjId',undefined);
+                }
             this.axios.post('/api/activity/bargain',data).then(res => {
+                if(res.data.msg === '参数错误') {
+                    Toast('当前商品已发起砍价，将跳转至我的活动');
+                    setTimeout(() => {
+                        this.$router.push({
+                            path: '/personalcenter/activities'
+                        });
+                    },1000)
+                    return;
+                };
                 this.activeId = res.data.obj.id;
                 this.userId = res.data.obj.userId;
                 sessionStorage.setItem('activeId',res.data.obj.id);
                 setTimeout(() => {
                     this.$router.push({
-                    path : `/invite/${item.id}`
-                });
-                },500)
-                
+                        path: `/invite/${item.id}`
+                    });
+                },1000)
             });
-
-
-            
         }
     },
     data(){
@@ -93,7 +103,10 @@ export default {
     background #e7e7e7
     .scroll
         height 100%
-        overflow hidden
+        overflow-x hidden;
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
+
         .good-wrap
             box-sizing border-box
             padding 0.2rem

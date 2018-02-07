@@ -7,12 +7,12 @@
             </svg>
         </div>
         <div class="content">
-            <img src="../../assets/img/goodimg.png" alt="">
+            <img :src="info.mianImg" alt="">
             <div class="text">
                 <div class="name" ref="name" >
-                    66666
+                    {{info.relation}}
                 </div> 
-                <div class="btn" ref='btn' data-clipboard-text="663126634" @click="copy">
+                <div class="btn" ref='btn' :data-clipboard-text="info.relation" @click="copy">
                     点击复制
                 </div>
                 <div class="tips">
@@ -25,22 +25,31 @@
 
 <script>
 import scroll from 'common/scroll'
-// import Copy from 'clipboard'
+import Copy from 'clipboard'
 import { Toast } from 'mint-ui'
 
 export default {
     components:{
         scroll
     },
+    activated() {
+        this.axios.get(`/api/wsc/tao/getTaoList?id=${this.$route.params.id}`).then(res => {
+            this.info = res.data.obj[0];
+        });
+    },
+    data() {
+        return {
+            info: {}
+        }
+    },
     methods:{
         back(){
             this.$router.back();
         },
-        copy(e){
-            var clipboard = new Copy(this.$refs.btn);
+        copy() {
+            let clipboard = new Copy(this.$refs.btn);
             clipboard.on('success',() => {
-                Toast('复制成功');
-                console.log('656')
+                Toast('淘口令复制成功');
             })
             clipboard.on('error',function(){
                 Toast('失败，请重试')

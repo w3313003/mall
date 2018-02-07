@@ -9,8 +9,11 @@
             <div class='m'>
                 收藏
             </div>
-            <div class='r' @click='editing = true;'>
+            <div class='r' v-if="editing === false" @click='editing = true;'>
                 编辑
+            </div>
+            <div class="r" v-else @click="editing = false;">
+                取消
             </div>
         </div>
         <div class='nav'>
@@ -20,23 +23,23 @@
         <div class='content'>
             <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
                 <swiper-slide>
-                    <div class='item'>
-                        <div class='radio' v-if='editing'>
-                            <img v-if='true' src='../.././assets/img/radio.png'>
+                    <div class='item' v-for="(v,i) of goodsList" :key="i">
+                        <div class='radio' v-if='editing' @click="cancle(v)">
+                            <img v-if='v.isClick' src='../.././assets/img/radio.png'>
                             <img v-else src='../.././assets/img/hradio.png'>                 
                         </div>
-                        <img src="../.././assets/img/good-item.png" alt="">
+                        <img :src="v.imgMain" alt="">
                         <div class='text'>
                             <p class='titles'>
-                                31233333333333333333333333333333333333333333333
+                                {{v.name}}
                             </p>
                             <div class='info'>
                                 <div>
                                     ￥
-                                    <span>300.00</span>
+                                    <span>{{v.sellingPrice}}</span>
                                 </div>
                                 <div>
-                                    已售500
+                                    已售{{v.xiaoshou_num}}件
                                 </div>
                             </div>
                         </div>
@@ -46,11 +49,11 @@
                     <scroll :data='sellerList' ref='scrollL'>
                         <div>
                             <div class='item' v-for='(item,index) in sellerList' :key="index">
-                                <div class='radio' v-if='editing' @click="editings(item)">
-                                    <img v-if='item.isediting' src='../.././assets/img/radio.png'>
+                                <div class='radio' v-if='editing' @click="cancle(item)">
+                                    <img v-if='item.isClick' src='../.././assets/img/radio.png'>
                                     <img v-else src='../.././assets/img/hradio.png'>                 
                                 </div>
-                                <img src="../.././assets/img/good-item.png" alt="">
+                                <img :src="item.logo" alt="">
                                 <div class='text seller'>
                                     <p class='titles '>
                                         {{item.shopName}}
@@ -66,9 +69,9 @@
             </swiper>
         </div>   
         <div class='bottom' v-if="editing">
-            <div class='l'>
+            <div class='l' @click="chooseALl">
                 <div class='img-wrap'>
-                    <img v-if='true' src='../.././assets/img/radio.png'>
+                    <img v-if='isAllchoose' src='../.././assets/img/radio.png'>
                     <img v-else src='../.././assets/img/hradio.png'>   
                 </div>
                 <div>
@@ -78,7 +81,7 @@
             <div class='cancle' @click="editing = false">
                 取消
             </div>
-            <div class='delete'>
+            <div class='delete' @click="_delete">
                 删除
             </div>
         </div>
@@ -95,21 +98,8 @@ export default {
         swiperSlide,
         scroll
     },
-    created(){
-        let data = new URLSearchParams();
-        data.append('userId',userInfo.userid)
-        this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/getGoosCollection',data).then(res => {
-            console.log(res.data)
-        })
-        this._getSellerList();
-        const id1 = '3c514d461c05486d8a667dd4e6507198',
-              id2 = '6f611d55eb7e435f8fca360e6dd7110e';
-        let params = new URLSearchParams();
-            params.append('ids','3,4');
-        this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/deleteCollectionList',params);
-    },
-    activated(){
-        this._getSellerList();
+    activated() {
+        this._getList();
     },
     data(){
         return {
@@ -122,7 +112,15 @@ export default {
                     this.currentIndex = s.activeIndex;
                 }
             },
+            goodsList:[],
             sellerList:[]
+        }
+    },
+    computed: {
+        isAllchoose() {
+            return [...this.sellerList,...this.goodsList].every(v => {
+                return v.isClick === true;
+            })
         }
     },
     methods:{
@@ -131,23 +129,52 @@ export default {
             this.currentIndex = index;
             this.$refs.mySwiper.swiper.slideTo(index)
         },
-        editings(item){
-            item.isediting = !item.isediting;
+        cancle(item) {
+            item.isClick = !item.isClick
+        },
+        chooseALl() {
+            [...this.sellerList,...this.goodsList].forEach(v => {
+                v.isClick = true;
+            })
         },
         back(){
             this.$router.back();
         },
-        _getSellerList(){
+        _getList() {
             let data = new URLSearchParams();
-            data.append('userId',userInfo.userid);
-            this.axios.post('http://10.0.0.25:8181/ykds-wsc/f/wsc/user/getShopCollection',data).then(res => {
-            res.data.obj.forEach(v => {
-                if(!v.isediting){
-                    this.$set(v,'isediting',true)
+            data.append('userId',userInfo.userid)
+            this.axios.post('/api/wsc/user/getGoosCollection',data).then(res => {
+                if(res.data.obj) {
+                    this.goodsList = res.data.obj;
+                    this.goodsList.forEach(v => {
+                        if(!v.isClick) {
+                            this.$set(v,'isClick',true);
+                        }
+                    });
+                }
+            })
+            this.axios.post('/api/wsc/user/getShopCollection',data).then(res => {
+                if(res.data.obj) {
+                    this.sellerList = res.data.obj;
+                    this.sellerList.forEach(v => {
+                        if(!v.isClick) {
+                            this.$set(v,'isClick',true);
+                        }
+                    });    
                 }
             });
-            this.sellerList = res.data.obj;
-            console.log(this.sellerList)
+        },
+        _delete() {
+            let _arr = [...this.sellerList,...this.goodsList].filter(v => {
+                return v.isClick === true;
+            }).map(_ => {
+                return _.cId;
+            });
+            console.log(_arr);
+            let params = new URLSearchParams();
+                params.append('ids',_arr.join(','));
+            this.axios.post('/api/wsc/user/deleteCollectionList',params).then(res => {
+                this._getList();
             })
         }
     }
@@ -244,6 +271,7 @@ export default {
                 display block
                 flex 0 0 2rem
                 height 2rem
+                width 2rem
             .radio
                 width 1.5333rem
                 display flex

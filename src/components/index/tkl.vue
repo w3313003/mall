@@ -6,67 +6,35 @@
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>
-        <scroll >
+        <div class="scroll">
             <div class="good-wrap">
-                <div class='gooditem'>
+                <div class='gooditem' v-for="(v,i) of goodsList" :key="i" @click="getDetail(v)">
                     <div class='img-wrap'>
-                        <img src="../../assets/img/goodimg.png" alt="">
+                        <img :src='v.mianImg'>
                     </div>
                     <div class='content'>
                         <div class='titles'>
                            <img src='../../assets/img/taobao.png'>
-                           <span>12341241222222222222222222222222222222</span>
+                           <i>
+                               {{v.goodsName}}
+                           </i>
                         </div>
                         <div class="price">
                             <div class="l">
-                                ￥<span>666</span>元
+                                ￥<span>
+                                    {{v.goodsPrice}}
+                                </span>元
                             </div>
                             <div class="r">
-                                券后价999元
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class='gooditem'>
-                    <div class='img-wrap'>
-                        <img src="../../assets/img/goodimg.png" alt="">
-                    </div>
-                    <div class='content'>
-                        <div class='titles'>
-                           <img src='../../assets/img/taobao.png'>
-                           <span>12341241222222222222222222222222222222</span>
-                        </div>
-                        <div class="price">
-                            <div class="l">
-                                ￥<span>666</span>元
-                            </div>
-                            <div class="r">
-                                券后价999元
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class='gooditem'>
-                    <div class='img-wrap'>
-                        <img src="../../assets/img/goodimg.png" alt="">
-                    </div>
-                    <div class='content'>
-                        <div class='titles'>
-                           <img src='../../assets/img/taobao.png'>
-                           <span>12341241222222222222222222222222222222</span>
-                        </div>
-                        <div class="price">
-                            <div class="l">
-                                ￥<span>666</span>元
-                            </div>
-                            <div class="r">
-                                券后价999元
+                                券后价
+                                {{v.afterPrice}}
+                                元
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </scroll>
+        </div>
     </div>
 </template>
 
@@ -76,9 +44,24 @@ export default {
     components:{
         scroll
     },
+    data() {
+        return {
+            goodsList: []
+        }
+    },
+    activated() {
+        this.axios.get('/api/wsc/tao/getTaoList').then(res => {
+            this.goodsList = res.data.obj;
+        })
+    },
     methods:{
-        back(){
+        back() {
             this.$router.back();
+        },
+        getDetail(item) {
+            this.$router.push({
+                path: `/tkl/${item.id}`
+            })
         }
     }
 }
@@ -86,10 +69,10 @@ export default {
 
 <style lang="stylus" scoped>
 .tkl-wrap
-    height: 90vh;
+    height: 90%;
+    position absolute
+    width 100%
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
     .title
         width: 100%;
         height: 1.1333rem;
@@ -98,10 +81,12 @@ export default {
         color: #fc7aa5;
         text-align: center;
         font-size: 0.4rem;
-        position: relative;
+        position: absolute;
         z-index 9999
         border-bottom: 0.0133rem solid #e7e7e7;
-        .icon
+        top 0
+        z-index 2
+        .icon   
             width: 0.5333rem;
             height: 0.5333rem;
             position: absolute;
@@ -114,10 +99,10 @@ export default {
         padding 0.2667rem
         display flex
         flex-wrap wrap
+        justify-content space-between
         .gooditem
             flex 0 0 4.5333rem
             overflow hidden
-            margin-right 0.3333rem
             margin-bottom 0.2rem
             &:nth-child(2n)
                 margin-right 0
@@ -127,6 +112,7 @@ export default {
                 border-radius 0.1333rem
                 img 
                     width 100%
+                    border-radius .25rem 
                     height 100%
             .content
                 margin-top 0.2rem
@@ -136,12 +122,21 @@ export default {
                     text-overflow ellipsis
                     white-space nowrap
                     vertical-align middle
-                    font-size .3rem
+                    font-size .35rem
                     margin-bottom 0.2rem
+                    display flex
+                    align-items center
                     img 
                         width 0.4rem
                         vertical-align text-top
                         height 0.4rem
+                        margin-right .15rem
+                    i 
+                        display block
+                        flex 1
+                        overflow hidden
+                        white-space nowrap
+                        text-overflow ellipsis
                 .price
                     display flex
                     justify-content space-between
@@ -149,8 +144,17 @@ export default {
                     span 
                         font-size .4rem
                     .r
-                        padding 5px 20px
-                        border-radius 10px
+                        padding 0.0667rem 0.1333rem
+                        border-radius 0.1333rem
                         border 0.075vmax solid #ef2b2a
+
+.scroll
+    height 100%
+    box-sizing border-box
+    padding-top 1.1333rem
+    overflow-x hidden;
+    overflow-y scroll
+    -webkit-overflow-scrolling: touch;
+
 
 </style>

@@ -1,10 +1,10 @@
 <template>
     <div class='coupon-wrap'>
-        <scroll :data='couponList' ref='scroll' class='scroll'>
+        <div ref='scroll' class='scroll'>
             <div class='seller-wrap'>
                 <div class='seller' v-for='(item,index) in couponList' :key="index">
                     <div class='img-wrap'>
-                        <img :src="item.shopImg" alt="" v-if='!item.shopImg'>
+                        <img :src="item.img" alt="" v-if='!item.shopImg'>
                         <img v-lazy='item.shopImg' alt="" v-else>
                     </div>
                     <div class='seller-content'>
@@ -44,7 +44,7 @@
                     </div>
                 </div>
             </div>
-        </scroll>  
+        </div>  
     </div>
 </template>
 
@@ -52,7 +52,7 @@
 <script>
 import scroll from "common/scroll";
 import { Toast } from "mint-ui";
-const userid = '91e3acaa614f4c97a779426d61d1de9e';
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
   components: {
@@ -63,11 +63,10 @@ export default {
       return Math.round(val * 100);
     }
   },
-  created() {
+  activated() {
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
     let params = new URLSearchParams();
-    // params.append("userId", userInfo.userid);
-    params.append('userId',userid)
+    params.append('userId',userInfo.userid)
     this.axios.post("/api/redpacket/getRedpacketList", params).then(res => {
       res.data.obj.forEach(v => {
         if (!v.shopName && v.type == 1) {
@@ -76,13 +75,7 @@ export default {
       });
       this.couponList = res.data.obj;
     });
-    this.axios.post("/api/wsc/user/userPacketList", params).then(res => {
-        console.log(res.data);
-    });
   },
-  activated(){
-        this.$refs.scroll.refresh()
-    },
   data() {
     return {
       dasharray: Math.PI * 100,
@@ -131,7 +124,9 @@ export default {
 
     .scroll {
         height: 100%;
-        overflow: hidden;
+        overflow-x hidden;
+        overflow-y scroll
+        -webkit-overflow-scrolling: touch;
 
         .seller-wrap {
             box-sizing: border-box;

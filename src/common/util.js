@@ -1,3 +1,6 @@
+export const APPID = 'wx8a2df9136c4a762a'
+
+
 export const moocgoodList = [{
         sellername: '墨刀旗舰店',
         id: 1,
@@ -659,29 +662,6 @@ export function prefixStyle(style) {
 
     return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }
-
-export const addressList = [{
-    name: '李康',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: true
-}, {
-    name: '厉害',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}, {
-    name: '七七八八',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}, {
-    name: '九九九九',
-    phone: '15665889965',
-    address: '安徽省合肥市合肥市合肥市合肥市合肥区656565',
-    default: false
-}];
-
 export const provinceList = [{
     text: '北京市',
     value: '110000'

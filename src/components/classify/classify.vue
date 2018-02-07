@@ -1,65 +1,32 @@
 <template>
     <div class='classify-wrap'>
-        <div class='search-wrap'>
-                    <div class='search-input'>
-                            <div class='s-svg'>
-                                <svg class="icon" aria-hidden="true">
-                                    <use xlink:href="#icon-sousuo"></use>
-                                </svg>
-                            </div>
-                            <div class='input-wrap'>
-                                <input type='text' placeholder='搜索' @click='isSearching = true'>
-                            </div>
-                            </div> 
-
-                            <div class='msg'  v-show='isSearching'>
-                                 <div @click='isSearching = false'>
-                                    取消
-                                </div>
-                            </div>
-                            <div v-if='!isSearching' style='font-size:.5rem;color:#666'>
-                                <svg class="icon" aria-hidden="true">
-                                    <use xlink:href="#icon-pingjia"></use>
-                                </svg>
-                            </div>
-                    </div> 
-                <transition name='searchList'>
-                    <div class='search-block' v-show='isSearching'>
-                        <div class='near'>
-                            <div class='title'>
-                                最近搜索
-                            </div>
-                            <div class='itemwrap'>
-                                <div class="item">
-                                    第一个
-                                </div>
-                                <div class="item">
-                                    第一个
-                                </div>
-                                <div class="item">
-                                    第一个
-                                </div>
-                            </div>
-                        </div>
-                        <div class='history'>
-                            <div class='title'>
-                                热门搜索
-                            </div>
-                            <div class='itemwrap'>
-                                <div class="item">
-                                    第一个
-                                </div>
-                                <div class="item">
-                                    第一个
-                                </div>
-                                <div class="item">
-                                    第一个
-                                </div>
-                            </div>
-                        </div>
-                    </div>  
-                </transition>
-        <scroll class='scroll' ref='scroll' :data='maleList'>
+        <div class='scroll' ref='scroll'>
+            <div class='search-wrap'>
+        <div class='search-input'>
+                <div class='s-svg'>
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-sousuo"></use>
+                    </svg>
+                </div>
+                <div class='input-wrap'>
+                    <input type='text' 
+                    placeholder='输入关键词按回车键进行搜索' 
+                    v-model.trim="word" 
+                    @keydown.enter="sendSearch" 
+                    @click='openSearch'>
+                </div>
+                </div> 
+                <div class='msg'  v-show='isSearching'>
+                     <div @click='isSearching = false; word ="" '>
+                        取消
+                    </div>
+                </div>
+                <div v-if='!isSearching' style='font-size:.5rem;color:#666'>
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-pingjia"></use>
+                    </svg>
+                </div>
+        </div> 
             <div>
                 <div class='content'>
                     <div class='male'>
@@ -104,36 +71,34 @@
                     </div>
                 </div>
             </div>
-        </scroll>
+        </div>
     </div>
 </template>
 
 <script>
 import scroll from "common/scroll";
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
+
 export default {
-    created(){
+    activated(){
+        this.maleList = [];
+        this.fmaleList = [];
         this.axios.get('/api/waresClass/getWaresClassList').then(res => {
             res.data.obj.forEach((v,i) => {
                 v.sexType === '0' ? this.maleList.push(v) : this.fmaleList.push(v);
             });
         });
-        // let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-        // let data = new URLSearchParams();
-        // data.append('userId',userInfo.userid);
-        // data.append('goodsId','086178380cc24aa3aa56eb46bc342bf6');
-        // this.axios.post('/api/activity/bargain',data).then(res => {
-        //     console.log(res.data)
-        // })
-
-    },
-    activated(){
-        this.$refs.scroll.refresh()
+        this.isSearching = false;
     },
     data() {
         return {
             maleList : [],
             fmaleList : [],
-            isSearching:false
+            isSearching:false,
+            word:'',
+            searchGoodsList:[],
+            hotSearch:[],
+            oldSearch:[]
         };
     },
     components: {
@@ -147,22 +112,73 @@ export default {
             this.$router.push({
                 path : `/good_all/${item.id}`
             })
+        },
+        goToGoodsDetail(item){
+            this.$router.push({
+                path:`/good/${item.id}`
+            })
+        },
+        sendSearch() {
+            this.sendsearch()
+        },
+        search(item){
+            this.word = item.searchName;
+            this.sendsearch();
+        },
+        sendsearch(){
+            if(this.word.length < 1) return;
+            let data = new URLSearchParams();
+                data.append('name',this.word);
+                data.append('userId',userInfo.userid)
+            this.axios.post('/api/wsc/goods/searchGoods',data).then(res => {
+                if(res.data.code === 'error'){
+                    this.searchGoodsList = [];
+                } else {
+                    this.searchGoodsList = res.data.obj
+                }
+            })
+        },
+        openSearch(){
+            this.$router.push('/search')
+            // this.isSearching = true;
+            // this.word = '';
+            // this._getSearchList();
+        },
+        _getSearchList(){
+            let data = new URLSearchParams();
+                data.append('userId',userInfo.userid)
+            this.axios.post(`/api/wsc/goods/searchList`,data).then(res => {
+                this.hotSearch = res.data.obj.topSearch;
+                this.oldSearch = res.data.obj.latelySeanch;
+            })
         }
     }
 };
 </script>
 
 <style lang="stylus" scoped>
+.searchList
+    h5
+        font-size .4rem 
+        text-align center
+        margin-bottom 10px
+    .item
+        font-size .35rem
+        margin .2rem 0;
+        text-align center
+
+
 .classify-wrap
-    height 90vh
+    position absolute
+    top 0
+    height 90%
     width:100%
-    display flex
-    flex-direction column
     .scroll
-        flex 1
         height 100%
-        overflow hidden
+        overflow-x hidden
+        overflow-y scroll
         background #e7e7e7
+        -webkit-overflow-scrolling: touch;
 .search-block
     width 100%
     height 100%
@@ -216,7 +232,7 @@ export default {
     padding  0 .3rem
     align-items center
     justify-content space-around
-
+    background: rgb(250,250,250);
 .fmale
     margin-top 0.1333rem
 
@@ -303,6 +319,7 @@ export default {
     font-size 0.4rem
     overflow hidden
     margin-right 15px
+    align-items center
     .input-wrap
         flex 1
         input

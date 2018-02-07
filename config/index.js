@@ -32,7 +32,8 @@ module.exports = {
         assetsPublicPath: '/',
         proxyTable: {
             '/api': {
-                target: 'http://10.0.0.12:8080/ykds-wsc/f/',
+                // 'http://weixintest.zhenshengxin.cn/api'
+                target: 'http://weixintest.zhenshengxin.cn/api',
                 changeOrigin: true,
                 pathRewrite: {
                     '^/api': ''

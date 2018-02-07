@@ -15,7 +15,7 @@
         <div class="content">
             <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
                 <swiper-slide>
-                    <div class='order-item'>
+                    <div class='order-item' v-for="(item,index) in exchangeList" :key="index">
                         <div class='header'>
                             <div class='icon-wrap'>  
                                 <svg class="icon fenlei" aria-hidden="true">
@@ -23,59 +23,48 @@
                                 </svg>
                             </div> 
                             <div class='seller-name'>
-                                    墨刀旗舰店
+                                {{item.shopName}}
                             </div>
                         </div>
                         <div class="gooddetail">
-                            <img src="../.././assets/img/good-item.png" alt="">
+                            <img :src="item.goodsImg" alt="">
                             <div class='info'>
-                                <div class="t">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
-                                <div class="m">颜色颜色颜色颜色颜色</div>
+                                <div class="t">
+                                    {{item.goodsName}}
+                                </div>
+                                <div class="m">
+                                    {{item.specName}}
+                                </div>
                                 <div class="b">
-                                    <span>￥66.66</span>
-                                    <span>X2</span>
+                                    <span>￥{{Number(item.goodsPrice).toFixed(2)}}</span>
+                                    <span>X{{item.goodsNum}}</span>
                                 </div>
                             </div>
                         </div>
                         <div class='state'>
-                                <div>换货中</div>
-                                <div class='btn'>
-                                    查看详情
-                                </div>
+                            <div v-if="item.backState == 1">
+                                审核中
                             </div>
+                            <div v-if='item.backState == 2'>
+                                换货中
+                            </div>
+                            <div v-if='item.backState == 3'>
+                                不通过
+                            </div>
+                            <div v-if='item.backState == 4'>
+                                已完成
+                            </div>
+                            <div v-if='item.backState == 5'>
+                                退款中
+                            </div>
+                            <div class='btn' @click="toDetail(item)">
+                                查看详情
+                            </div>
+                        </div>
                     </div>  
-                    <div class='order-item'>
-                        <div class='header'>
-                            <div class='icon-wrap'>  
-                                <svg class="icon fenlei" aria-hidden="true">
-                                    <use xlink:href="#icon-shangjia"></use>
-                                </svg>
-                            </div> 
-                            <div class='seller-name'>
-                                    墨刀旗舰店
-                            </div>
-                        </div>
-                        <div class="gooddetail">
-                            <img src="../.././assets/img/good-item.png" alt="">
-                            <div class='info'>
-                                <div class="t">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
-                                <div class="m">颜色颜色颜色颜色颜色</div>
-                                <div class="b">
-                                    <span>￥66.66</span>
-                                    <span>X2</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class='state'>
-                                <div>换货中</div>
-                                <div class='btn'>
-                                    查看详情
-                                </div>
-                            </div>
-                    </div> 
                 </swiper-slide>
                 <swiper-slide>
-                    <div class='order-item'>
+                    <div class='order-item' v-for="(item,index) in returnsList" :key="index">
                         <div class='header'>
                             <div class='icon-wrap'>  
                                 <svg class="icon fenlei" aria-hidden="true">
@@ -83,23 +72,41 @@
                                 </svg>
                             </div> 
                             <div class='seller-name'>
-                                    墨刀旗舰店
+                                {{item.shopName}}
                             </div>
                         </div>
                         <div class="gooddetail">
-                            <img src="../.././assets/img/good-item.png" alt="">
+                            <img :src="item.goodsImg" alt="">
                             <div class='info'>
-                                <div class="t">标题标签标题标签标题标签标题标签标题标签标题标签标题标签</div>
-                                <div class="m">颜色颜色颜色颜色颜色</div>
+                                <div class="t">
+                                    {{item.goodsName}}
+                                </div>
+                                <div class="m">
+                                    {{item.specName}}
+                                </div>
                                 <div class="b">
-                                    <span>￥66.66</span>
-                                    <span>X2</span>
+                                    <span>￥{{Number(item.goodsPrice).toFixed(2)}}</span>
+                                    <span>X{{item.goodsNum}}</span>
                                 </div>
                             </div>
                         </div>
                         <div class='state'>
-                            <div>退货中</div>
-                            <div class='btn' @click='show = true'>
+                            <div v-if="item.backState == 1">
+                                审核中
+                            </div>
+                            <div v-if='item.backState == 2'>
+                                换货中
+                            </div>
+                            <div v-if='item.backState == 3'>
+                                不通过
+                            </div>
+                            <div v-if='item.backState == 4'>
+                                已完成
+                            </div>
+                            <div v-if='item.backState == 5'>
+                                退款中
+                            </div>
+                            <div class='btn' @click="toDetail(item)">
                                 查看详情
                             </div>
                         </div>
@@ -114,6 +121,9 @@
 <script>
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import detail from './returnDetail'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+
+
 export default {
     components:{
         swiper,
@@ -121,17 +131,27 @@ export default {
         detail
     },
     data(){
-        return {
-            show:false,
-            currentIndex:0,
-            notNextTick:true,
-            swiperOption:{
+        return { 
+            show: false,
+            currentIndex: 0,
+            notNextTick: true,
+            swiperOption: {
                 paginationClickable: true,
                 onSlideChangeEnd:s => {
                     this.currentIndex = s.activeIndex;
                 }
-            }
+            },
+            returnsList: [],
+            exchangeList: []
         }
+    },
+    activated() {   
+        this.axios.get(`/api/wsc/user/getBackList?state=1&userId=${userInfo.userid}`).then(res => {
+            this.exchangeList = res.data.obj
+        });
+        this.axios.get(`/api/wsc/user/getBackList?state=2&userId=${userInfo.userid}`).then(res => {
+            this.returnsList = res.data.obj
+        });
     },
     methods:{
         toggleNav(e){
@@ -141,6 +161,11 @@ export default {
         },
         back(){
             this.$router.back();
+        },
+        toDetail(item){
+            this.$router.push({
+                path: `/returnDetail/${item.id}`,
+            })
         }
     }
 }

@@ -6,30 +6,38 @@
                 <use xlink:href="#icon-jiantou"></use>
             </svg>
         </div>  
-        <div class='item' v-for='(item,index) in itemList' :key="index" @click='watchDetail(item)'>
-            <div class='header'>
-                <img v-lazy="item.headImg" alt="">
-                <div class='nickname'>{{item.name}}</div>
-                <div class='time'>
-                    {{item.timeDifference}}
+        <div class="scroll">
+            <div class='item' v-for='(item,index) in itemList' :key="index" @click='watchDetail(item)'>
+                <div class='header'>
+                    <img v-lazy="item.headImg" alt="">
+                    <div class='nickname'>{{item.name}}</div>
+                    <div class='time'>
+                        {{item.timeDifference}}
+                    </div>
                 </div>
-            </div>
-            <div class='banner'>
-                <img v-lazy="item.img" alt="">
-            </div>
-            <div class='heading'>{{item.title}}</div>
-            <div class='control'>
-                <div>
-                    <svg class="icon fenlei" aria-hidden="true">
-                        <use xlink:href="#icon-dianzan"></use>
-                    </svg>
-                    {{item.zan}}
+                <div class='banner'>
+                    <img v-lazy="item.img" alt="">
                 </div>
-                <div>
-                    <svg class="icon fenlei" aria-hidden="true">
-                        <use xlink:href="#icon-fenxiang-copy"></use>
-                    </svg>
-                    分享
+                <div class='heading'>{{item.title}}</div>
+                <div class='control'>
+                    <div v-if="item.isZan == '1'">
+                        <svg class="icon fenlei" aria-hidden="true">
+                            <use xlink:href="#icon-dianzan-copy"></use>
+                        </svg>
+                        {{item.zan}}
+                    </div>
+                    <div @click.stop='zan(item)' v-else>
+                        <svg class="icon fenlei" aria-hidden="true">
+                            <use xlink:href="#icon-dianzan"></use>
+                        </svg>
+                        {{item.zan}}
+                    </div>
+                    <div>
+                        <svg class="icon fenlei" aria-hidden="true">
+                            <use xlink:href="#icon-fenxiang-copy"></use>
+                        </svg>
+                        分享
+                    </div>
                 </div>
             </div>
         </div>
@@ -37,12 +45,12 @@
 </template>
 
 <script>
+import { Toast } from 'mint-ui'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 export default {
-    created(){
-        this.axios.get('/api/outFit/getOutfitList').then(res => {
-
+    activated() {
+        this.axios.get(`/api/outFit/getOutfitList?userId=${userInfo.userid}`).then(res => {
             this.itemList = res.data.obj
-            console.log(this.itemList)
         })
     },  
     data(){
@@ -69,6 +77,26 @@ export default {
             this.$router.push({
                 path:`/fashion/${item.id}`
             })
+        },
+        zan(item) {
+            let data = new URLSearchParams();
+            const outId = item.id,
+                userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+            data.append("outId", outId);
+            data.append("userId", userInfo.userid);
+            data.append('type','1');
+            this.axios.post("/api/outFit/addZanShare", data).then(res => {
+                if (res.data.message == "成功") {
+                    this.zanList = res.data.obj;
+                    Toast('点赞成功');
+                    item.isZan = '1';
+                    this.axios.get(`/api/outFit/getOutfitList?userId=${userInfo.userid}`).then(res => {
+                        this.itemList = res.data.obj
+                    });
+                } else {
+                    Toast('已经点赞')
+                }
+            });
         }
     }
 }
@@ -77,9 +105,10 @@ export default {
 <style lang="stylus" scoped>
 .f-wrap
     width 100%
-    height 90vh
+    height 90%
     background #e7e7e7
-    overflow scroll
+    overflow hidden
+    position fixed
     .title
         width 100%
         height 1.1333rem
@@ -88,8 +117,11 @@ export default {
         color #fc7aa5
         text-align center
         font-size 0.4rem
-        position relative
+        position absolute
         border-bottom 0.0133rem solid #e7e7e7
+        width 100%
+        top 0
+        z-index 2
         .icon
             width 0.5333rem
             height 0.5333rem
@@ -145,5 +177,9 @@ export default {
                     margin-right 0.1333rem
         &:first-child
             margin 0
-
+.scroll
+    height 100%
+    overflow scroll
+    box-sizing border-box
+    padding-top 1.1333rem
 </style>

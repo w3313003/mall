@@ -1,8 +1,8 @@
 /*
  * @Author: ZhaoJie 
  * @Date: 2017-11-15 10:25:28 
- * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-26 14:25:39
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2018-02-07 17:10:22
  */
 
 <template>
@@ -12,19 +12,19 @@
             <div :class='{"active":index == 0}'  @click='getinfo'>商品信息</div>
             <div :class='{"active":index == 1}' @click='getDetail'>商品详情</div>
             <div :class='{"active":index == 2}' @click='getRating'>评价</div>
-            <div class='svg-wrap'>
+            <!-- <div class='svg-wrap'>
                 <svg class="icon" aria-hidden="true">
                      <use xlink:href="#icon-gouwuche1"></use>
                 </svg>
                 <span>
                     {{cartLength}}
                 </span>
-            </div>
+            </div> -->
         </div>
         <div class='content' ref='content' >
             <swiper  class='scroll-wrap' :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
             <swiper-slide>
-            <scroll class='scroll scroll-l' ref='scroll' :data='sourcegood.goodsPrices'>
+            <div class='scroll scroll-l' ref='scroll'>
                 <div>
                 <div class='img-wrap'>
                     <swiper :options="soption" :not-next-tick="notNextTick" ref="swiper">
@@ -84,77 +84,78 @@
                     <div class='coupon-item' :key="index" v-for='(item,index) in couponList'
                     @click='receiveCoupon(item)'>
                         <div>
-                            满
-                                {{item.fullAmount}}
-                            减
-                                {{item.money}}
+                            <span>
+                                满{{item.fullAmount}}减{{item.money}}
+                            </span>
                         </div>
                     </div>
                 </div>
-                <!-- <div class='rating-block'>
-                <div class='title'>商品评价({{ratingNum}})</div>
-                <div class='rating-nav'>
-                    <div>全部({{ratingNum}})</div>
-                    <div>好评({{goodRating}})</div>
-                    <div>差评({{badRating}})</div>
-                </div>
-                <div class='rating-content'>
-                    <div class='rating-item' v-for='(item,index) in sourcegood.ratingList' :key="index" v-if='index === 0'>
-                        <div class='r-header'>
-                            <div class='avatar'>
-                                <img src="../.././assets/img/avatar.png" alt="">
-                            </div>
-                            <div class='username'>
-                                {{item.username}}
+                <div class='rating-block'>
+                    <div class='title'>商品评价({{commentList.length}})</div>
+                    <div v-if="commentList.length >= 1">
+                        <div class='rating-nav'>
+                            <div>全部({{commentList.length}})</div>
+                            <div>好评({{goodRating}})</div>
+                            <div>差评({{badRating}})</div>
+                        </div>
+                        <div class='rating-content'>
+                            <div class='rating-item' v-for='(item,index) in commentList' :key="index" v-if='index === 0'>
+                                <div class='r-header'>
+                                    <div class='avatar'>
+                                        <img :src="item.avatar" alt="">
+                                    </div>
+                                    <div class='username'>
+                                        {{item.nickName}}
+                                    </div>
+                                </div>
+                                <div class='info'>
+                                    <div class='date'>
+                                        {{item.updateDate}}
+                                    </div>
+                                    <div class='disc'>
+                                        {{item.specName}}
+                                    </div>
+                                </div>
+                                <div class='r-content'>
+                                    {{item.content}}
+                                </div>
                             </div>
                         </div>
-                        <div class='info'>
-                            <div class='date'>
-                                {{item.date}}
-                            </div>
-                            <div class='disc'>
-                                颜色:自由组合;尺码：175/M
-                            </div>
-                        </div>
-                        <div class='r-content'>
-                            {{item.content}}
+                        <div class='r-btn' @click='getComment'>
+                            查看更多评价
                         </div>
                     </div>
+                    <div  v-else style="font-size:.35rem;text-align:center;">
+                        此商品暂无评论
+                    </div>
                 </div>
-                <div class='r-btn' @click='getComment'>
-                    查看更多评价
-                </div>
-                </div> -->
-                </div>
-            </scroll>
+            </div>
+            </div>
             </swiper-slide>
             <swiper-slide>
-                <scroll class='scroll scroll-m' ref='scrollM' :data='sourcegood.goodsPrices'>
+                <div class='scroll scroll-m' ref='scrollM'>
                  <div v-html="sourcegood.details" id='details' class="details">
                 </div>
                 <good-list :goodList='tests' @nowTrue='nowIsTrue'></good-list>
-                </scroll>
+                </div>
             </swiper-slide>
             <swiper-slide>
-                <scroll class='scroll scroll-r' ref='scrollR' :data='sourcegood.ratingList'>
+                <div class='scroll scroll-r' ref='scrollR' :data='ratingList'>
                 <div class='ratingblock'>
-                      <!-- <div class='rating-nav'>
-                            <div @click='getAllComment'>全部()</div>
-                            <div @click='getGoodComment'>好评()</div>
-                            <div @click='getImageComment'>有图()</div>
+                      <div class='rating-nav'>
+                            <div @click='getAllComment'>全部({{commentList.length}})</div>
+                            <div @click='getGoodComment'>好评({{goodRating}})</div>
+                            <div @click='getImageComment'>有图({{hasImage}})</div>
                         </div>
                         <div class='rating-detail'>
-                            <div class='rating-item' v-for='(item,index) in good.ratingList' :key="index">
+                            <div class='rating-item' v-for='(item,index) in ratingList' :key="index">
                                 <div class='r-t'>
                                     <div class='r-header'>
                                         <div class='avatar'>
-                                            <img src="../.././assets/img/avatar.png" alt="">
+                                            <img :src="item.avatar" alt="">
                                         </div>
                                         <div class='username'>
-                                            <p>{{item.username}}</p>
-                                            <div class='date'>
-                                                {{item.date}}
-                                            </div>
+                                            {{item.nickName}}
                                         </div>
                                     </div>
                                     <div class='info'>
@@ -167,7 +168,9 @@
                                     </div>
                                     <div class='r-content'>
                                         {{item.content}}
-                                        <img v-for='(items,indexs) in item.img' :key="indexs" :src="items" alt="">
+                                        <div class="img-wrap">
+                                            <img style='width: 2.3333rem;height: 2.3333rem' v-for='(items,indexs) in item.img' :key="indexs" :src="items" alt="">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class='seller-Reply' v-if='item.sellerReply'>
@@ -180,31 +183,37 @@
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
-                </scroll>
+                </div>
             </swiper-slide>
             </swiper>
         </div>
         <div class='bottom' ref='bottom'>
             <div class='l'>
-                <div>
+                <!-- <div>
                     <svg class="icon kefu" aria-hidden="true">
                          <use xlink:href="#icon-kefu"></use>
                     </svg>
                     客服
-                </div>
-                <div>
-                    <svg class="icon" aria-hidden="true">
+                </div> -->
+                <div @click='sellerDetail'>
+                    <svg class="icon" aria-hidden="true" style="color: #19b5f9">
                          <use xlink:href="#icon-dianpu"></use>
                     </svg>
-                    进入店铺
+                    <p>进入店铺</p>
                 </div>
-                <div>
-                    <svg class="icon" aria-hidden="true">
+                <div @click="collection" v-if="!sourcegood.cId">
+                    <svg class="icon" aria-hidden="true" >
                          <use xlink:href="#icon-wodehuodong"></use>
                     </svg>
-                    收藏
+                    <p>收藏</p>
+                </div>
+                <div v-else>
+                    <svg class="icon" aria-hidden="true" style="color :red">
+                         <use xlink:href="#icon-wodehuodong"></use>
+                    </svg>
+                    <p>已收藏</p>
                 </div>
             </div>
             <div class='m' @click='shopcartShow'>
@@ -213,17 +222,24 @@
             <div class='r' @click="toConfirm">
                 立即购买    
             </div> 
-        </div>       
-        <confirm v-if='confirm'
+        </div>   
+        <confirm 
+        v-if='confirm'
         @back='closeConfirm'
         :orderList='orderList'>
         </confirm> 
-        <shopChoosing 
-        ref='shopcart' :goodInfo='sourcegood'
-        @appendTo='appendTo' 
-        @add='add'
-        @less='less'
-        v-if='choosing'></shopChoosing> 
+        <transition name='shopChoosing'>
+            <shopChoosing 
+            ref='shopcart' 
+            v-if='choosing'
+            :goodInfo='sourcegood'
+            @close='closeShopCart'
+            @appendTo='appendTo' 
+            @add='add'
+            @less='less'
+            ></shopChoosing>
+        </transition>
+
     </div>
     </transition>
 
@@ -240,46 +256,58 @@ import shopChoosing from "common/shopChoosing";
 import confirm from "common/confirm";
 import good from "common/mock";
 import wx from "weixin-js-sdk";
-import { Toast } from 'mint-ui'
+import { Toast } from 'mint-ui';
+import { APPID } from 'common/util'
+ 
 const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 const USER_ID = '91e3acaa614f4c97a779426d61d1de9e';
 
 export default {
   async created() {
-        await this._getWxConfig();
         await this._getGoodInfo();
-        await this._getCoupon();
+              this._getCoupon();
+        this.choosedType = {};
+        this.orderList = [];
   },
   async activated(){
-      this.confirm = false;
+        this.confirm = false;
+        this.choosedType = {};
         await this._getWxConfig();
         await this._getGoodInfo();
         await this._getCoupon();
+        this.orderList = [];
+        this.$refs.mySwiper.swiper.slideTo(0)
   },
   computed: {
     ratingNum() {
-      return this.sourcegood.ratingList.length;
+      return this.commentList.length;
     },
     // type 1 好评
     goodRating() {
-      //  return this.sourcegood.ratingList.filter(v => {
-      //     return v.type == 1;
-      // }).length;
+       return this.commentList.filter(v => {
+          return v.type == 1;
+      }).length;
     },
     badRating() {
-      // return this.sourcegood.ratingList.filter(v => {
-      //     return v.type != 1
-      // }).length
+      return this.commentList.filter(v => {
+          return v.type != 1
+      }).length
     },
     hasImage() {
-      // return this.sourcegood.ratingList.filter(v => {
-      //     return v.img.length != 0
-      // }).length
+      return this.commentList.filter(v => {
+          return v.img.length != 0
+      }).length
     },
     cartLength() {
       // return this.shopcartList.length
     },
-    ...mapGetters(["get_current_good", "get_good_detailshow", "shopcartList"])
+    ...mapGetters(
+        [
+            "get_current_good", 
+            "get_good_detailshow", 
+            "shopcartList"
+        ]
+    )
   },
   components: {
     scroll,
@@ -309,59 +337,53 @@ export default {
         console.log("update");
         this.calcheight();
         this.tests = moocgoodList;
-        this.$refs.scroll.refresh();
-        this.$refs.scrollR.refresh();
-        this.$refs.scrollM.refresh();
+        // this.$refs.scroll.refresh();
+        // this.$refs.scrollR.refresh();
+        // this.$refs.scrollM.refresh();
       }, 20);
     },
     // nav切换
     getinfo() {
-      this.currentIndex = 0;
-      console.log(this.$refs.mySwiper.swiper.slideTo);
-      this.$refs.mySwiper.swiper.slideTo(0);
+        this.currentIndex = 0;
+        this.$refs.mySwiper.swiper.slideTo(0);
     },
     getDetail() {
-      this.currentIndex = 1;
-      this.$refs.mySwiper.swiper.slideTo(1);
+        this.currentIndex = 1;
+        this.$refs.mySwiper.swiper.slideTo(1);
     },
     getRating() {
-      this.currentIndex = 2;
-      this.$refs.mySwiper.swiper.slideTo(2);
+        this.currentIndex = 2;
+        this.$refs.mySwiper.swiper.slideTo(2);
     },
     // 评价过滤
     getAllComment() {
-      this.good = JSON.parse(JSON.stringify(this.sourcegood));
+        this.ratingList = JSON.parse(JSON.stringify(this.commentList));
     },
     getGoodComment() {
-      this.good = JSON.parse(JSON.stringify(this.sourcegood));
-      this.good.ratingList = this.good.ratingList.filter(v => {
-        return v.type === 1;
-      });
+        this.ratingList = JSON.parse(JSON.stringify(this.commentList));
+        this.ratingList = this.commentList.filter(v => {
+          return v.type === 1;
+        });
     },
     getImageComment() {
-      this.good = JSON.parse(JSON.stringify(this.sourcegood));
-      this.good.ratingList = this.good.ratingList.filter(v => {
-        return v.img.length !== 0;
-      });
+        this.good = JSON.parse(JSON.stringify(this.sourcegood));
+        this.ratingList = this.commentList.filter(v => {
+          return v.img.length !== 0;
+        });
     },
     stop(e) {
-      e.stopPropagation();
+        e.stopPropagation();
     },
-    setCurrentType(){
+    setCurrentType() {
         this.choosing = true;
-        setTimeout(() => {
-          this.$refs.shopcart.choosing = true;
-        }, 20);
+        this.appendToShopCart = false;
     },
     shopcartShow() {
-      this.choosing = true;
-      setTimeout(() => {
-        this.$refs.shopcart.choosing = true;
-      }, 20);
-      this.appendToShopCart = true;
+        this.choosing = true;
+        this.appendToShopCart = true;
     },
-    shopclose() {
-      this.choosing = false;
+    closeShopCart(){
+        this.choosing = false;
     },
     add() {
     //   this.sourcegood.amount++;
@@ -375,9 +397,9 @@ export default {
       this.back(false);
     },
     appendTo(data) {
-        console.log(data);
         let obj = {
             shopId : this.sourcegood.shopId,
+            shopName: this.sourcegood.shopName,
             totalPrice : data.totalPrice,
             freight : Number(this.sourcegood.freight) || 0,
             goodsName : this.sourcegood.name,
@@ -388,36 +410,61 @@ export default {
             specName : data.choosedType,
             goodsImg : data.img
         };
-        this.choosedType = obj
-        if(this.appendToShopCart){
+        this.choosedType = obj;
+        if(this.appendToShopCart === true) {
             const params = new URLSearchParams(),
                   { shopId, specId, specName, goodsId, goodsPrice, goodsNum } = obj;
             params.append('shoppingCart',JSON.stringify({ userId:userInfo.userid, shopId, specId, specName, goodsId, goodsPrice, goodsNum }))
-            this.axios.post('/api/wsc/wscShoppingCart/saveShoppingCart',params);
+            this.axios.post('/api/wsc/wscShoppingCart/saveShoppingCart',params).then(res => {
+                if(res.data === '加入购物车商品成功') {
+                    Toast('商品已成功加入购物车')
+                } else {
+                    Toast('该商品规格已在购物车内，请去购物车结算');
+                }
+            });
         }
+    },
+    sellerDetail(){
+        this.$router.push({
+            path: `/seller/${this.sourcegood.shopId}`
+        })
+    },
+    collection() {
+        let data = new URLSearchParams();
+            data.append('userId',userInfo.userid);
+            data.append('goodsId',this.sourcegood.id);
+        this.axios.post('/api/wsc/user/goodsCollection',data).then(res => {
+            if(res.data.message === '收藏商品成功') {
+                Toast('收藏成功');
+                this.$set(this.sourcegood,'cId',999);
+                console.log()
+            }
+        })
     },
     toConfirm() {
         this.appendToShopCart = false;
         if(!this.choosedType.specId){
-            this.shopcartShow();
+            this.setCurrentType();
             return;
         } else {
-            const { goodsId, goodsName, goodsNum, goodsPrice, specId, goodsImg, specName } = this.choosedType;
+            const { goodsId, goodsName, goodsNum, shopName, goodsPrice, specId, goodsImg, specName } = this.choosedType;
+            
             const goodsInfo = {
-                        shopId : this.choosedType.shopId,
-                        freight : this.choosedType.freight,
-                        payPrice : this.choosedType.totalPrice + this.choosedType.freight,
-                        orderGoods : [
-                            {
-                                goodsId,
-                                goodsName,
-                                goodsNum,
-                                goodsPrice,
-                                specId,
-                                specName,
-                                goodsImg
-                            }
-                        ]
+                    shopId : this.choosedType.shopId,
+                    freight : this.choosedType.freight,
+                    shopName : this.choosedType.shopName,
+                    payPrice : this.choosedType.totalPrice + this.choosedType.freight,
+                    orderGoods : [
+                        {
+                            goodsId,
+                            goodsName,
+                            goodsNum,
+                            goodsPrice,
+                            specId,
+                            specName,
+                            goodsImg,
+                        }
+                    ]
                   };
             this.orderList.push(goodsInfo);
             this.confirm = true;
@@ -426,6 +473,7 @@ export default {
     },
     closeConfirm() {
         this.confirm = false;
+        this.orderList = [];
     },
     getComment() {
       this.currentIndex = 2;
@@ -433,29 +481,58 @@ export default {
     },
     // 领取红包
     receiveCoupon(item) {
-      let data = new URLSearchParams();
-      data.append("userId", userInfo.userid);
-      data.append("redpacketId", item.id);
-      this.axios.post("/api/redpacket/redEnvelope", data).then(res => {
-        if (res.data.code === "success") {
-            Toast("领取成功");
-        } else if(res.data.message === '已经领取该红包'){
-            Toast("已经领取该红包");
-        }
-      });
+        this.$router.push('/coupon')
+    //   let data = new URLSearchParams();
+    //   data.append("userId", userInfo.userid);
+    //   data.append("redpacketId", item.id);
+    //   this.axios.post("/api/redpacket/redEnvelope", data).then(res => {
+    //     if (res.data.code === "success") {
+    //         Toast("领取成功");
+    //     } else if(res.data.msg === '已经领取该红包'){
+    //         Toast("已经领取该红包");
+    //     }
+    //   });
     },
     _getGoodInfo() {
       let id = this.$route.params.id,
           data = new URLSearchParams();
           data.append("goodsId", id);
+          data.append('userId',userInfo.userid);
         return this.axios.post(`/api/wsc/goods/getById`, data).then(res => {
             let price = res.data.obj.goodsPrices.map(v => {
                 return Number(v.price);
             });
             this.sourcegood = res.data.obj;
+            if(!this.sourcegood.discount) {
+                this.$set(this.sourcegood,'discount',0)
+            };
             this.maxPrice = Math.max(...price);
             this.minPrice = Math.min(...price);
             this.imgs = res.data.obj.imgShow.split("|");
+            this.axios.get(`/api/goodsComment/goodsCommentList?gooodsId=${this.sourcegood.id}`).then(res => {
+                if(!res.data.obj || !res.data.obj instanceof Array) return;
+                res.data.obj.forEach((v => {
+                    let img = [];
+                    for(let i in v) {
+                        if(/img/.exec(i)) {
+                            img.push(v[i]);
+                        }
+                    };
+                    if(v.praise >= 3) {
+                        this.$set(v,'type',1)
+                    } else {
+                        this.$set(v,'type',0)
+                    };
+                    Object.defineProperty(v,'img',{
+                        value: img,
+                        writable: true,
+                        enumerable: true
+                    });
+                }));
+                this.commentList = res.data.obj;
+                this.ratingList = JSON.parse(JSON.stringify(this.commentList));
+                // this.$refs.scroll.refresh();
+            })
         });
     },
     _getCoupon() {
@@ -464,8 +541,10 @@ export default {
         data.append('userId',userInfo.userid);
         data.append("shopId", id);
         return this.axios.post("/api/redpacket/getRedpacketList", data).then(res => {
-              if (res.data.code !== 200) throw new Error("接口获取失败");
-              this.couponList = res.data.obj;
+                this.couponList = res.data.obj;
+                // this.$refs.scroll.refresh();
+                // this.$refs.scrollR.refresh();
+                // this.$refs.scrollM.refresh();
         });
     },
     _getWxConfig() {
@@ -474,10 +553,10 @@ export default {
         let params = new URLSearchParams();
             params.append('url',configUrl);
             params.append('userId',userId);
-        return -this.axios.post(`/api/wsc/user/getJsSdk`,params).then(res => {
+        return this.axios.post(`/api/wsc/user/getJsSdk`,params).then(res => {
             wx.config({
-                debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-                appId: 'wx8a2df9136c4a762a', // 必填，公众号的唯一标识
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: APPID, // 必填，公众号的唯一标识
                 timestamp: res.data.obj.timestamp , // 必填，生成签名的时间戳
                 nonceStr: res.data.obj.nonce, // 必填，生成签名的随机串
                 signature: res.data.obj.signature,// 必填，签名，见附录1
@@ -493,9 +572,6 @@ export default {
                console.log("i'm ready")
            });
         });
-    },
-    _scrollRefresh(){
-        console.log(this.$refs)
     },
     ...mapMutations({
       back: "SET_GOODDETAIL_SHOW",
@@ -524,9 +600,9 @@ export default {
         preventClicks: true,
         onSlideChangeEnd: s => {
           this.index = s.activeIndex;
-          this.$refs.scrollR.refresh();
-          this.$refs.scrollM.refresh();
-          this.$refs.scroll.refresh();
+        //   this.$refs.scrollR.refresh();
+        //   this.$refs.scrollM.refresh();
+        //   this.$refs.scroll.refresh();
         }
       },
       soption: {
@@ -538,7 +614,9 @@ export default {
       confirm:false,
       choosedType : {},
       orderList : [] ,
-      appendToShopCart : false
+      appendToShopCart : false,
+      commentList: [],
+      ratingList: []
     };
   }
 };
@@ -546,9 +624,14 @@ export default {
 
 <style lang="stylus" scoped>
 
+.shopChoosing-enter-active,.shopChoosing-leave-active
+    transition all .5s
+.shopChoosing-enter,.shopChoosing-leave-to
+    transform translateY(100%)    
+
 .scroll {
     height: 100%;
-    overflow: hidden;
+    overflow: scroll;
 }
 
 .scroll-wrap {
@@ -561,12 +644,9 @@ export default {
     width: 100%;
     top: 0;
     left: 0;
-    height: 100vh;
+    height: 100%;
     background-color: #Fff;
     z-index: 1000;
-    display: flex;
-    flex-direction: column;
-
     .nav {
         height: 1.2rem;
         width: 100%;
@@ -576,7 +656,10 @@ export default {
         font-size: 0.4rem;
         border-top: 2px solid #e7e7e7;
         border-bottom: 2px solid #e7e7e7;
-
+        position absolute
+        top 0
+        z-index 2
+        background #fff
         & > div {
             height: 100%;
             line-height: 1.2rem;
@@ -616,9 +699,9 @@ export default {
         height: 100%;
         overflow: hidden;
         background-color: #e7e7e7;
-        flex: 1;
         position: relative;
-
+        box-sizing border-box 
+        padding 1.2rem 0 1.3rem
         .back {
             width: 0.5333rem;
             height: 0.5333rem !important;
@@ -631,7 +714,6 @@ export default {
 
         .img-wrap {
             width: 100%;
-            height: 10rem;
             overflow: hidden;
 
             img {
@@ -669,7 +751,7 @@ export default {
 
             .oldprice {
                 margin: 0.2rem 0;
-
+                padding-left: .2rem
                 span {
                     text-decoration: line-through;
                 }
@@ -733,15 +815,19 @@ export default {
 
                 &.coupon-item {
                     color: #fc7ba6;
-                    font-size: 0.3333rem;
+                    width: auto;
+                    font-size:0;
                     text-align: center;
                     margin: 0.15rem 0;
+                    margin-left : .55rem;
 
                     div {
+                        font-size: 0.3333rem;
+                        text-align: left;
                         display: inline-block;
-                        text-align: center;
                         border: 1px solid #fc7ba6;
-                        width: 2.6667rem;
+                        width: auto;
+                        padding: 0 .1rem;
                         border-radius: 0.3333rem;
                     }
                 }
@@ -794,7 +880,9 @@ export default {
         height: 1.3333rem;
         display: flex;
         border-top: 0.0133rem solid #e7e7e7;
-
+        position absolute
+        z-index 99999
+        bottom 0
         .l {
             flex: 0 0 5.0667rem;
             display: flex;
@@ -873,21 +961,30 @@ export default {
         .r-content {
             height: 0.6667rem;
             overflow: hidden;
-        }
-
-        .info {
-            display: flex;
-            font-size: 0.3333rem;
-            height: 0.9333rem;
-            line-height: 0.9333rem;
-            color: #777;
-
-            .disc {
-                margin-left: 0.2667rem;
+            .img-wrap{
+                display flex
+                flex-wrap wrap
+                img {
+                    width 1.3333rem 
+                    height 1.3333rem
+                    overflow hidden
+                    margin-right 0.2rem
+                }
             }
         }
     }
 }
+.info {
+    display: flex;
+    font-size: 0.3333rem;
+    height: 0.9333rem;
+    line-height: 0.9333rem;
+    color: #777;
+    .disc {
+        margin-left: 0.2667rem;
+    }
+}
+
 
 .scroll-r {
     .ratingblock {

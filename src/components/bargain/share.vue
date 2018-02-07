@@ -5,21 +5,24 @@
         </div>
         <scroll class="scroll" ref="scroll">
             <div>
-                <img src="../../assets/img/goodimg.png" alt="" class="img">
+                <img :src="goodsInfo.imgMain" alt="" class="img">
                 <div class="desc">
                     <div class="title">
-                        标题标题便偷偷标题标题便偷偷标题标题便偷偷标题标题便偷偷标题标题便偷偷
+                        {{goodsInfo.shopName}}
                     </div>
                     <div class="info">
                         <span class="price">
-                            <i>￥</i>300.00
+                            <i>￥</i>
+                            {{goodsInfo.sellingPrice - goodsInfo.discount}}
                         </span>
                         <span class="tips">
-                            [10人帮砍，立减100元]
+                            [{{goodsInfo.kjNum}}人帮砍，立减{{goodsInfo.kjNum * goodsInfo.kjPrice}}元]
                         </span>
                     </div> 
                     <div class="count">
-                        <span>3</span>人帮砍
+                        <span>
+                            {{goodsInfo.discount / goodsInfo.kjPrice}}
+                        </span>人帮砍
                     </div>
                     <div class="btn" @click="HelpBargin">
                         帮砍一刀
@@ -29,28 +32,16 @@
                     <div class="title">
                         帮砍好友
                     </div>
-                    <div class="content">
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
+                    <div class="content" v-if="friendsList.length > 0">
+                        <div class="item" v-for="(v,i) of friendsList" :key="i">
+                            <img :src="v.img" alt="">
+                            <div class="nickName">{{v.nikeName}}</div>
+                            <div class="price">-￥{{Number(goodsInfo.kjPrice).toFixed(2)}}</div>
                         </div>
                     </div> 
+                    <div class='content' style="text-align:center" v-else>
+                        暂无帮砍好友
+                    </div>
                 </div>
             </div>
         </scroll>
@@ -59,14 +50,34 @@
 
 <script>
 import scroll from 'common/scroll'
-let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
 export default {
     components:{
         scroll
     },
+    data() {
+        return {
+            activeId:'',
+            goodsId: '',
+            kjId: '',
+            goodsInfo:{},
+            friendsList: []
+        }
+    },
     created(){
-        
+        alert(userInfo.userid);
+        let searchObj = new URLSearchParams(location.search);
+            this.activeId = searchObj.get('activeid');
+            this.kjId = searchObj.get('kjId');
+            this.goodsId = searchObj.get('goodsId');
+        let data = new URLSearchParams();
+            data.append('goodsId',this.goodsId);
+            data.append('userId',userInfo.userid);
+        this.axios.post('/api/wsc/goods/getById',data).then(res => {
+            this.goodsInfo = res.data.obj;
+            this._getFriends();
+        });
     },
     methods:{
         HelpBargin(){
@@ -74,14 +85,20 @@ export default {
                 alert('参数错误');
                 return false;
             };
-            let searchObj = new URLSearchParams(location.search),
-                activeId = searchObj.get('activeid'),
-                userId = userInfo.userid;
             let data = new URLSearchParams();
-                data.append('id',activeId);
-                data.append('userId',userId);
+                data.append('id',this.activeId);
+                data.append('userId',userInfo.userid);
             this.axios.post('/api/activity/joinKj',data).then(res => {
                 console.log(res.data)
+            })
+        },
+        _getFriends() {
+            let params = new URLSearchParams();
+                params.append('id',this.kjId);
+            this.axios.post('/api/activity/getJoiners',params).then(res => {
+                if(res.data.obj) {
+                    this.friendsList = res.data.obj;
+                }
             })
         }
     }

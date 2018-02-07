@@ -2,24 +2,30 @@
     <div class="share-wrap">
         <div class="title">
             砍价分享
+            <svg class="icon fenlei" aria-hidden="true" @click="back">
+                <use xlink:href="#icon-jiantou"></use>
+            </svg>
         </div>
-        <scroll class="scroll" ref="scroll">
+        <scroll class="scroll" ref="scroll" :data='friendsList'>
             <div>
-                <img src="../../assets/img/goodimg.png" alt="" class="img">
+                <img :src="goodsInfo.imgMain" alt="" class="img">
                 <div class="desc">
                     <div class="title">
-                        标题标题便偷偷标题标题便偷偷标题标题便偷偷标题标题便偷偷标题标题便偷偷
+                        {{goodsInfo.name}}
                     </div>
                     <div class="info">
                         <span class="price">
-                            <i>￥</i>300.00
+                            <i>￥</i>
+                            {{goodsInfo.sellingPrice - goodsInfo.discount}}
                         </span>
                         <span class="tips">
-                            [10人帮砍，立减100元]
+                            [{{goodsInfo.kjNum}}人帮砍，立减{{goodsInfo.kjNum * goodsInfo.kjPrice}}元]
                         </span>
                     </div> 
                     <div class="count">
-                        <span>3</span>人帮砍
+                        <span>
+                            {{goodsInfo.discount / goodsInfo.kjPrice}}
+                        </span>人帮砍
                     </div>
                     <div class="btn" @click="invite">
                         发起砍价
@@ -29,28 +35,16 @@
                     <div class="title">
                         帮砍好友
                     </div>
-                    <div class="content">
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
-                        </div>
-                        <div class="item">
-                            <img src="../../assets/img/avatar.png" alt="">
-                            <div class="nickName">name</div>
-                            <div class="price">-￥5.00</div>
+                    <div class="content" v-if="friendsList.length > 0">
+                        <div class="item" v-for="(v,i) of friendsList" :key="i">
+                            <img :src="v.img" alt="">
+                            <div class="nickName">{{v.nikeName}}</div>
+                            <div class="price">-￥{{Number(goodsInfo.kjPrice).toFixed(2)}}</div>
                         </div>
                     </div> 
+                    <div class='content' style="text-align:center" v-else>
+                        暂无帮砍好友
+                    </div>
                 </div>
             </div>
         </scroll>
@@ -61,6 +55,7 @@
 import scroll from 'common/scroll'
 import wx from 'weixin-js-sdk'
 import { Toast } from 'mint-ui'
+import { APPID } from 'common/util'
 const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 export default {
     components:{
@@ -71,24 +66,28 @@ export default {
             activeId : '',
             userId : '',
             shareConfig:{},
-            activeId: ''
+            activeId: '',
+            kjId:'',
+            goodsInfo: {},
+            friendsList: []
         }
     },
-    created(){
+    async activated() {
         this.activeId = sessionStorage.getItem('activeId');
-        let url = location.href.split('#')[0],
-            userid = userInfo.userid;
+        this.kjId = sessionStorage.getItem('kjId')
+        let configUrl = location.href.split('#')[0],
+            userId = userInfo.userId;
         let params = new URLSearchParams();
-            params.append('url',url);
-            params.append('userId',userid);
+            params.append('url',configUrl);
+            params.append('userId',userId);
         this.axios.post(`/api/wsc/user/getJsSdk`,params).then(res => {
             wx.config({
-                debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-                appId: 'wx8a2df9136c4a762a', // 必填，公众号的唯一标识
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: APPID, // 必填，公众号的唯一标识
                 timestamp: res.data.obj.timestamp , // 必填，生成签名的时间戳
                 nonceStr: res.data.obj.nonce, // 必填，生成签名的随机串
                 signature: res.data.obj.signature,// 必填，签名，见附录1
-                jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','onMenuShareQZone'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+                jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo'], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
                 success(){
                     alert('confsig:ok')
                 },
@@ -98,19 +97,23 @@ export default {
             });
            wx.ready(() => {
                console.log("i'm ready")
-           })
-        });  
-    },
-    activated(){
-        
+           });
+        });
+        let data = new URLSearchParams();
+            data.append('goodsId',this.$route.params.id);
+            data.append('userId',userInfo.userid);
+        this.axios.post('/api/wsc/goods/getById',data).then(res => {
+            this.goodsInfo = res.data.obj;
+            this._getFriends();
+        });
     },
     methods:{
         invite(){
             this.shareConfig = {
-                shareUrl : `${location.origin}/?activeid=${this.activeId}&userId=${userInfo.userid}#/share`,
-                title : '分享测试',
-                imgUrl : '',
-                desc : '分享测试分享测试分享测试'
+                shareUrl : `${location.origin}/weixin/?goodsId=${this.goodsInfo.id}&activeid=${this.activeId}&userId=${userInfo.userid}&kjId=${this.kjId}#/share`,
+                title :this.goodsInfo.name,
+                imgUrl : this.goodsInfo.imgMain,
+                desc : this.goodsInfo.keyword
             };
             wx.onMenuShareTimeline({
                 title: this.shareConfig.title, // 分享标题
@@ -120,6 +123,7 @@ export default {
                     alert('分享成功')
                 },
                 cancel(){
+
                 }
             });
             wx.onMenuShareAppMessage({
@@ -160,7 +164,20 @@ export default {
                 // 用户取消分享后执行的回调函数
                 }
             });
-            Toast('分享链接已生成，点击右上角分享')
+            Toast('分享链接已生成，点击右上角分享');
+        },
+        back() {
+            this.$router.back();
+        },
+        _getFriends() {
+            let params = new URLSearchParams();
+                params.append('id',sessionStorage.getItem('kjId'));
+            this.axios.post('/api/activity/getJoiners',params).then(res => {
+                if(res.data.obj) {
+                    this.friendsList = res.data.obj;
+                }
+                
+            })
         }
     }
 }
@@ -178,13 +195,23 @@ export default {
     display flex
     flex-direction column
     & > .title
-        height 1.2rem
-        line-height 1.2rem
-        text-align center
-        color #ffffff
-        background #fc7aa5
-        font-size .4rem
-        letter-spacing 0.0533rem
+            width 100%
+            height 1.1333rem
+            line-height 1.1333rem
+            color #fff
+            background #fc7aa5
+            text-align center
+            font-size 0.4rem
+            position relative
+            .icon
+                width 0.5333rem
+                height 0.5333rem
+                position absolute
+                left 0.3rem
+                top 50%
+                transform translateY(-50%) rotate(180deg)
+                font-size 0.4rem
+        
     .scroll
         flex 1
         overflow hidden

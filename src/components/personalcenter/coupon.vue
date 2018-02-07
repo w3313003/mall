@@ -2,7 +2,7 @@
  * @Author: ZhaoJie 
  * @Date: 2017-11-28 14:35:40 
  * @Last Modified by: 赵杰
- * @Last Modified time: 2017-12-15 10:21:46
+ * @Last Modified time: 2018-01-02 15:01:54
  */
 <template>
     <div class="coupon-wrap">
@@ -19,16 +19,16 @@
                         <div class='t'>
                             <div class='price'>
                                 ￥<span>
-                                    {{item.money}}</span>.0元
+                                    {{item.money}}</span>
                             </div>
                             <div class='seller_name'>
                                 {{item.shopName}}
                             </div>
                         </div>
                         <div class='b'>
-                            <div class='disc'>
+                            <div class='desc' style="word-break: keep-all;font-size:.3rem;">
                                 满
-                                    {{item.fullAmount}}-
+                                    {{item.fullAmount}}减
                                     {{item.money}}元
                             </div>
                             <div class='date'>
@@ -36,9 +36,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class='r'>
+                    <router-link class='r' to='/index' tag="div">
                         立即使用
-                    </div>
+                    </router-link>
                 </li>
             </ul>
         </scroll>
@@ -68,7 +68,7 @@ export default {
                 if (!v.shopName && v.type == 1) {
                     this.$set(v, "shopName", "平台红包");
                 }
-            })
+            });
             this.couponList = res.data.obj;
         });
     },
@@ -122,6 +122,7 @@ export default {
             justify-content space-between
             align-items center
             font-size .4rem
+            word-break keep-all
             .l
                 flex 1
                 .t,.b
@@ -146,6 +147,7 @@ export default {
                 border-radius 0.3667rem
                 background #fc7aa5
                 color #fff
+                font-size .35rem
                 margin-left 10vw
             
 </style>

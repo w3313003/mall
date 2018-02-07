@@ -75,9 +75,7 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
       cityPicker,
       'mt-switch': Switch
     },
-    created(){
-        console.log(this.addressInfo)
-    },
+    
     props: {
         addressInfo:{
             type:Object,
@@ -85,12 +83,19 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
                 return {}
             }
         },
+        isADefault:false,
         isNew:{
             type : Boolean,
             default : false
         }
     },
     computed : {
+    },
+    created() {
+        console.log(this.isADefault);
+        if(this.isADefault) {
+            this.addressInfo.isDefault = true;
+        };
     },
     data () {
       return {
@@ -114,8 +119,6 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
             }
         }
     },
-    created() {
-    },
     methods: {
         showPicker(){
             this.$refs.picker.show();
@@ -123,7 +126,7 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
         handleSelect(arg){
             this.carea = [...arg[2]];
         },
-        confirm(){
+        confirm() {
             let reg = /^1[3|4|5|7|8|9]\d{9}/;
             if(!reg.test(this.addressInfo.phoneNum)){
                 Toast('手机号码格式错误');
@@ -158,10 +161,14 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
                 params.append('userId',userInfo.userid);
                 this.axios.post('/api/wsc/user/editAddress',params).then(res => {
                     if(res.data.code === 'success'){
-                        Toast('修改成功');
-                        setTimeout(() => {
-                            location.reload();
-                        },1000)
+                        Toast('设置成功');
+                        if(this.isADefault) {
+                            this.$emit('success',data)
+                        } else {
+                            setTimeout(() => {
+                                location.reload();
+                            },1000)
+                        }
                     }
                 })
             } else {
@@ -175,11 +182,16 @@ const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
                 this.axios.post('/api/wsc/user/editAddress',params).then(res => {
                     if(res.data.code === 'success'){
                         Toast('修改成功');
-                        setTimeout(() => {
-                            location.reload();
-                        },1000)
+                        if(this.isADefault) {
+                            this.$emit('success',data)
+                        } else {
+                            setTimeout(() => {
+                                location.reload();
+                            },1000)
+                        }
+                        
                     }
-                })
+                });
             }
             console.log(data)
             // this.$emit('confirm',data);

@@ -1,6 +1,6 @@
 <template>
     <div class='index-wrap'>
-        <div class='search-wrap'>
+        <div class='search-wrap' ref='searchWrap'>
         <div class='search-input'>
                 <div class='s-svg'>
                     <svg class="icon" aria-hidden="true">
@@ -8,12 +8,15 @@
                     </svg>
                 </div>
                 <div class='input-wrap'>
-                    <input type='text' placeholder='搜索' @click='isSearching = true'>
+                    <input type='text' 
+                    placeholder='输入关键词按回车键进行搜索' 
+                    v-model.trim="word" 
+                    @keydown.enter="sendSearch" 
+                    @click='goSearch'>
                 </div>
                 </div> 
-               
                 <div class='msg'  v-show='isSearching'>
-                     <div @click='isSearching = false'>
+                     <div @click='isSearching = false; word ="" '>
                         取消
                     </div>
                 </div>
@@ -25,45 +28,55 @@
         </div> 
         <transition name='searchList'>
             <div class='search-block' v-if='isSearching'>
-                <div class='near'>
-                    <div class='title'>
-                        最近搜索
+                <div class="searchList" v-if='word.length >= 1'>
+                    <h5>搜索商品</h5>
+                    <div v-if="searchGoodsList.length >= 1">
+                        <div class="item" v-for='(item,index) in searchGoodsList' :key="index" @click="goToGoodsDetail(item)">
+                            <span>
+                                {{item.name}}
+                            </span>
+                        </div>
                     </div>
-                    <div class='itemwrap'>
-                        <div class="item">
-                            第一个
-                        </div>
-                        <div class="item">
-                            第一个
-                        </div>
-                        <div class="item">
-                            第一个
-                        </div>
+                    <div v-else>
+                        暂无商品
                     </div>
                 </div>
-                <div class='history'>
-                    <div class='title'>
-                        热门搜索
+                <div v-else>
+                    <div class='near'>
+                        <div class='title'>
+                            最近搜索
+                        </div>
+                        <div class='itemwrap' v-if='oldSearch.length > 0'>
+                            <div  class="item" v-for='(item,index) in oldSearch' :key="index"
+                                @click='search(item)'>
+                                {{item.searchName}}
+                            </div>
+                            <div v-if='oldSearch.length < 1'>
+                                暂无记录
+                            </div>
+                        </div>
                     </div>
-                    <div class='itemwrap'>
-                        <div class="item">
-                            第一个
+                    <div class='history'>
+                        <div class='title'>
+                            热门搜索
                         </div>
-                        <div class="item">
-                            第一个
-                        </div>
-                        <div class="item">
-                            第一个
+                        <div class='itemwrap'>
+                            <div class="item" v-for='(item,index) in hotSearch' :key="index">
+                                {{item.searchName}}
+                            </div>
+                            <div v-if='hotSearch.length < 1'>
+                                暂无记录
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>  
         </transition>
-        <scroll :data='maleitem' class='index-scroll' ref='scroll'>
+        <div class='index-scroll' ref='scroll'>
             <div>
-                <div class='swipe-wrap'>
+                <div class='swipe-wrap' ref="swiper">
                     <swiper :options="swiperOption" :not-next-tick="notNextTick" ref="mySwiper">
-                        <swiper-slide v-for='(item,index) in banner' :key="index">
+                        <swiper-slide v-for='(item,index) in banner' :key="index" @click.native='bannerAbout(item)'>
                             <img :src='item.banner' alt="">
                         </swiper-slide>
                         <div class="swiper-pagination"  slot="pagination"></div>
@@ -71,7 +84,7 @@
                 </div>
                 <swiper :options='hOptions' class='n-h-s'>
                     <swiper-slide class='wrap'>
-                    <router-link tag='div' to='/coupon' class='h-wiper-item'>
+                    <router-link tag='div' @click.native="toCoupon" to='/coupon' class='h-wiper-item'>
                         <div class='icon'>
                             <div>
                                 <svg class="icon" aria-hidden="true">
@@ -123,7 +136,7 @@
                         <div class='icon'>
                             <div>
                             <svg class="icon" aria-hidden="true">
-                                <use xlink:href="#icon-xiaoyuan"></use>
+                                <use xlink:href="#icon-Skiing"></use>
                             </svg>
                             </div>
                         </div>
@@ -135,7 +148,7 @@
                             <div class='icon'>
                                 <div>
                                 <svg class="icon" aria-hidden="true">
-                                    <use xlink:href="#icon-xiaoyuan"></use>
+                                    <use xlink:href="#icon-dianying"></use>
                                 </svg>
                                 </div>
                             </div>
@@ -147,7 +160,7 @@
                             <div class='icon'>
                                 <div>
                                 <svg class="icon" aria-hidden="true">
-                                    <use xlink:href="#icon-xiaoyuan"></use>
+                                    <use xlink:href="#icon-kouling"></use>
                                 </svg>
                                 </div>
                             </div>
@@ -182,23 +195,23 @@
                         <transition name='indexBox' mode='out-in'>
                             <div class='c-d-wrap' v-if='ismale'>
                                 <div class='act-item' v-for='(v,i) in maleitem' :key="i">
-                                    <div class='c-d-banner'>
-                                        <img v-lazy="v.img" alt="">
+                                    <div class='c-d-banner' style="border-radius: .3rem;overflow:hidden">
+                                        <img v-lazy="v.img" alt="" style="border-radius: .3rem;overflow:hidden" @click.stop="toAcDetail(v)">
                                     </div>
                                     <swiper :options='hOptions' class='h-show'>
                                         <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index" @click.native='goToGoodsDetail(item)'>
                                             <img v-lazy="item.imgMain">
                                             <span>￥{{item.sellingPrice}}</span>
                                         </swiper-slide>
-                                        <swiper-slide class='showitem last'>
-                                            <router-link to='/' tag='div' class='box'>
+                                        <swiper-slide class='showitem last' @click.native="toAcDetail(v)">
+                                            <div class='box'>
                                                     <div class='red'>
                                                         查看全部
                                                     </div>
                                                     <div class='gray'>
                                                         See more
                                                     </div>
-                                            </router-link> 
+                                            </div> 
                                         </swiper-slide>
                                     </swiper>
                                 </div> 
@@ -206,56 +219,55 @@
                         </transition>
                         <transition name='indexBox' mode='out-in'>
                             <div class='c-d-wrap' v-if='!ismale'> 
-                                <div class='c-d-wrap'>
-                                    <div class='act-item' v-for='(v,i) in fmaleitem' :key="i">
-                                        <div class='c-d-banner'>
-                                            <img v-lazy="v.img" alt="">
-                                        </div>
-                                        <swiper :options='hOptions' class='h-show'>
-                                            <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index">
-                                                <img v-lazy="item.imgMain">
-                                                <span>￥{{item.sellingPrice}}</span>
-                                            </swiper-slide>
-                                            <swiper-slide class='showitem last'>
-                                                <router-link to='/' tag='div' class='box'>
-                                                <div class='red'>
-                                                    查看全部
-                                                </div>
-                                                <div class='gray'>
-                                                    See more
-                                                </div>
-                                                </router-link> 
-                                                </swiper-slide>
-                                        </swiper>
-                                    </div> 
-                                </div>
+                                <div class='act-item' v-for='(v,i) in fmaleitem' :key="i">
+                                    <div class='c-d-banner' style="border-radius: .3rem;overflow:hidden">
+                                        <img v-lazy="v.img" alt="" style="border-radius: .3rem;overflow:hidden" @click.stop="toAcDetail(v)">
+                                    </div>
+                                    <swiper :options='hOptions' class='h-show'>
+                                        <swiper-slide class='showitem' v-for='(item,index) in v.goodsList' :key="index" @click.native='goToGoodsDetail(item)'>
+                                            <img v-lazy="item.imgMain">
+                                            <span>￥{{item.sellingPrice}}</span>
+                                        </swiper-slide>
+                                        <swiper-slide class='showitem last' @click.native="toAcDetail(v)">
+                                            <div class='box'>
+                                                    <div class='red'>
+                                                        查看全部
+                                                    </div>
+                                                    <div class='gray'>
+                                                        See more
+                                                    </div>
+                                            </div> 
+                                        </swiper-slide>
+                                    </swiper>
+                                </div> 
                             </div>
                         </transition>
                     </div>
                 </div>                
             </div>
-        </scroll>
+        </div>
+
+        
     </div>
 </template>
 
 
 <script>
-import scroll from "common/scroll";
-import { swiper, swiperSlide } from 'vue-awesome-swiper'
-import Bscroll from 'better-scroll'
 
+// import scroll from "common/scroll";
+import { swiper, swiperSlide } from 'vue-awesome-swiper'
+// import Bscroll from 'better-scroll'
+import { throttle } from 'common/util'
+const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
 
 export default {
     components: {
-      scroll,
       swiper,
       swiperSlide
     },
-    activated(){
-        this.$refs.scroll.refresh()
-    },
-    created(){
-        
+    activated() {   
+        this.isSearching = false;
+        this.axios.get('/api/wsc/goods/deleteSearch?id=05ed238c271e491c91e89f302b261aba')
         this.axios.get('/api/index/getBaannerList?type=1').then(res => {
             this.banner = res.data.obj;
         });
@@ -271,8 +283,24 @@ export default {
                 return v.goodsList && v.goodsList.length > 0
             })
         });
+        this._getSearchList();
+        this.acDetailShow = false;
+        this.carlOpcity()
     },
     methods:{
+        carlOpcity() {
+            this.$refs.scroll.addEventListener('scroll',e => {
+                const parcent = e.target.scrollTop/this.$refs.swiper.clientHeight;
+                if(e.target.scrollTop > this.$refs.swiper.clientHeight) {
+                    this.$refs.searchWrap.style.opacity = `1`;
+                    this.$refs.searchWrap.style.background = `rgba(255,255,255,1)`;
+                    return;
+                }
+                if(parcent > 0.6) return;
+                this.$refs.searchWrap.style.opacity = `${0.5+parcent}`
+                this.$refs.searchWrap.style.background = `rgba(255,255,255,${0.4+parcent})`
+            })
+        },
         _formatProGoodsList(arr){
             let map = {};
             arr.forEach(v => {
@@ -301,15 +329,67 @@ export default {
             })
         },
         toggle(i){
-            setTimeout(() => {
-                 this.$refs.scroll.refresh();
-            },700)
             if(i == 1){
                 this.ismale = true;
             } else if(i == 2) {
                 this.ismale = false;                
             };
-            
+        },
+        bannerAbout(item) {
+            if(item.proId) {
+                let obj = [...this.maleitem,...this.fmaleitem].find(v => {
+                    return v.id === item.proId;
+                });
+                if(obj) {
+                    this.$router.push(`/acDetail/${item.proId}`)
+                    // this.currentAcList = obj.goodsList;
+                    // this.acDetailShow = true;
+                }
+            };
+        },
+        toAcDetail(item) {
+            this.$router.push(`/acDetail/${item.id}`)
+            // this.currentAcList = item.goodsList
+            // this.acDetailShow = true;
+        },  
+        sendSearch() {
+            this.sendsearch()
+        },
+        search(item){
+            this.word = item.searchName;
+            this.sendsearch();
+        },
+        sendsearch(){
+            if(this.word.length < 1) return;
+            let data = new URLSearchParams();
+                data.append('name',this.word);
+                data.append('userId',userInfo.userid)
+            this.axios.post('/api/wsc/goods/searchGoods',data).then(res => {
+                if(res.data.code === 'error'){
+                    this.searchGoodsList = [];
+                } else {
+                    this.searchGoodsList = res.data.obj
+                }
+            })
+        },
+        toCoupon() {
+            this.$router.push('/coupon');
+        },
+        goSearch() {
+            this.$router.push('/search');
+        },
+        openSearch(){
+            this.isSearching = true;
+            this.word = '';
+            this._getSearchList();
+        },
+        _getSearchList(){
+            let data = new URLSearchParams();
+                data.append('userId',userInfo.userid)
+            this.axios.post(`/api/wsc/goods/searchList`,data).then(res => {
+                this.hotSearch = res.data.obj.topSearch;
+                this.oldSearch = res.data.obj.latelySeanch;
+            })
         }
     },
     data() {
@@ -320,7 +400,7 @@ export default {
             pagination: '.swiper-pagination',
             paginationClickable: true,
             loop:true,
-            autoplay:2000
+            autoplay: 3000
         },
         hOptions:{
             slidesPerView:'auto',
@@ -329,13 +409,30 @@ export default {
         ismale:true,
         maleitem:[],
         fmaleitem: [],
-        isSearching:false
+        isSearching:false,
+        word:'',
+        searchGoodsList:[],
+        hotSearch:[],
+        oldSearch:[],
+        acDetailShow: false,
+        currentAcList: []
       };
     },
 };
 </script>
 
 <style lang="stylus" scoped>
+.searchList
+    h5
+        font-size .4rem 
+        text-align center
+        margin-bottom 10px
+    .item
+        font-size .35rem
+        margin .2rem 0;
+        text-align center
+
+
 .swiper-slide
     height 4.4rem!important
 
@@ -365,6 +462,7 @@ export default {
 .search-block
     width 100%
     height 100%
+    overflow scroll
     background #fff
     position absolute
     top 0.93rem
@@ -389,6 +487,7 @@ export default {
                 border-radius 0.3333rem
                 padding 0 .2rem
                 margin-right  .3rem
+                min-width 0.6rem
     .history
         .title
             font-size .35rem
@@ -405,6 +504,8 @@ export default {
                 border-radius 0.3333rem
                 padding 0 .2rem
                 margin-right  .3rem    
+                min-width 0.8rem
+                text-align center
 .search-wrap
     height 0.93rem
     overflow hidden
@@ -414,6 +515,12 @@ export default {
     padding  0 .3rem
     align-items center
     justify-content space-around
+    position fixed
+    width 100%
+    top 0
+    left 0
+    z-index 9999
+    opacity 0.5
 
 .msg
     height 0.8rem
@@ -441,6 +548,7 @@ export default {
     font-size 0.4rem
     overflow hidden
     margin-right 15px
+    align-items center
     .input-wrap
         flex 1
         input
@@ -455,17 +563,17 @@ export default {
             color #666
 
 .index-wrap
-    height 90vh
+    position fixed
+    height 90%
     width:100%
-    display flex
-    flex-direction column
     .index-scroll
-        flex 1
         height 100%
-        overflow hidden
+        overflow-y scroll
+        overflow-x hidden
+        -webkit-overflow-scrolling: touch;
         .swipe-wrap
             width 100vw
-            height 4.4rem
+            // height 4.4rem
             overflow hidden 
             .swiper-wrapper
                 width 100%
@@ -570,6 +678,7 @@ export default {
         width 100%
         border-radius 5px
         overflow hidden
+        // height 4rem
         position relative
         &:before
             width 0.5333rem
@@ -582,6 +691,7 @@ export default {
             bottom -0.2667rem           
         img 
             width 100%
+            // height 100%
     .h-show
         margin 0.2667rem 0
         .showitem
@@ -612,4 +722,10 @@ export default {
                     padding-top 0.2rem
             img
                 width 100%
+                height 1.8rem
+
+.Tin-enter-active,.Tin-leave-active
+    transition all .5s
+.Tin-enter,.Tin-leave-to
+    transform translate3d(100%,0,0)
 </style>

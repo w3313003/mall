@@ -25,7 +25,7 @@ import block from './sofratingblock'
 
 export default {
     methods:{
-        back(){
+        back() {
             this.$router.back();
         }
     },
